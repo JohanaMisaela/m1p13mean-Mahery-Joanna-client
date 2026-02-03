@@ -1,0 +1,25 @@
+export interface User {
+    id: string;
+    name: string;
+    surname?: string;
+    email: string;
+    role: 'admin' | 'shop' | 'user' | 'buyer';
+}
+
+export interface AuthResponse {
+    user: User;
+    token: string;
+}
+
+export interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface RegisterRequest {
+    name: string;
+    surname?: string;
+    email: string;
+    password: string;
+    role?: 'admin' | 'shop' | 'user';
+}
