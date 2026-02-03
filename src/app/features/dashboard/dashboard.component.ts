@@ -7,20 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
   selector: 'app-dashboard',
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-      <!-- Header -->
-      <header class="bg-black text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 class="text-xl font-bold tracking-tight uppercase">Dashboard</h1>
-          <button
-            (click)="logout()"
-            class="px-4 py-2 bg-white text-black text-sm font-medium hover:bg-gray-200 transition-colors border border-transparent"
-          >
-            LOGOUT
-          </button>
-        </div>
-      </header>
-
+    <div class="flex flex-col font-sans text-gray-900 h-full">
       <!-- Main Content -->
       <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
         <div class="bg-white border border-gray-200 shadow-sm p-8 max-w-2xl mx-auto text-center">
@@ -48,13 +35,6 @@ import { AuthService } from '../../core/services/auth.service';
 
         </div>
       </main>
-      
-      <!-- Footer -->
-      <footer class="bg-white border-t border-gray-200 mt-auto">
-          <div class="max-w-7xl mx-auto px-4 py-6 text-center text-gray-400 text-xs uppercase tracking-wider">
-              Ecommerce Dashboard &copy; 2026
-          </div>
-      </footer>
     </div>
   `,
   styles: ``
@@ -65,7 +45,4 @@ export class DashboardComponent {
 
   protected readonly currentUser = this.authService.currentUser;
 
-  protected logout(): void {
-    this.authService.logout();
-  }
 }

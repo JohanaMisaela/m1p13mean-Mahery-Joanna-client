@@ -1,0 +1,28 @@
+<header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <!-- Logo -->
+        <a routerLink="/" class="text-2xl font-bold text-gray-900 no-underline hover:text-gray-700 cursor-pointer">
+            E-Commerce
+        </a>
+
+
+
+        <!-- Auth Buttons -->
+        <div class="flex items-center gap-4">
+            @if (currentUser()) {
+            <a routerLink="/profil" class="hidden sm:flex items-center gap-2 text-gray-600 ">
+                <fa-icon [icon]="faUser" class="text-xl"></fa-icon>
+            </a>
+            <button (click)="logout()"
+                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
+                Déconnexion
+            </button>
+            } @else {
+            <a routerLink="/auth/login"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium no-underline inline-block">
+                Connexion
+            </a>
+            }
+        </div>
+    </div>
+</header>

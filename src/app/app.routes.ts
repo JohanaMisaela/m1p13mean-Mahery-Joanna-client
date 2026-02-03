@@ -3,10 +3,31 @@ import { authGuard, guestGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-    // Default route - public access
     {
         path: '',
-        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+        loadComponent: () => import('./core/layout/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+            },
+            {
+                path: 'dashboard',
+                canActivate: [roleGuard],
+                data: { roles: ['admin', 'shop'] },
+                loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            },
+            {
+                path: 'profil',
+                canActivate: [roleGuard],
+                data: { roles: ['admin', 'shop', 'user'] },
+                loadComponent: () => import('./features/profil/profil.component').then(m => m.ProfilComponent)
+            },
+            {
+                path: 'unauthorized',
+                loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+            }
+        ]
     },
 
     {
@@ -23,19 +44,20 @@ export const routes: Routes = [
             }
         ]
     },
-
     {
-        path: 'dashboard',
+        path: 'orders',
         canActivate: [roleGuard],
-        data: { roles: ['admin', 'shop'] },
-        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+        data: { roles: ['user', 'shop', 'admin'] },
+        loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
     },
-
     {
-        path: 'unauthorized',
-        loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+        path: 'shop',
+        canActivate: [roleGuard],
+        data: { roles: ['shop', 'admin'] },
+        loadComponent: () => import('./features/shop/shop-dashboard.component').then(m => m.ShopDashboardComponent)
     },
 
+    // Wildcard
     {
         path: '**',
         redirectTo: '/'

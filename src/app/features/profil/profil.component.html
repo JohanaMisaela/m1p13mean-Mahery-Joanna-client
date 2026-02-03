@@ -1,0 +1,12 @@
+<div class="min-h-screen bg-gray-50">
+
+    <!-- Main Content -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Bienvenue, {{ currentUser()?.name }}!</h2>
+        <div class="space-y-2 text-gray-600">
+            <p><strong>Email:</strong> {{ currentUser()?.email }}</p>
+            <p><strong>Rôle:</strong> <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">{{
+                    currentUser()?.role }}</span></p>
+        </div>
+    </div>
+</div>
