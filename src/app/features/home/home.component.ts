@@ -9,11 +9,12 @@ import { CategoryService } from '../../core/services/category.service';
 import { ShopService } from '../../core/services/shop.service';
 import { Product, Category, Shop } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faTimes, faFilter, faCartPlus, faStar, faStore } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTimes, faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -34,6 +35,12 @@ export class HomeComponent implements OnInit {
   protected loading = signal<boolean>(false);
   protected showFilterSidebar = signal<boolean>(false);
 
+  // Pagination
+  protected currentPage = signal<number>(1);
+  protected totalPages = signal<number>(1);
+  protected totalItems = signal<number>(0);
+  protected itemsPerPage = signal<number>(12); // Adjustable
+
   // Icons
   protected icons = {
     search: faSearch,
@@ -41,7 +48,9 @@ export class HomeComponent implements OnInit {
     filter: faFilter,
     cart: faCartPlus,
     star: faStar,
-    shop: faStore
+    shop: faStore,
+    next: faChevronRight,
+    prev: faChevronLeft
   };
 
   // Filter Form
@@ -93,18 +102,30 @@ export class HomeComponent implements OnInit {
     const filters = this.filterForm.value;
 
     // Clean filters
-    const params: any = {};
+    const params: any = {
+      page: this.currentPage(),
+      limit: this.itemsPerPage()
+    };
+
     if (filters.search) params.search = filters.search;
     if (filters.category) params.category = filters.category;
     if (filters.minPrice) params.minPrice = filters.minPrice;
     if (filters.maxPrice) params.maxPrice = filters.maxPrice;
     if (filters.isOnSale) params.isOnSale = filters.isOnSale;
+    if (filters.shop) params.shop = filters.shop;
 
     this.productService.getProducts(params).subscribe({
       next: (response: any) => {
         // Handle pagination response wrapper
+        // Assumes backend returns { data: [], total: number, totalPages: number, page: number }
         const data = Array.isArray(response) ? response : (response.data || []);
         this.products.set(data);
+
+        if (!Array.isArray(response)) {
+          this.totalPages.set(response.totalPages || 1);
+          this.totalItems.set(response.total || 0);
+        }
+
         this.loading.set(false);
       },
       error: (err) => {
@@ -114,12 +135,23 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadProducts();
+      // Scroll to top of product grid
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   toggleSidebar(): void {
     this.showFilterSidebar.update(v => !v);
   }
 
   resetFilters(): void {
     this.filterForm.reset();
+    this.currentPage.set(1); // Reset to first page on filter reset
+    this.loadProducts();
   }
 
   getStarArray(rating: number): number[] {
