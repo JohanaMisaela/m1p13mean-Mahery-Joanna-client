@@ -6,8 +6,7 @@ import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera } from '@fortawesome/free-solid-svg-icons';
-import { FormArray } from '@angular/forms';
+import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-product-detail',
@@ -28,12 +27,15 @@ export class ProductDetailComponent implements OnInit {
   isLoading = signal<boolean>(true);
   currentUser = this.authService.currentUser;
   selectedImages = signal<string[]>([]);
+  editSelectedImages = signal<string[]>([]);
+  editingCommentId = signal<string | null>(null);
 
   // Modals
   showReportModal = signal<boolean>(false);
 
   // Forms
   commentForm: FormGroup;
+  editCommentForm: FormGroup;
   reportForm: FormGroup;
 
   icons = {
@@ -47,11 +49,16 @@ export class ProductDetailComponent implements OnInit {
     heart: faHeart,
     plus: faPlus,
     trash: faTrash,
-    camera: faCamera
+    camera: faCamera,
+    edit: faEdit
   };
 
   constructor() {
     this.commentForm = this.fb.group({
+      comment: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+    });
+
+    this.editCommentForm = this.fb.group({
       comment: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
     });
 
@@ -60,24 +67,99 @@ export class ProductDetailComponent implements OnInit {
       description: ['']
     });
   }
+  isCommentOwner(comment: any): boolean {
+    const user = this.currentUser();
+    if (!user || !comment.user) return false;
+    const commentUserId = comment.user._id || comment.user.id || comment.user;
+    const currentUserId = user._id || user.id;
+    return commentUserId === currentUserId;
+  }
 
-  onFileSelected(event: any): void {
+  editComment(comment: any): void {
+    this.editingCommentId.set(comment._id);
+    this.editCommentForm.patchValue({
+      comment: comment.comment
+    });
+    // Load existing images into edit buffer
+    this.editSelectedImages.set(comment.images || []);
+  }
+
+  cancelEdit(): void {
+    this.editingCommentId.set(null);
+    this.editCommentForm.reset();
+    this.editSelectedImages.set([]);
+  }
+
+  submitUpdate(commentId: string): void {
+    if (this.editCommentForm.invalid) return;
+
+    const updatedData = {
+      ...this.editCommentForm.value,
+      images: this.editSelectedImages()
+    };
+
+    this.productService.updateComment(commentId, updatedData).subscribe({
+      next: () => {
+        this.editingCommentId.set(null);
+        this.editSelectedImages.set([]);
+        const prodId = this.product()?._id;
+        if (prodId) this.loadComments(prodId, true);
+      },
+      error: (err) => {
+        console.error('Update comment error:', err);
+        alert('Erreur lors de la modification');
+      }
+    });
+  }
+
+  deleteComment(commentId: string): void {
+    if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
+
+    const previousComments = this.comments();
+    this.comments.set(previousComments.filter(c => c._id !== commentId));
+
+    this.productService.deleteComment(commentId).subscribe({
+      next: () => {
+        const prodId = this.product()?._id;
+        if (prodId) {
+          this.loadProduct(prodId, true);
+          // Optionally reload comments to ensure sync
+          this.loadComments(prodId, true);
+        }
+      },
+      error: (err) => {
+        console.error('Delete comment error:', err);
+        this.comments.set(previousComments);
+        alert('Erreur lors de la suppression');
+      }
+    });
+  }
+
+  onFileSelected(event: any, target: 'main' | 'edit' = 'main'): void {
     const files = event.target.files;
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.selectedImages.update(imgs => [...imgs, e.target.result as string]);
+          const result = e.target.result as string;
+          if (target === 'main') {
+            this.selectedImages.update(imgs => [...imgs, result]);
+          } else {
+            this.editSelectedImages.update(imgs => [...imgs, result]);
+          }
         };
         reader.readAsDataURL(files[i]);
       }
     }
-    // Clear input
     event.target.value = '';
   }
 
-  removeSelectedImage(index: number): void {
-    this.selectedImages.update(imgs => imgs.filter((_, i) => i !== index));
+  removeSelectedImage(index: number, target: 'main' | 'edit' = 'main'): void {
+    if (target === 'main') {
+      this.selectedImages.update(imgs => imgs.filter((_, i) => i !== index));
+    } else {
+      this.editSelectedImages.update(imgs => imgs.filter((_, i) => i !== index));
+    }
   }
 
   isFavorite(): boolean {
@@ -89,16 +171,29 @@ export class ProductDetailComponent implements OnInit {
   }
 
   toggleFavorite(): void {
-    if (!this.currentUser()) return;
+    const user = this.currentUser();
     const prod = this.product();
-    if (prod) {
-      const favorite = !this.isFavorite();
-      this.productService.toggleProductFavorite(prod._id, favorite).subscribe({
-        next: () => {
-          this.loadProduct(prod._id, true);
-        }
-      });
-    }
+    if (!user || !prod) return;
+
+    const userId = user._id || user.id;
+    const isFav = this.isFavorite();
+
+    // Optimistic Update
+    const newFavoritedBy = isFav
+      ? (prod.favoritedBy || []).filter(id => id !== userId)
+      : [...(prod.favoritedBy || []), userId];
+
+    const updatedProd = { ...prod, favoritedBy: newFavoritedBy };
+    this.product.set(updatedProd);
+
+    // Background API call
+    this.productService.toggleProductFavorite(prod._id, !isFav).subscribe({
+      error: (err) => {
+        console.error('Favorite toggle error:', err);
+        // Revert on error
+        this.product.set(prod);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -111,16 +206,14 @@ export class ProductDetailComponent implements OnInit {
   loadAll(id: string, silent: boolean = false): void {
     if (!silent) this.isLoading.set(true);
 
-    // Load product first, then comments/ratings
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
         if (!silent) this.isLoading.set(false);
 
-        // Load additional data
-        this.loadComments(id, true); // Load comments silently
+        this.loadComments(id, true);
         if (this.currentUser()) {
-          this.loadUserRating(id, true); // Load user rating silently
+          this.loadUserRating(id, true);
         }
       },
       error: () => this.isLoading.set(false)
@@ -153,7 +246,6 @@ export class ProductDetailComponent implements OnInit {
         console.log('User Rating loaded:', res);
         this.userRating.set(res?.rating || 0);
       },
-      // Handle 404/error quietly as user might not have rated yet
       error: () => this.userRating.set(0)
     });
   }
@@ -171,46 +263,58 @@ export class ProductDetailComponent implements OnInit {
     if (!this.currentUser()) return;
     const prodId = this.product()?._id;
     if (prodId) {
-      // Optimistic update
       this.userRating.set(rating);
 
       this.productService.rateProduct(prodId, rating).subscribe({
         next: () => {
-          // Refresh product and rating silently to ensure consistency
           this.loadProduct(prodId, true);
           this.loadUserRating(prodId, true);
         },
         error: (err) => {
           console.error('Rating error:', err);
-          // Revert on error? Or just leave it.
         }
       });
     }
   }
 
   submitComment(): void {
-    if (this.commentForm.invalid || !this.currentUser()) return;
-
+    const user = this.currentUser();
     const prodId = this.product()?._id;
-    if (prodId) {
-      const payload = {
-        ...this.commentForm.value,
-        images: this.selectedImages()
-      };
+    if (this.commentForm.invalid || !user || !prodId) return;
 
-      this.productService.addComment(prodId, payload).subscribe({
-        next: () => {
-          this.commentForm.reset();
-          this.selectedImages.set([]);
+    const commentData = this.commentForm.value.comment;
+    const commentImages = [...this.selectedImages()];
 
-          // Reload comments to get populated user info
-          this.loadComments(prodId, true);
-          // Refresh product stats silently
-          this.loadProduct(prodId, true);
-        },
-        error: (err) => console.error('Comment error:', err)
-      });
-    }
+    const tempComment = {
+      _id: 'temp-' + Date.now(),
+      comment: commentData,
+      images: commentImages,
+      user: {
+        _id: user._id || user.id,
+        id: user.id || user._id,
+        name: user.name || 'Moi'
+      },
+      createdAt: new Date().toISOString()
+    };
+
+    const previousComments = this.comments();
+    this.comments.set([tempComment, ...previousComments]);
+
+    this.commentForm.reset();
+    this.selectedImages.set([]);
+
+    const payload = { comment: commentData, images: commentImages };
+    this.productService.addComment(prodId, payload).subscribe({
+      next: () => {
+        this.loadComments(prodId, true);
+        this.loadProduct(prodId, true);
+      },
+      error: (err) => {
+        console.error('Comment error:', err);
+        this.comments.set(previousComments);
+        alert('Erreur lors de l\'envoi du commentaire. Veuillez réessayer.');
+      }
+    });
   }
 
   openImage(url: string): void {

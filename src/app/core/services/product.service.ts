@@ -38,6 +38,14 @@ export class ProductService {
         return this.http.post(`${this.API_URL}/product-comments/${productId}`, data);
     }
 
+    updateComment(commentId: string, data: { comment?: string, images?: string[] }): Observable<any> {
+        return this.http.put(`${this.API_URL}/product-comments/${commentId}`, data);
+    }
+
+    deleteComment(commentId: string): Observable<any> {
+        return this.http.delete(`${this.API_URL}/product-comments/${commentId}`);
+    }
+
     toggleProductFavorite(productId: string, favorite: boolean): Observable<any> {
         return this.http.post(`${this.API_URL}/products/${productId}/favorite`, { favorite });
     }
