@@ -55,11 +55,11 @@ export class ProductDetailComponent implements OnInit {
 
   constructor() {
     this.commentForm = this.fb.group({
-      comment: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
     });
 
     this.editCommentForm = this.fb.group({
-      comment: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
     });
 
     this.reportForm = this.fb.group({
@@ -93,20 +93,36 @@ export class ProductDetailComponent implements OnInit {
   submitUpdate(commentId: string): void {
     if (this.editCommentForm.invalid) return;
 
+    const previousComments = this.comments();
+    const updatedText = this.editCommentForm.value.comment;
+    const updatedImages = this.editSelectedImages();
+
+    // Optimistic Update
+    this.comments.set(previousComments.map(c =>
+      c._id === commentId
+        ? { ...c, comment: updatedText, images: updatedImages }
+        : c
+    ));
+
     const updatedData = {
-      ...this.editCommentForm.value,
-      images: this.editSelectedImages()
+      comment: updatedText,
+      images: updatedImages
     };
+
+    this.editingCommentId.set(null);
+    this.editSelectedImages.set([]);
 
     this.productService.updateComment(commentId, updatedData).subscribe({
       next: () => {
-        this.editingCommentId.set(null);
-        this.editSelectedImages.set([]);
         const prodId = this.product()?._id;
-        if (prodId) this.loadComments(prodId, true);
+        if (prodId) {
+          this.loadComments(prodId, true);
+          this.loadProduct(prodId, true);
+        }
       },
       error: (err) => {
         console.error('Update comment error:', err);
+        this.comments.set(previousComments);
         alert('Erreur lors de la modification');
       }
     });
