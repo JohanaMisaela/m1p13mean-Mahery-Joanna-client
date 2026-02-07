@@ -28,4 +28,31 @@ export class ProductService {
     getProduct(id: string): Observable<Product> {
         return this.http.get<Product>(`${this.API_URL}/products/${id}`);
     }
+
+    // Comments
+    getComments(productId: string, params?: any): Observable<any> {
+        return this.http.get(`${this.API_URL}/product-comments/${productId}`, { params });
+    }
+
+    addComment(productId: string, data: { comment: string, images?: string[] }): Observable<any> {
+        return this.http.post(`${this.API_URL}/product-comments/${productId}`, data);
+    }
+
+    toggleProductFavorite(productId: string, favorite: boolean): Observable<any> {
+        return this.http.post(`${this.API_URL}/products/${productId}/favorite`, { favorite });
+    }
+
+    // Ratings
+    rateProduct(productId: string, rating: number): Observable<any> {
+        return this.http.post(`${this.API_URL}/product-ranking/${productId}`, { rating });
+    }
+
+    getMyRating(productId: string): Observable<any> {
+        return this.http.get(`${this.API_URL}/product-ranking/my/${productId}`);
+    }
+
+    // Reports
+    reportProduct(productId: string, data: { reason: string, description?: string }): Observable<any> {
+        return this.http.post(`${this.API_URL}/reports/product/${productId}`, data);
+    }
 }

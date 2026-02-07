@@ -4,7 +4,7 @@
     <!-- Image -->
     <div class="relative aspect-[4/5] bg-gray-100 overflow-hidden cursor-pointer"
         [routerLink]="['/product', product._id]">
-        <img [src]="product.images?.[0] || 'assets/placeholder.png'" [alt]="product.name"
+        <img [src]="product.images[0] || 'assets/placeholder.png'" [alt]="product.name"
             class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500">
 
         @if (product.stock === 0) {

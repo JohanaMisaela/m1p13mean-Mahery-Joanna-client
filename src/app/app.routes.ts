@@ -12,6 +12,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
             },
             {
+                path: 'product/:id',
+                loadComponent: () => import('./features/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+            },
+            {
                 path: 'dashboard',
                 canActivate: [roleGuard],
                 data: { roles: ['admin', 'shop'] },

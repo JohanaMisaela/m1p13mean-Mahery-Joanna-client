@@ -1,0 +1,309 @@
+<div class="min-h-screen bg-gray-50 pt-8 pb-16">
+    @if (isLoading()) {
+    <div class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+    </div>
+    } @else if (product(); as prod) {
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Main Product Section -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8">
+            <!-- Image Gallery (Simplified for now) -->
+            <div class="relative aspect-square bg-gray-100 group">
+                <img [src]="prod.images[0] || 'assets/placeholder.png'" [alt]="prod.name"
+                    class="w-full h-full object-cover">
+
+                <!-- Heart Icon Superimposed -->
+                @if (currentUser()) {
+                <button (click)="toggleFavorite()"
+                    class="absolute top-4 right-4 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart z-10"
+                    title="Favoris">
+                    <fa-icon [icon]="icons.heart" [class.text-red-500]="isFavorite()"
+                        [class.text-gray-300]="!isFavorite()"
+                        class="text-xl group-hover/heart:scale-110 transition-transform"></fa-icon>
+                </button>
+                }
+
+                @if (prod.isOnSale && prod.activePromotion) {
+                <div
+                    class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold uppercase rounded shadow-md">
+                    -{{ prod.activePromotion.discountPercentage }}%
+                </div>
+                }
+                @if (prod.stock === 0) {
+                <div class="absolute inset-0 bg-white/60 flex items-center justify-center">
+                    <span class="bg-black text-white px-4 py-2 text-sm font-bold uppercase">Épuisé</span>
+                </div>
+                }
+            </div>
+
+            <!-- Product Info -->
+            <div class="p-8 flex flex-col">
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
+                            {{ prod.category?.name || 'Catégorie' }}
+                        </p>
+                        <div class="flex items-center gap-4 mb-2">
+                            <h1 class="text-3xl font-bold text-gray-900">{{ prod.name }}</h1>
+                        </div>
+
+                        <!-- Shop Link -->
+                        <div class="flex items-center gap-2 text-sm text-gray-600 mb-4 cursor-pointer hover:text-black transition-colors"
+                            [routerLink]="['/shop', prod.shop?._id]">
+                            <!-- Assuming shop link works like this or needs adjustment -->
+                            <fa-icon [icon]="icons.shop"></fa-icon>
+                            <span class="font-medium underline decoration-1 underline-offset-2">
+                                {{ prod.shop?.name || 'Boutique' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Report Button -->
+                    @if (currentUser()) {
+                    <button (click)="openReportModal()" class="text-gray-400 hover:text-red-500 transition-colors"
+                        title="Signaler ce produit">
+                        <fa-icon [icon]="icons.report"></fa-icon>
+                    </button>
+                    }
+                </div>
+
+                <!-- Rating -->
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="flex">
+                        @for (star of getStarArray(prod.averageRating || 0); track $index) {
+                        <fa-icon [icon]="icons.star" [class.text-yellow-400]="star"
+                            [class.text-gray-300]="!star"></fa-icon>
+                        }
+                    </div>
+                    <span class="text-sm text-gray-500">({{ prod.totalRatings || 0 }} avis)</span>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-8">
+                    @if (prod.isOnSale && prod.activePromotion) {
+                    <div class="flex items-baseline gap-3">
+                        <span class="text-3xl font-bold text-red-600">
+                            {{ getDiscountedPrice(prod.price, prod.activePromotion.discountPercentage) |
+                            currency:'MGA':'Ar ':'1.0-0' }}
+                        </span>
+                        <span class="text-lg text-gray-400 line-through">
+                            {{ prod.price | currency:'MGA':'Ar ':'1.0-0' }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-red-600 mt-1 font-medium">Offre spéciale jusqu'au {{
+                        prod.activePromotion.endDate | date }}</p>
+                    } @else {
+                    <span class="text-3xl font-bold text-gray-900">
+                        {{ prod.price | currency:'MGA':'Ar ':'1.0-0' }}
+                    </span>
+                    }
+                </div>
+
+                <!-- Description -->
+                <div class="prose prose-sm text-gray-600 mb-8">
+                    <h3 class="text-sm font-bold uppercase text-black mb-2">Description</h3>
+                    <p>{{ prod.description }}</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-auto pt-6 border-t border-gray-100 flex gap-4">
+                    <button
+                        class="flex-1 bg-black text-white px-6 py-4 rounded-lg font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        [disabled]="prod.stock === 0">
+                        <fa-icon [icon]="icons.cart"></fa-icon>
+                        Ajouter au panier
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews & Ratings Section -->
+        <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Your Rating & Add Comment -->
+            <div class="lg:col-span-1 space-y-8">
+                <!-- User Rating -->
+                @if (currentUser()) {
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-2">Votre note</h3>
+                    @if (userRating() > 0) {
+                    <p class="text-xs text-green-600 font-medium mb-3">Merci pour votre avis !</p>
+                    }
+                    <div class="flex gap-2">
+                        @for (i of [1, 2, 3, 4, 5]; track i) {
+                        <button (click)="submitRating(i)"
+                            class="text-2xl focus:outline-none transition-colors transform hover:scale-110"
+                            [class.text-yellow-400]="userRating() >= i" [class.text-gray-300]="userRating() < i">
+                            <fa-icon [icon]="icons.star"></fa-icon>
+                        </button>
+                        }
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Cliquez pour noter</p>
+                </div>
+
+                <!-- Add Comment Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-4">Laisser un commentaire</h3>
+                    <div [formGroup]="commentForm" class="space-y-4">
+                        <div class="relative">
+                            <textarea formControlName="comment" rows="4"
+                                class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm transition-all shadow-inner bg-gray-50"
+                                placeholder="Partagez votre avis sur ce produit..."></textarea>
+
+                            <!-- Internal Camera Icon -->
+                            <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                                <label
+                                    class="cursor-pointer p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-black"
+                                    title="Ajouter des photos">
+                                    <fa-icon [icon]="icons.camera"></fa-icon>
+                                    <input type="file" (change)="onFileSelected($event)" multiple accept="image/*"
+                                        class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        @if (commentForm.get('comment')?.touched && commentForm.get('comment')?.invalid) {
+                        <p class="text-red-500 text-xs mt-1">Le commentaire doit faire entre 10 et 500 caractères.</p>
+                        }
+
+                        <!-- Previews of selected local images -->
+                        @if (selectedImages().length > 0) {
+                        <div class="flex flex-wrap gap-2 py-2">
+                            @for (img of selectedImages(); track img; let i = $index) {
+                            <div class="relative w-16 h-16 group">
+                                <img [src]="img"
+                                    class="w-full h-full object-cover rounded-lg border border-gray-200 shadow-sm">
+                                <button (click)="removeSelectedImage(i)"
+                                    class="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <fa-icon [icon]="icons.trash"></fa-icon>
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        <button type="button" (click)="submitComment()" [disabled]="commentForm.invalid"
+                            class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm uppercase hover:bg-black transition-all shadow-md active:scale-95 disabled:opacity-50">
+                            Poster le commentaire
+                        </button>
+                    </div>
+                </div>
+                } @else {
+                <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center">
+                    <p class="text-blue-800 font-medium mb-2">Connectez-vous pour noter et commenter</p>
+                    <a routerLink="/auth/login" class="text-sm font-bold underline">Se connecter</a>
+                </div>
+                }
+            </div>
+
+            <!-- Right: Comments List -->
+            <div class="lg:col-span-2">
+                <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
+                    Commentaires <span class="text-sm font-normal text-gray-500">({{ comments().length }})</span>
+                </h3>
+
+                <div class="space-y-4">
+                    @for (comment of comments(); track comment?._id) {
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div
+                                    class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                                    <fa-icon [icon]="icons.user" class="text-sm"></fa-icon>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm">{{ comment.user?.name || 'Utilisateur' }}</p>
+                                    <!-- Potentially show user's rating here if available in comment object -->
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">
+                                {{ comment.createdAt | date:'mediumDate' }}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">{{ comment.comment }}</p>
+
+                        <!-- Comment Images -->
+                        @if (comment.images?.length) {
+                        <div class="flex flex-wrap gap-2">
+                            @for (imgUrl of comment.images; track imgUrl) {
+                            <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-100">
+                                <img [src]="imgUrl"
+                                    class="w-full h-full object-cover cursor-zoom-in hover:opacity-90 transition-opacity"
+                                    (click)="openImage(imgUrl)">
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    } @empty {
+                    <div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                        <fa-icon [icon]="icons.comment" class="text-gray-300 text-4xl mb-3"></fa-icon>
+                        <p class="text-gray-500">Aucun commentaire pour le moment.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Report Modal -->
+    @if (showReportModal()) {
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeReportModal()"
+                aria-hidden="true"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div
+                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <fa-icon [icon]="icons.report" class="text-red-600"></fa-icon>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Signaler ce produit
+                            </h3>
+                            <div class="mt-4">
+                                <form [formGroup]="reportForm" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Raison</label>
+                                        <select formControlName="reason"
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-black focus:border-black sm:text-sm rounded-md border">
+                                            <option value="" disabled>Sélectionnez une raison</option>
+                                            <option value="scam">Arnaque</option>
+                                            <option value="wrong_info">Informations incorrectes</option>
+                                            <option value="prohibited">Produit interdit</option>
+                                            <option value="other">Autre</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                                        <textarea formControlName="description" rows="3"
+                                            class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-black focus:border-black sm:text-sm"
+                                            placeholder="Détails supplémentaires..."></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" (click)="submitReport()" [disabled]="reportForm.invalid"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
+                        Signaler
+                    </button>
+                    <button type="button" (click)="closeReportModal()"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
