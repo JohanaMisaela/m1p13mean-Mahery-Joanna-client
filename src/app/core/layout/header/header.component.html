@@ -7,16 +7,93 @@
 
 
 
-        <!-- Auth Buttons -->
         <div class="flex items-center gap-4">
             @if (currentUser()) {
-            <a routerLink="/profil" class="hidden sm:flex items-center gap-2 text-gray-600 ">
-                <fa-icon [icon]="faUser" class="text-xl"></fa-icon>
-            </a>
-            <button (click)="logout()"
-                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
-                Déconnexion
-            </button>
+            <div class="relative">
+                <button (click)="toggleMenu()" class="flex items-center gap-2 p-2 rounded-full transition-colors ">
+                    <span class="hidden md:block font-medium text-gray-700">{{ currentUser()?.name }} {{
+                        currentUser()?.surname }}</span>
+                    <fa-icon [icon]="isMenuOpen ? icons.close : icons.menu" class="text-xl text-gray-700"></fa-icon>
+
+                </button>
+
+                @if (isMenuOpen) {
+                <div class="fixed inset-0 z-10" (click)="closeMenu()"></div>
+
+                <div
+                    class="absolute right-0 mt-3 w-60 bg-white rounded-xl shadow-2xl ring-1 ring-black ring-opacity-5 z-20 overflow-hidden origin-top-right transform transition-all duration-200">
+
+                    <div class="py-2">
+
+                        <!-- Admin Logic -->
+                        @if (currentUser()?.role === 'admin') {
+                        <!-- Admin Dashboard -->
+                        <a routerLink="/dashboard" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
+                            <span class="font-medium">Administration</span>
+                        </a>
+                        <!-- Shop Dashboard for Admin -->
+                        <a routerLink="/shop" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.shop" class="w-4"></fa-icon>
+                            <span class="font-medium">Gestion Boutique</span>
+                        </a>
+                        <div class="border-t border-gray-100 my-1 mx-2"></div>
+                        }
+
+                        <!-- Shop Logic -->
+                        @if (currentUser()?.role === 'shop') {
+                        <!-- Shop Dashboard -->
+                        <a routerLink="/shop" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.shop" class="w-4"></fa-icon>
+                            <span class="font-medium">Ma Boutique</span>
+                        </a>
+                        <!-- Dashboard (Product/Orders) if different from shop or same route -->
+                        <a routerLink="/dashboard" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
+                            <span class="font-medium">Dashboard Vendeur</span>
+                        </a>
+                        <div class="border-t border-gray-100 my-1 mx-2"></div>
+                        }
+
+                        <!-- User Links (Visible to ALL) -->
+                        <a routerLink="/profil" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.user" class="w-4"></fa-icon>
+                            <span class="font-medium">Profil</span>
+                        </a>
+                        <a routerLink="/profil" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.settings" class="w-4"></fa-icon>
+                            <span class="font-medium">Paramètres</span>
+                        </a>
+                        <a routerLink="/orders" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.orders" class="w-4"></fa-icon>
+                            <span class="font-medium">Commandes</span>
+                        </a>
+                        <a routerLink="/favorites" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.heart" class="w-4"></fa-icon>
+                            <span class="font-medium">Favoris</span>
+                        </a>
+
+
+                        <div class="border-t border-gray-100 my-1 mx-2"></div>
+
+                        <!-- Logout -->
+                        <button (click)="logout()"
+                            class="w-full text-left flex items-center gap-3 px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <fa-icon [icon]="icons.logout" class="w-4"></fa-icon>
+                            <span class="font-medium">Déconnexion</span>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
             } @else {
             <a routerLink="/auth/login"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium no-underline inline-block">

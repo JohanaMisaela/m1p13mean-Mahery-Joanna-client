@@ -26,7 +26,19 @@ export const routes: Routes = [
             {
                 path: 'unauthorized',
                 loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
-            }
+            },
+            {
+                path: 'orders',
+                canActivate: [roleGuard],
+                data: { roles: ['user', 'shop', 'admin'] },
+                loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
+            },
+            {
+                path: 'shop',
+                canActivate: [roleGuard],
+                data: { roles: ['shop', 'admin'] },
+                loadComponent: () => import('./features/shop/shop-dashboard.component').then(m => m.ShopDashboardComponent)
+            },
         ]
     },
 
@@ -44,18 +56,7 @@ export const routes: Routes = [
             }
         ]
     },
-    {
-        path: 'orders',
-        canActivate: [roleGuard],
-        data: { roles: ['user', 'shop', 'admin'] },
-        loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
-    },
-    {
-        path: 'shop',
-        canActivate: [roleGuard],
-        data: { roles: ['shop', 'admin'] },
-        loadComponent: () => import('./features/shop/shop-dashboard.component').then(m => m.ShopDashboardComponent)
-    },
+
 
     // Wildcard
     {

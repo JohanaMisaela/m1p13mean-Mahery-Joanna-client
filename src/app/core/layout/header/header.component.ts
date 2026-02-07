@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBars, faTimes, faCog, faBox, faSignOutAlt, faTachometerAlt, faStore, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-header',
@@ -13,12 +13,35 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 })
 export class HeaderComponent {
     private readonly authService = inject(AuthService);
-    protected readonly currentUser = this.authService.currentUser;
-    protected readonly faUser = faUser;
     private readonly router = inject(Router);
 
+    protected readonly currentUser = this.authService.currentUser;
+
+    // Icons
+    protected readonly icons = {
+        user: faUser,
+        menu: faBars,
+        close: faTimes,
+        settings: faCog,
+        orders: faBox,
+        logout: faSignOutAlt,
+        dashboard: faTachometerAlt,
+        shop: faStore,
+        heart: faHeart
+    };
+
+    protected isMenuOpen = false;
+
+    protected toggleMenu(): void {
+        this.isMenuOpen = !this.isMenuOpen;
+    }
+
+    protected closeMenu(): void {
+        this.isMenuOpen = false;
+    }
 
     protected logout(): void {
+        this.closeMenu();
         this.authService.logout();
     }
 }
