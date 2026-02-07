@@ -82,6 +82,14 @@ export class AuthService {
     }
 
     /**
+     * Manually update current user state
+     */
+    updateCurrentUser(user: User): void {
+        this._currentUser.set(user);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+
+    /**
      * Get token from localStorage
      */
     private getTokenFromStorage(): string | null {
