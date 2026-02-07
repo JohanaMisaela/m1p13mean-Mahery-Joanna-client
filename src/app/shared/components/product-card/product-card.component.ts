@@ -24,4 +24,8 @@ export class ProductCardComponent {
   getStarArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < Math.round(rating) ? 1 : 0);
   }
+
+  getDiscountedPrice(price: number, discountPercentage: number): number {
+    return price * (1 - discountPercentage / 100);
+  }
 }

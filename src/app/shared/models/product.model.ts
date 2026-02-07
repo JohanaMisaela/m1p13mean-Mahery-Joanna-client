@@ -24,6 +24,12 @@ export interface Product {
     averageRating: number;
     totalRatings: number;
     isActive: boolean;
+    isOnSale?: boolean;
+    activePromotion?: {
+        discountPercentage: number;
+        name: string;
+        endDate: string;
+    };
     createdAt?: string;
     updatedAt?: string;
 }
