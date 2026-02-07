@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUser, faBars, faTimes, faCog, faBox, faSignOutAlt, faTachometerAlt, faStore, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBars, faTimes, faCog, faBox, faSignOutAlt, faTachometerAlt, faStore, faHeart, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-header',
@@ -27,7 +27,8 @@ export class HeaderComponent {
         logout: faSignOutAlt,
         dashboard: faTachometerAlt,
         shop: faStore,
-        heart: faHeart
+        heart: faHeart,
+        cart: faShoppingCart
     };
 
     protected isMenuOpen = false;
