@@ -9,12 +9,13 @@ import { CategoryService } from '../../core/services/category.service';
 import { ShopService } from '../../core/services/shop.service';
 import { Product, Category, Shop } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faTimes, faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { FilterSidebarComponent } from '../../shared/components/filter-sidebar/filter-sidebar.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -43,8 +44,6 @@ export class HomeComponent implements OnInit {
 
   // Icons
   protected icons = {
-    search: faSearch,
-    close: faTimes,
     filter: faFilter,
     cart: faCartPlus,
     star: faStar,
