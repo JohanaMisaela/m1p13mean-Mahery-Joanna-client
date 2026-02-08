@@ -11,6 +11,17 @@ export interface Shop {
     owner?: string;
 }
 
+export interface ProductVariant {
+    _id: string;
+    product: string;
+    attributes: { [key: string]: string };
+    price: number;
+    stock: number;
+    sku?: string;
+    images: string[];
+    isActive: boolean;
+}
+
 export interface Product {
     _id: string;
     name: string;
@@ -31,6 +42,8 @@ export interface Product {
         name: string;
         endDate: string;
     };
+    attributeConfig?: { [key: string]: string[] };
+    variants?: ProductVariant[];
     createdAt?: string;
     updatedAt?: string;
 }

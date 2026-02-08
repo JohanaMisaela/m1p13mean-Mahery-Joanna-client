@@ -1,10 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Product } from '../../shared/models/product.model';
+import { Product, ProductVariant } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
@@ -30,6 +30,19 @@ export class ProductDetailComponent implements OnInit {
   editSelectedImages = signal<string[]>([]);
   editingCommentId = signal<string | null>(null);
   currentImageIndex = signal<number>(0);
+
+  // Variant Selection
+  selectedAttributes = signal<{ [key: string]: string }>({});
+
+  currentVariant = computed(() => {
+    const prod = this.product();
+    const selected = this.selectedAttributes();
+    if (!prod || !prod.variants || prod.variants.length === 0) return null;
+
+    return prod.variants.find(v => {
+      return Object.entries(selected).every(([key, value]) => v.attributes[key] === value);
+    }) || null;
+  });
 
   // Modals
   showReportModal = signal<boolean>(false);
@@ -228,6 +241,9 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
+        if (product.variants && product.variants.length > 0) {
+          this.selectedAttributes.set(product.variants[0].attributes);
+        }
         if (!silent) this.isLoading.set(false);
 
         this.loadComments(id, true);
@@ -250,6 +266,18 @@ export class ProductDetailComponent implements OnInit {
         if (!silent) this.isLoading.set(false);
       }
     });
+  }
+
+  getEffectivePrice(): number {
+    const variant = this.currentVariant();
+    if (variant) return variant.price;
+    return this.product()?.price || 0;
+  }
+
+  getEffectiveStock(): number {
+    const variant = this.currentVariant();
+    if (variant) return variant.stock;
+    return this.product()?.stock || 0;
   }
 
   loadComments(id: string, silent: boolean = false): void {
@@ -350,6 +378,26 @@ export class ProductDetailComponent implements OnInit {
 
   setImageIndex(idx: number): void {
     this.currentImageIndex.set(idx);
+  }
+
+  selectAttribute(key: string, value: string): void {
+    this.selectedAttributes.update(attrs => ({ ...attrs, [key]: value }));
+  }
+
+  isAttributeDisabled(key: string, value: string): boolean {
+    const prod = this.product();
+    if (!prod || !prod.variants) return false;
+
+    // Check if any variant exists with current selections + this potential selection
+    const potentialSelection = { ...this.selectedAttributes(), [key]: value };
+    return !prod.variants.some(v => {
+      return Object.entries(potentialSelection).every(([k, val]) => v.attributes[k] === val);
+    });
+  }
+
+  getAttributeKeys(): string[] {
+    const config = this.product()?.attributeConfig;
+    return config ? Object.keys(config) : [];
   }
 
   openImage(url: string): void {

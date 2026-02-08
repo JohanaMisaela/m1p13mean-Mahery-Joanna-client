@@ -111,26 +111,72 @@
                     <span class="text-sm text-gray-500">({{ prod.totalRatings || 0 }} avis)</span>
                 </div>
 
-                <!-- Price -->
-                <div class="mb-8">
-                    @if (prod.isOnSale && prod.activePromotion) {
-                    <div class="flex items-baseline gap-3">
-                        <span class="text-3xl font-bold text-red-600">
-                            {{ getDiscountedPrice(prod.price, prod.activePromotion.discountPercentage) |
-                            currency:'MGA':'Ar ':'1.0-0' }}
-                        </span>
-                        <span class="text-lg text-gray-400 line-through">
-                            {{ prod.price | currency:'MGA':'Ar ':'1.0-0' }}
-                        </span>
+                <!-- Price & Stock -->
+                <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
+                    <div>
+                        <div class="flex items-baseline gap-3">
+                            @if (prod.isOnSale && prod.activePromotion) {
+                            <span class="text-3xl font-black text-red-600">
+                                {{ (getEffectivePrice() * (1 - prod.activePromotion.discountPercentage / 100)) |
+                                number:'1.0-0' }} Ar
+                            </span>
+                            <span class="text-lg text-gray-400 line-through">
+                                {{ getEffectivePrice() | number:'1.0-0' }} Ar
+                            </span>
+                            } @else {
+                            <span class="text-3xl font-black text-gray-900">
+                                {{ getEffectivePrice() | number:'1.0-0' }} Ar
+                            </span>
+                            }
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">TVA incluse</p>
                     </div>
-                    <p class="text-sm text-red-600 mt-1 font-medium">Offre spéciale jusqu'au {{
-                        prod.activePromotion.endDate | date }}</p>
-                    } @else {
-                    <span class="text-3xl font-bold text-gray-900">
-                        {{ prod.price | currency:'MGA':'Ar ':'1.0-0' }}
-                    </span>
+
+                    <div class="text-right">
+                        <div class="flex items-center gap-2 justify-end">
+                            <div class="w-2 h-2 rounded-full" [class.bg-green-500]="getEffectiveStock() > 10"
+                                [class.bg-orange-500]="getEffectiveStock() <= 10 && getEffectiveStock() > 0"
+                                [class.bg-red-500]="getEffectiveStock() === 0">
+                            </div>
+                            <span class="text-sm font-bold" [class.text-green-600]="getEffectiveStock() > 10"
+                                [class.text-orange-600]="getEffectiveStock() <= 10 && getEffectiveStock() > 0"
+                                [class.text-red-600]="getEffectiveStock() === 0">
+                                {{ getEffectiveStock() > 0 ? getEffectiveStock() + ' en stock' : 'Rupture de stock' }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Livraison sous 2-4 jours</p>
+                    </div>
+                </div>
+
+                <!-- Variant Selectors -->
+                @if (prod.attributeConfig && getAttributeKeys().length > 0) {
+                <div class="space-y-6 mb-8">
+                    @for (key of getAttributeKeys(); track key) {
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                            {{ key === 'color' ? 'Couleur' : (key === 'size' ? 'Taille' : key) }} :
+                            <span class="text-gray-500 font-medium">{{ selectedAttributes()[key] }}</span>
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            @for (value of prod.attributeConfig[key]; track value) {
+                            <button (click)="selectAttribute(key, value)" [disabled]="isAttributeDisabled(key, value)"
+                                [class.border-black]="selectedAttributes()[key] === value"
+                                [class.bg-black]="selectedAttributes()[key] === value"
+                                [class.text-white]="selectedAttributes()[key] === value"
+                                [class.border-gray-200]="selectedAttributes()[key] !== value"
+                                [class.text-gray-900]="selectedAttributes()[key] !== value"
+                                [class.hover:border-black]="!isAttributeDisabled(key, value)"
+                                [class.opacity-25]="isAttributeDisabled(key, value)"
+                                [class.cursor-not-allowed]="isAttributeDisabled(key, value)"
+                                class="px-4 py-2 text-sm font-medium border-2 rounded-lg transition-all min-w-[3rem] flex items-center justify-center">
+                                {{ value }}
+                            </button>
+                            }
+                        </div>
+                    </div>
                     }
                 </div>
+                }
 
                 <!-- Description -->
                 <div class="prose prose-sm text-gray-600 mb-8">
@@ -142,7 +188,7 @@
                 <div class="mt-auto pt-6 border-t border-gray-100 flex gap-4">
                     <button
                         class="flex-1 bg-black text-white px-6 py-4 rounded-lg font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        [disabled]="prod.stock === 0">
+                        [disabled]="getEffectiveStock() === 0 || (prod.variants && prod.variants.length > 0 && !currentVariant())">
                         <fa-icon [icon]="icons.cart"></fa-icon>
                         Ajouter au panier
                     </button>
