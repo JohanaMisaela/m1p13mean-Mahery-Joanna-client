@@ -6,7 +6,7 @@ import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-product-detail',
@@ -29,6 +29,7 @@ export class ProductDetailComponent implements OnInit {
   selectedImages = signal<string[]>([]);
   editSelectedImages = signal<string[]>([]);
   editingCommentId = signal<string | null>(null);
+  currentImageIndex = signal<number>(0);
 
   // Modals
   showReportModal = signal<boolean>(false);
@@ -50,7 +51,9 @@ export class ProductDetailComponent implements OnInit {
     plus: faPlus,
     trash: faTrash,
     camera: faCamera,
-    edit: faEdit
+    edit: faEdit,
+    prev: faChevronLeft,
+    next: faChevronRight
   };
 
   constructor() {
@@ -331,6 +334,22 @@ export class ProductDetailComponent implements OnInit {
         alert('Erreur lors de l\'envoi du commentaire. Veuillez réessayer.');
       }
     });
+  }
+
+  prevImage(): void {
+    const images = this.product()?.images || [];
+    if (images.length <= 1) return;
+    this.currentImageIndex.update(idx => (idx === 0 ? images.length - 1 : idx - 1));
+  }
+
+  nextImage(): void {
+    const images = this.product()?.images || [];
+    if (images.length <= 1) return;
+    this.currentImageIndex.update(idx => (idx === images.length - 1 ? 0 : idx + 1));
+  }
+
+  setImageIndex(idx: number): void {
+    this.currentImageIndex.set(idx);
   }
 
   openImage(url: string): void {
