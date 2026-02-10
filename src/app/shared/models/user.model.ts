@@ -7,6 +7,7 @@ export interface User {
     contact?: string;
     role: 'admin' | 'shop' | 'user' | 'buyer';
     isActive?: boolean;
+    favoriteShops?: string[];
 }
 
 export interface AuthResponse {

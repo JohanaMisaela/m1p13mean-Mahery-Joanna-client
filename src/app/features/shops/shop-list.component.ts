@@ -11,11 +11,12 @@ import { AuthService } from '../../core/services/auth.service';
 
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { ShopCardComponent } from '../../shared/components/shop-card/shop-card.component';
 
 @Component({
     selector: 'app-public-shop-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, PaginationComponent, EmptyStateComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, PaginationComponent, EmptyStateComponent, ShopCardComponent],
     templateUrl: './shop-list.component.html',
     styleUrl: './shop-list.component.css'
 })
@@ -126,9 +127,7 @@ export class PublicShopListComponent implements OnInit {
         });
     }
 
-    toggleFavorite(event: Event, shop: Shop): void {
-        event.preventDefault();
-        event.stopPropagation();
+    toggleFavorite(shop: Shop): void {
 
         const user = this.currentUser();
         if (!user) return;

@@ -1,0 +1,36 @@
+<a [routerLink]="['/shop', shop._id]"
+    class="group bg-white border border-gray-100 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full relative">
+
+    <!-- Favorite Icon -->
+    @if (showFavoriteButton && currentUser) {
+    <button type="button" (click)="toggleFavorite($event)"
+        class="absolute top-8 right-8 z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 bg-white shadow-sm border border-gray-50"
+        [class.text-red-500]="isFavorited()" [class.text-gray-300]="!isFavorited()">
+        <fa-icon [icon]="icons.heart"></fa-icon>
+    </button>
+    }
+
+    <!-- Shop Image/Icon Box -->
+    <div
+        class="w-16 h-16 bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-black group-hover:text-white transition-all duration-500 overflow-hidden border border-gray-100 shadow-inner">
+        @if (shop.gallery?.[0] || shop.logo) {
+        <img [src]="shop.gallery?.[0] || shop.logo" class="w-full h-full object-cover transition-all duration-700">
+        } @else {
+        <fa-icon [icon]="icons.shop" class="text-xl"></fa-icon>
+        }
+    </div>
+
+    <h3 class="text-xl font-medium text-gray-900 mb-2 truncate">{{ shop.name }}</h3>
+
+    <p class="text-gray-500 text-sm font-light leading-relaxed line-clamp-3 mb-8 flex-1">
+        {{ shop.description || 'Bienvenue dans notre boutique exclusive.' }}
+    </p>
+
+    <div class="flex items-center justify-between pt-6 border-t border-gray-50">
+        <span
+            class="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors font-black">Voir
+            les produits</span>
+        <fa-icon [icon]="icons.next"
+            class="text-gray-300 group-hover:translate-x-1 transition-transform text-[10px]"></fa-icon>
+    </div>
+</a>
