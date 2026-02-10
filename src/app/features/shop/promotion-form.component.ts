@@ -1,0 +1,102 @@
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+    selector: 'app-promotion-form',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    template: `
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div class="bg-white max-w-xl w-full p-8 shadow-2xl">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+          <h3 class="text-2xl font-light uppercase tracking-widest">Nouvelle Promotion</h3>
+          <button (click)="close.emit()" class="text-gray-400 hover:text-black transition-all">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form (ngSubmit)="submit()" class="space-y-6">
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Nom de la promo</label>
+            <input type="text" [(ngModel)]="formData.name" name="name" required
+                   class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition-all" placeholder="Soldes d'été">
+          </div>
+
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Remise (%)</label>
+              <input type="number" [(ngModel)]="formData.discountPercentage" name="discount" required
+                     class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Type</label>
+              <select [(ngModel)]="formData.type" name="type" required
+                      class="w-full border-b border-gray-200 py-2 bg-transparent focus:border-black outline-none transition-all">
+                <option value="percentage">Pourcentage</option>
+                <option value="fixed">Fixe (Bientôt)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Début</label>
+              <input type="date" [(ngModel)]="formData.startDate" name="start" required
+                     class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition-all text-xs">
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Fin</label>
+              <input type="date" [(ngModel)]="formData.endDate" name="end" required
+                     class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition-all text-xs">
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-4 pt-8 border-t border-gray-100">
+            <button type="button" (click)="close.emit()" 
+                    class="px-6 py-2 border border-gray-200 text-xs uppercase tracking-widest hover:bg-gray-50 transition-all">
+              Annuler
+            </button>
+            <button type="submit" 
+                    class="px-8 py-2 bg-black text-white text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg">
+              Créer Promo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `,
+    styles: []
+})
+export class PromotionFormModalComponent implements OnInit {
+    @Input() initialData: any = null;
+    @Output() close = new EventEmitter<void>();
+    @Output() save = new EventEmitter<any>();
+
+    formData = {
+        name: '',
+        discountPercentage: 10,
+        type: 'percentage',
+        startDate: '',
+        endDate: ''
+    };
+
+    ngOnInit() {
+        if (this.initialData) {
+            this.formData = { ...this.initialData };
+        } else {
+            // Set default dates
+            const now = new Date();
+            const nextMonth = new Date();
+            nextMonth.setMonth(now.getMonth() + 1);
+            this.formData.startDate = now.toISOString().split('T')[0];
+            this.formData.endDate = nextMonth.toISOString().split('T')[0];
+        }
+    }
+
+    submit() {
+        this.save.emit(this.formData);
+    }
+}

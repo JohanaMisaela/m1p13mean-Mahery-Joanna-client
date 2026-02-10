@@ -34,9 +34,15 @@
         }
 
         <!-- Category -->
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">
-            {{ product.category?.name || 'Catégorie' }}
-        </p>
+        <div class="flex flex-wrap gap-1 mb-1 min-h-[1.5rem]">
+            @if (product.category) {
+            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
+                {{ product.category.name || 'Catégorie' }}
+            </span>
+            } @else {
+            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Aucune catégorie</span>
+            }
+        </div>
 
         <h3 class="text-sm font-bold uppercase text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]" [title]="product.name">
             <a [routerLink]="['/product', product._id]" class="hover:underline decoration-1 underline-offset-2">

@@ -1,0 +1,177 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-1">
+        @if (currentUser) {
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-lg mb-2">Votre note</h3>
+            @if (userRating() > 0) {
+            <p class="text-xs text-green-600 font-medium mb-3">Merci pour votre avis !</p>
+            }
+            <div class="flex gap-2">
+                @for (i of [1, 2, 3, 4, 5]; track i) {
+                <button (click)="submitRating(i)"
+                    class="text-2xl focus:outline-none transition-colors transform hover:scale-110"
+                    [class.text-yellow-400]="userRating() >= i" [class.text-gray-300]="userRating() < i">
+                    <fa-icon [icon]="icons.star"></fa-icon>
+                </button>
+                }
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Cliquez pour noter</p>
+        </div>
+        } @else {
+        <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-center mb-8">
+            <p class="text-blue-800 font-medium mb-2">Connectez-vous pour noter et commenter</p>
+            <a routerLink="/auth/login" class="text-sm font-bold underline">Se connecter</a>
+        </div>
+        }
+    </div>
+
+    <div class="lg:col-span-2 space-y-6">
+
+        <h3 class="font-bold text-xl flex items-center gap-2">
+            Commentaires <span class="text-sm font-normal text-gray-500">({{ comments().length }})</span>
+        </h3>
+
+        @if (currentUser) {
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-lg mb-4">Laisser un commentaire</h3>
+            <div [formGroup]="commentForm" class="space-y-4">
+                <div class="relative">
+                    <textarea formControlName="comment" rows="4"
+                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm transition-all shadow-inner bg-gray-50"
+                        placeholder="Partagez votre avis sur ce produit..."></textarea>
+
+                    <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                        <label
+                            class="cursor-pointer p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-black"
+                            title="Ajouter des photos">
+                            <fa-icon [icon]="icons.camera"></fa-icon>
+                            <input type="file" (change)="onFileSelected($event, 'main')" multiple accept="image/*"
+                                class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                @if (commentForm.get('comment')?.touched && commentForm.get('comment')?.invalid) {
+                <p class="text-red-500 text-xs mt-1">Le commentaire doit faire entre 5 et 500 caractères.</p>
+                }
+
+                @if (selectedImages().length > 0) {
+                <div class="flex flex-wrap gap-2 py-2">
+                    @for (img of selectedImages(); track img; let i = $index) {
+                    <div class="relative w-16 h-16 group">
+                        <img [src]="img" class="w-full h-full object-cover rounded-lg border border-gray-200 shadow-sm">
+                        <button (click)="removeSelectedImage(i, 'main')"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                            <fa-icon [icon]="icons.trash"></fa-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+                }
+
+                <button type="button" (click)="submitComment()" [disabled]="commentForm.invalid"
+                    class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold text-sm uppercase hover:bg-black transition-all shadow-md active:scale-95 disabled:opacity-50">
+                    Poster le commentaire
+                </button>
+            </div>
+        </div>
+        }
+
+        <div class="space-y-4">
+            @for (comment of comments(); track comment?._id) {
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative group/comment">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                            <fa-icon [icon]="icons.user" class="text-sm"></fa-icon>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">{{ comment.user?.name || 'Utilisateur' }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400">
+                        {{ comment.createdAt | date:'medium' }}
+                    </span>
+                </div>
+
+                @if (editingCommentId() === comment._id) {
+                <div [formGroup]="editCommentForm" class="mt-2 space-y-3">
+                    <div class="relative">
+                        <textarea formControlName="comment" rows="4"
+                            class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm transition-all shadow-inner bg-gray-50"></textarea>
+
+                        <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                            <label
+                                class="cursor-pointer p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-black"
+                                title="Modifier les photos">
+                                <fa-icon [icon]="icons.camera"></fa-icon>
+                                <input type="file" (change)="onFileSelected($event, 'edit')" multiple accept="image/*"
+                                    class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (editSelectedImages().length > 0) {
+                    <div class="flex flex-wrap gap-2 py-2">
+                        @for (img of editSelectedImages(); track $index; let i = $index) {
+                        <div class="relative w-16 h-16 group/img">
+                            <img [src]="img"
+                                class="w-full h-full object-cover rounded-lg border border-gray-200 shadow-sm">
+                            <button (click)="removeSelectedImage(i, 'edit')"
+                                class="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-md opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                <fa-icon [icon]="icons.trash"></fa-icon>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                    }
+
+                    <div class="flex justify-end gap-3">
+                        <button (click)="cancelEdit()"
+                            class="px-4 py-2 text-sm font-bold text-gray-500 hover:text-black border border-gray-200 rounded-lg transition-colors">
+                            Annuler
+                        </button>
+                        <button (click)="submitUpdate(comment._id)" [disabled]="editCommentForm.invalid"
+                            class="px-5 py-2 text-sm font-bold text-white bg-black rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors shadow-sm">
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
+                } @else {
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">{{ comment.comment }}</p>
+
+                @if (comment.images?.length) {
+                <div class="flex flex-wrap gap-2 mb-4">
+                    @for (imgUrl of comment.images; track imgUrl) {
+                    <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-100">
+                        <img [src]="imgUrl"
+                            class="w-full h-full object-cover cursor-zoom-in hover:opacity-90 transition-opacity"
+                            (click)="openImage(imgUrl)">
+                    </div>
+                    }
+                </div>
+                }
+
+                @if (isCommentOwner(comment)) {
+                <div class="flex items-center justify-end gap-6 mt-4 pt-4 border-t border-gray-100">
+                    <button (click)="editComment(comment)"
+                        class="text-black transition-transform flex items-center gap-2 group/edit" title="Modifier">
+                        <fa-icon [icon]="icons.edit" class="text-xl"></fa-icon>
+                    </button>
+                    <button (click)="deleteComment(comment._id)"
+                        class="text-red-600 transition-transform flex items-center gap-2 group/del" title="Supprimer">
+                        <fa-icon [icon]="icons.trash" class="text-xl"></fa-icon>
+                    </button>
+                </div>
+                }
+                }
+            </div>
+            } @empty {
+            <div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                <fa-icon [icon]="icons.comment" class="text-gray-300 text-4xl mb-3"></fa-icon>
+                <p class="text-gray-500">Aucun commentaire pour le moment.</p>
+            </div>
+            }
+        </div>
+    </div>
+</div>

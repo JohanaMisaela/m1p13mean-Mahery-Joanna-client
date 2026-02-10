@@ -8,7 +8,11 @@ export interface Category {
 export interface Shop {
     _id: string;
     name: string;
-    owner?: string;
+    owner?: any;
+    gallery?: string[];
+    slogan?: string;
+    mallBoxNumber?: string;
+    isActive?: boolean;
 }
 
 export interface ProductVariant {

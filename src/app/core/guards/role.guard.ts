@@ -25,12 +25,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
         return true;
     }
 
-    // Check if user has one of the required roles
-    console.log('RoleGuard Debug:', {
-        currentUserRole: currentUser?.role,
-        requiredRoles: requiredRoles,
-        hasRole: currentUser && requiredRoles.includes(currentUser.role)
-    });
+
 
     if (currentUser && requiredRoles.includes(currentUser.role)) {
         return true;

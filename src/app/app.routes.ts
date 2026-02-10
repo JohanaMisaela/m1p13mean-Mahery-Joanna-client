@@ -44,6 +44,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/shop/shop-dashboard.component').then(m => m.ShopDashboardComponent)
             },
             {
+                path: 'admin/shop/:id',
+                canActivate: [roleGuard],
+                data: { roles: ['admin', 'shop'] },
+                loadComponent: () => import('./features/shop/shop-management.component').then(m => m.ShopManagementComponent)
+            },
+            {
                 path: 'cart',
                 canActivate: [roleGuard],
                 data: { roles: ['user', 'shop', 'admin'] },

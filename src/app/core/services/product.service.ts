@@ -63,4 +63,16 @@ export class ProductService {
     reportProduct(productId: string, data: { reason: string, description?: string }): Observable<any> {
         return this.http.post(`${this.API_URL}/reports/product/${productId}`, data);
     }
+
+    createProduct(shopId: string, data: any): Observable<Product> {
+        return this.http.post<Product>(`${this.API_URL}/products/${shopId}`, data);
+    }
+
+    updateProduct(id: string, data: any): Observable<Product> {
+        return this.http.put<Product>(`${this.API_URL}/products/${id}`, data);
+    }
+
+    setProductActive(id: string, isActive: boolean): Observable<any> {
+        return this.http.patch(`${this.API_URL}/products/${id}/activate`, { isActive });
+    }
 }

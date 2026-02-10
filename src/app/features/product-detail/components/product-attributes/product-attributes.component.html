@@ -1,0 +1,44 @@
+@if (mergedAttributeConfig() && getAttributeKeys().length > 0) {
+<div class="space-y-6 mb-8">
+    @for (key of getAttributeKeys(); track key) {
+    <div>
+        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+            {{ key === 'color' ? 'Couleur' : (key === 'size' ? 'Taille' : key) }} :
+            <span class="text-gray-500 font-medium">{{ selectedAttributes()[key] || 'Non sélectionné'
+                }}</span>
+        </h3>
+        <div class="flex flex-wrap gap-2">
+            @for (value of mergedAttributeConfig()[key]; track value) {
+            <button (click)="selectAttribute(key, value)" [disabled]="isAttributeDisabled(key, value)"
+                [class.border-black]="selectedAttributes()[key] === value"
+                [class.bg-black]="selectedAttributes()[key] === value"
+                [class.text-white]="selectedAttributes()[key] === value"
+                [class.border-gray-200]="selectedAttributes()[key] !== value"
+                [class.text-gray-900]="selectedAttributes()[key] !== value"
+                [class.hover:border-black]="!isAttributeDisabled(key, value)"
+                [class.opacity-25]="isAttributeDisabled(key, value)"
+                [class.cursor-not-allowed]="isAttributeDisabled(key, value)"
+                class="px-4 py-2 text-sm font-medium border-2 rounded-lg transition-all min-w-[3rem] flex items-center justify-center">
+                {{ value }}
+            </button>
+            }
+        </div>
+    </div>
+    }
+</div>
+}
+
+@if (Object.keys(variantSpecificAttributes()).length > 0) {
+<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-8">
+    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Informations
+        supplémentaires</h3>
+    <div class="space-y-2">
+        @for (attr of Object.entries(variantSpecificAttributes()); track attr[0]) {
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-gray-700">{{ attr[0] }}:</span>
+            <span class="text-sm text-gray-900 font-semibold">{{ attr[1] }}</span>
+        </div>
+        }
+    </div>
+</div>
+}

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,11 +7,14 @@ import { AuthService } from '../../core/services/auth.service';
 import { Product, ProductVariant } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
+import { ProductAttributesComponent } from './components/product-attributes/product-attributes.component';
+import { ProductReportComponent } from './components/product-report/product-report.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductReviewsComponent, ProductAttributesComponent, ProductReportComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -19,16 +22,14 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private authService = inject(AuthService);
-  private fb = inject(FormBuilder);
+  // fb is likely not needed anymore if only used for reportForm (unless used for something else? Checked, it was used for comment editing but that's gone too. Let's keep it if I missed something or remove if unused.)
+  // Wait, I see no other form groups in the truncated view. But let's check carefully.
+  // The provided view earlier showed `reportForm` initialization in constructor. `commentForm` etc were already removed.
+  // So `fb` might be unused now. I'll remove it to be clean.
 
   product = signal<Product | null>(null);
-  comments = signal<any[]>([]);
-  userRating = signal<number>(0);
   isLoading = signal<boolean>(true);
   currentUser = this.authService.currentUser;
-  selectedImages = signal<string[]>([]);
-  editSelectedImages = signal<string[]>([]);
-  editingCommentId = signal<string | null>(null);
   currentImageIndex = signal<number>(0);
 
   // Variant Selection
@@ -37,20 +38,72 @@ export class ProductDetailComponent implements OnInit {
   currentVariant = computed(() => {
     const prod = this.product();
     const selected = this.selectedAttributes();
+
     if (!prod || !prod.variants || prod.variants.length === 0) return null;
 
-    return prod.variants.find(v => {
-      return Object.entries(selected).every(([key, value]) => v.attributes[key] === value);
+    const selectedKeys = Object.keys(selected);
+    if (selectedKeys.length === 0) return null;
+
+    // Find a variant where ALL of its attributes match our current selection
+    // We don't require selecting all possible attributes - just that what we selected matches
+    const variant = prod.variants.find(v => {
+      return Object.entries(v.attributes).every(([key, value]) => {
+        // If we haven't selected this attribute yet, it's not a mismatch
+        if (!selected[key]) return true;
+
+        const val1 = value?.toString().toLowerCase();
+        const val2 = selected[key]?.toString().toLowerCase();
+        return val1 === val2;
+      });
     }) || null;
+
+    console.log('Current Variant detected:', variant?._id, 'for selection:', selected);
+    return variant;
   });
 
-  // Modals
-  showReportModal = signal<boolean>(false);
+  effectivePrice = computed(() => {
+    const variant = this.currentVariant();
+    if (variant) return variant.price;
+    return this.product()?.price || 0;
+  });
 
-  // Forms
-  commentForm: FormGroup;
-  editCommentForm: FormGroup;
-  reportForm: FormGroup;
+  effectiveStock = computed(() => {
+    const variant = this.currentVariant();
+    if (variant) return variant.stock;
+    return this.product()?.stock || 0;
+  });
+
+  effectiveImages = computed(() => {
+    const variant = this.currentVariant();
+    if (variant && variant.images && variant.images.length > 0) {
+      return variant.images;
+    }
+    return this.product()?.images || [];
+  });
+
+  allAvailableImages = computed(() => {
+    const prod = this.product();
+    if (!prod) return [];
+
+    const baseImages = prod.images || [];
+    const variantImages = (prod.variants || []).flatMap(v => v.images || []);
+
+    // Unique URLs
+    return Array.from(new Set([...baseImages, ...variantImages]));
+  });
+
+  imageToVariantMap = computed(() => {
+    const prod = this.product();
+    const map = new Map<string, ProductVariant>();
+    if (!prod || !prod.variants) return map;
+
+    prod.variants.forEach(v => {
+      if (v.images) {
+        v.images.forEach(img => map.set(img, v));
+      }
+    });
+    return map;
+  });
 
   icons = {
     star: faStar,
@@ -70,128 +123,13 @@ export class ProductDetailComponent implements OnInit {
   };
 
   constructor() {
-    this.commentForm = this.fb.group({
-      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
+    effect(() => {
+      // Re-initialize image index when variant changes to ensure valid view
+      this.currentVariant();
+      untracked(() => {
+        this.currentImageIndex.set(0);
+      });
     });
-
-    this.editCommentForm = this.fb.group({
-      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
-    });
-
-    this.reportForm = this.fb.group({
-      reason: ['', Validators.required],
-      description: ['']
-    });
-  }
-  isCommentOwner(comment: any): boolean {
-    const user = this.currentUser();
-    if (!user || !comment.user) return false;
-    const commentUserId = comment.user._id || comment.user.id || comment.user;
-    const currentUserId = user._id || user.id;
-    return commentUserId === currentUserId;
-  }
-
-  editComment(comment: any): void {
-    this.editingCommentId.set(comment._id);
-    this.editCommentForm.patchValue({
-      comment: comment.comment
-    });
-    // Load existing images into edit buffer
-    this.editSelectedImages.set(comment.images || []);
-  }
-
-  cancelEdit(): void {
-    this.editingCommentId.set(null);
-    this.editCommentForm.reset();
-    this.editSelectedImages.set([]);
-  }
-
-  submitUpdate(commentId: string): void {
-    if (this.editCommentForm.invalid) return;
-
-    const previousComments = this.comments();
-    const updatedText = this.editCommentForm.value.comment;
-    const updatedImages = this.editSelectedImages();
-
-    // Optimistic Update
-    this.comments.set(previousComments.map(c =>
-      c._id === commentId
-        ? { ...c, comment: updatedText, images: updatedImages }
-        : c
-    ));
-
-    const updatedData = {
-      comment: updatedText,
-      images: updatedImages
-    };
-
-    this.editingCommentId.set(null);
-    this.editSelectedImages.set([]);
-
-    this.productService.updateComment(commentId, updatedData).subscribe({
-      next: () => {
-        const prodId = this.product()?._id;
-        if (prodId) {
-          this.loadComments(prodId, true);
-          this.loadProduct(prodId, true);
-        }
-      },
-      error: (err) => {
-        console.error('Update comment error:', err);
-        this.comments.set(previousComments);
-        alert('Erreur lors de la modification');
-      }
-    });
-  }
-
-  deleteComment(commentId: string): void {
-    if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
-
-    const previousComments = this.comments();
-    this.comments.set(previousComments.filter(c => c._id !== commentId));
-
-    this.productService.deleteComment(commentId).subscribe({
-      next: () => {
-        const prodId = this.product()?._id;
-        if (prodId) {
-          this.loadProduct(prodId, true);
-          // Optionally reload comments to ensure sync
-          this.loadComments(prodId, true);
-        }
-      },
-      error: (err) => {
-        console.error('Delete comment error:', err);
-        this.comments.set(previousComments);
-        alert('Erreur lors de la suppression');
-      }
-    });
-  }
-
-  onFileSelected(event: any, target: 'main' | 'edit' = 'main'): void {
-    const files = event.target.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const result = e.target.result as string;
-          if (target === 'main') {
-            this.selectedImages.update(imgs => [...imgs, result]);
-          } else {
-            this.editSelectedImages.update(imgs => [...imgs, result]);
-          }
-        };
-        reader.readAsDataURL(files[i]);
-      }
-    }
-    event.target.value = '';
-  }
-
-  removeSelectedImage(index: number, target: 'main' | 'edit' = 'main'): void {
-    if (target === 'main') {
-      this.selectedImages.update(imgs => imgs.filter((_, i) => i !== index));
-    } else {
-      this.editSelectedImages.update(imgs => imgs.filter((_, i) => i !== index));
-    }
   }
 
   isFavorite(): boolean {
@@ -241,15 +179,10 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
-        if (product.variants && product.variants.length > 0) {
-          this.selectedAttributes.set(product.variants[0].attributes);
-        }
-        if (!silent) this.isLoading.set(false);
+        // Default to empty selection to show base product price/stock initially
+        this.selectedAttributes.set({});
 
-        this.loadComments(id, true);
-        if (this.currentUser()) {
-          this.loadUserRating(id, true);
-        }
+        if (!silent) this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
     });
@@ -268,33 +201,15 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
-  getEffectivePrice(): number {
-    const variant = this.currentVariant();
-    if (variant) return variant.price;
-    return this.product()?.price || 0;
+  onReviewsUpdated(): void {
+    const prod = this.product();
+    if (prod) {
+      this.loadProduct(prod._id, true);
+    }
   }
 
-  getEffectiveStock(): number {
-    const variant = this.currentVariant();
-    if (variant) return variant.stock;
-    return this.product()?.stock || 0;
-  }
-
-  loadComments(id: string, silent: boolean = false): void {
-    this.productService.getComments(id).subscribe({
-      next: (res: any) => this.comments.set(res.data || []),
-      error: (err) => console.error('Error loading comments:', err)
-    });
-  }
-
-  loadUserRating(id: string, silent: boolean = false): void {
-    this.productService.getMyRating(id).subscribe({
-      next: (res) => {
-        console.log('User Rating loaded:', res);
-        this.userRating.set(res?.rating || 0);
-      },
-      error: () => this.userRating.set(0)
-    });
+  onAttributesUpdated(newAttributes: { [key: string]: string }): void {
+    this.selectedAttributes.set(newAttributes);
   }
 
   getStarArray(rating: any): number[] {
@@ -306,127 +221,54 @@ export class ProductDetailComponent implements OnInit {
     return price * (1 - discountPercentage / 100);
   }
 
-  submitRating(rating: number): void {
-    if (!this.currentUser()) return;
-    const prodId = this.product()?._id;
-    if (prodId) {
-      this.userRating.set(rating);
-
-      this.productService.rateProduct(prodId, rating).subscribe({
-        next: () => {
-          this.loadProduct(prodId, true);
-          this.loadUserRating(prodId, true);
-        },
-        error: (err) => {
-          console.error('Rating error:', err);
-        }
-      });
-    }
-  }
-
-  submitComment(): void {
-    const user = this.currentUser();
-    const prodId = this.product()?._id;
-    if (this.commentForm.invalid || !user || !prodId) return;
-
-    const commentData = this.commentForm.value.comment;
-    const commentImages = [...this.selectedImages()];
-
-    const tempComment = {
-      _id: 'temp-' + Date.now(),
-      comment: commentData,
-      images: commentImages,
-      user: {
-        _id: user._id || user.id,
-        id: user.id || user._id,
-        name: user.name || 'Moi'
-      },
-      createdAt: new Date().toISOString()
-    };
-
-    const previousComments = this.comments();
-    this.comments.set([tempComment, ...previousComments]);
-
-    this.commentForm.reset();
-    this.selectedImages.set([]);
-
-    const payload = { comment: commentData, images: commentImages };
-    this.productService.addComment(prodId, payload).subscribe({
-      next: () => {
-        this.loadComments(prodId, true);
-        this.loadProduct(prodId, true);
-      },
-      error: (err) => {
-        console.error('Comment error:', err);
-        this.comments.set(previousComments);
-        alert('Erreur lors de l\'envoi du commentaire. Veuillez réessayer.');
-      }
-    });
-  }
-
   prevImage(): void {
-    const images = this.product()?.images || [];
+    const images = this.effectiveImages();
     if (images.length <= 1) return;
     this.currentImageIndex.update(idx => (idx === 0 ? images.length - 1 : idx - 1));
   }
 
   nextImage(): void {
-    const images = this.product()?.images || [];
+    const images = this.effectiveImages();
     if (images.length <= 1) return;
     this.currentImageIndex.update(idx => (idx === images.length - 1 ? 0 : idx + 1));
   }
 
   setImageIndex(idx: number): void {
-    this.currentImageIndex.set(idx);
+    const allImgs = this.allAvailableImages();
+    if (idx < 0 || idx >= allImgs.length) return;
+
+    const clickedImageUrl = allImgs[idx];
+
+    // Check if the clicked image is in the current effective images
+    const effIdx = this.effectiveImages().indexOf(clickedImageUrl);
+    if (effIdx !== -1) {
+      // Image is in current set, just navigate to it
+      this.currentImageIndex.set(effIdx);
+    } else {
+      // Image is not in current effective images
+      // Check if it belongs to a variant or base product
+      const variant = this.imageToVariantMap().get(clickedImageUrl);
+
+      if (variant) {
+        // It's a variant image - select that variant's attributes to show its images
+        this.selectedAttributes.set({ ...variant.attributes });
+        // The effect will reset currentImageIndex to 0
+      } else {
+        // It's a base product image - clear variant selection to show base images
+        this.selectedAttributes.set({});
+        // Find the index in base product images
+        const baseImages = this.product()?.images || [];
+        const baseIdx = baseImages.indexOf(clickedImageUrl);
+        if (baseIdx !== -1) {
+          this.currentImageIndex.set(baseIdx);
+        }
+      }
+    }
   }
 
-  selectAttribute(key: string, value: string): void {
-    this.selectedAttributes.update(attrs => ({ ...attrs, [key]: value }));
-  }
 
-  isAttributeDisabled(key: string, value: string): boolean {
-    const prod = this.product();
-    if (!prod || !prod.variants) return false;
-
-    // Check if any variant exists with current selections + this potential selection
-    const potentialSelection = { ...this.selectedAttributes(), [key]: value };
-    return !prod.variants.some(v => {
-      return Object.entries(potentialSelection).every(([k, val]) => v.attributes[k] === val);
-    });
-  }
-
-  getAttributeKeys(): string[] {
-    const config = this.product()?.attributeConfig;
-    return config ? Object.keys(config) : [];
-  }
 
   openImage(url: string): void {
     window.open(url, '_blank');
-  }
-
-  openReportModal(): void {
-    if (this.currentUser()) {
-      this.showReportModal.set(true);
-    }
-  }
-
-  closeReportModal(): void {
-    this.showReportModal.set(false);
-    this.reportForm.reset();
-  }
-
-  submitReport(): void {
-    if (this.reportForm.invalid || !this.currentUser()) return;
-
-    const prodId = this.product()?._id;
-    if (prodId) {
-      this.productService.reportProduct(prodId, this.reportForm.value).subscribe({
-        next: () => {
-          alert('Signalement envoyé avec succès');
-          this.closeReportModal();
-        },
-        error: () => alert('Erreur lors de l\'envoi du signalement')
-      });
-    }
   }
 }

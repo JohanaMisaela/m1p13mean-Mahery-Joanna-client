@@ -14,4 +14,8 @@ export class ShopService {
     getShops(): Observable<any> {
         return this.http.get<any>(`${this.API_URL}/shop`);
     }
+
+    getShopById(id: string): Observable<Shop> {
+        return this.http.get<Shop>(`${this.API_URL}/shop/${id}`);
+    }
 }

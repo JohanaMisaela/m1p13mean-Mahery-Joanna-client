@@ -79,7 +79,6 @@ export class HomeComponent implements OnInit {
   loadCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (cats: any) => {
-        console.log('Categories loaded:', cats);
         this.categories.set(Array.isArray(cats) ? cats : cats.data || []);
       },
       error: (err) => console.error('Error loading categories', err)
@@ -89,7 +88,6 @@ export class HomeComponent implements OnInit {
   loadShops(): void {
     this.shopService.getShops().subscribe({
       next: (shops: any) => {
-        console.log('Shops loaded:', shops);
         this.shops.set(Array.isArray(shops) ? shops : shops.data || []);
       },
       error: (err) => console.error('Error loading shops', err)
