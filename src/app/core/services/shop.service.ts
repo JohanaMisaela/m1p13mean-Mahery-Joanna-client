@@ -38,4 +38,16 @@ export class ShopService {
     toggleFavorite(shopId: string, favorite: boolean): Observable<any> {
         return this.http.post(`${this.API_URL}/shop/${shopId}/favorite`, { favorite });
     }
+
+    rateShop(shopId: string, rating: number): Observable<any> {
+        return this.http.post(`${this.API_URL}/shop-ranking/${shopId}`, { rating });
+    }
+
+    getMyShopRating(shopId: string): Observable<any> {
+        return this.http.get(`${this.API_URL}/shop-ranking/my/${shopId}`);
+    }
+
+    reportShop(shopId: string, data: { reason: string, description?: string }): Observable<any> {
+        return this.http.post(`${this.API_URL}/reports/shop/${shopId}`, data);
+    }
 }

@@ -1,8 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 import { ShopService } from '../../../core/services/shop.service';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
@@ -29,6 +30,9 @@ export class PublicShopDetailComponent implements OnInit {
     private readonly productService = inject(ProductService);
     private readonly categoryService = inject(CategoryService);
     private readonly fb = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+
+    protected currentUser = this.authService.currentUser;
 
     // Signals
     protected shop = signal<Shop | null>(null);
@@ -44,6 +48,16 @@ export class PublicShopDetailComponent implements OnInit {
     protected totalItems = signal<number>(0);
     protected itemsPerPage = signal<number>(12);
     protected userRating = signal<number>(0);
+    protected showReportModal = signal<boolean>(false);
+
+    protected reportForm: FormGroup;
+
+    constructor() {
+        this.reportForm = this.fb.group({
+            reason: ['', Validators.required],
+            description: ['']
+        });
+    }
 
     // Icons
     protected icons = {
@@ -80,6 +94,10 @@ export class PublicShopDetailComponent implements OnInit {
             this.loadCategories();
             this.loadProducts(id);
 
+            if (this.currentUser()) {
+                this.loadUserRating(id);
+            }
+
             this.filterForm.valueChanges.pipe(
                 debounceTime(500),
                 distinctUntilChanged()
@@ -100,6 +118,13 @@ export class PublicShopDetailComponent implements OnInit {
                 console.error('Error loading shop', err);
                 this.loading.set(false);
             }
+        });
+    }
+
+    loadUserRating(shopId: string): void {
+        this.shopService.getMyShopRating(shopId).subscribe({
+            next: (res) => this.userRating.set(res?.rating || 0),
+            error: () => this.userRating.set(0)
         });
     }
 
@@ -175,13 +200,48 @@ export class PublicShopDetailComponent implements OnInit {
     }
 
     submitRating(rating: number): void {
+        const shop = this.shop();
+        if (!shop || !this.currentUser()) return;
+
         this.userRating.set(rating);
-        console.log('Submitting shop rating:', rating);
-        // Implement API call here in the future
+        this.shopService.rateShop(shop._id, rating).subscribe({
+            next: () => {
+                // Refresh shop to get updated average rating/total ratings
+                this.loadShop(shop._id);
+            },
+            error: (err) => {
+                console.error('Rating error:', err);
+            }
+        });
     }
 
     openReportModal(): void {
-        console.log('Opening shop report modal');
-        // Implement report modal logic here
+        if (this.currentUser()) {
+            this.showReportModal.set(true);
+        } else {
+            // Optional: redirect to login or show message
+            alert('Connectez-vous pour signaler cette boutique');
+        }
+    }
+
+    closeReportModal(): void {
+        this.showReportModal.set(false);
+        this.reportForm.reset();
+    }
+
+    submitReport(): void {
+        const shop = this.shop();
+        if (this.reportForm.invalid || !this.currentUser() || !shop) return;
+
+        this.shopService.reportShop(shop._id, this.reportForm.value).subscribe({
+            next: () => {
+                alert('Signalement envoyé avec succès');
+                this.closeReportModal();
+            },
+            error: (err) => {
+                console.error('Report error:', err);
+                alert('Erreur lors de l\'envoi du signalement');
+            }
+        });
     }
 }

@@ -37,9 +37,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
                         <div class="flex items-center gap-4">
                             <h1 class="text-3xl font-black italic uppercase tracking-tighter">{{ shop()?.name }}</h1>
-                            <!-- Ratings Display -->
-                            <app-star-rating [rating]="shop()?.averageRating || 0"
-                                [totalRatings]="shop()?.totalRatings || 0" size="small"></app-star-rating>
+
                         </div>
 
                         <!-- Action Buttons -->
@@ -60,8 +58,11 @@
                         </div>
                     </div>
 
-                    <p class="text-gray-500 text-sm font-light mb-6 italic">{{ shop()?.slogan || 'Boutique exclusive' }}
+                    <p class="text-gray-500 text-sm font-light mb-2 italic">{{ shop()?.slogan || 'Boutique exclusive' }}
                     </p>
+                    <!-- Ratings Display -->
+                    <app-star-rating [rating]="shop()?.averageRating || 0" [totalRatings]="shop()?.totalRatings || 0"
+                        size="small"></app-star-rating>
 
                     <!-- Details Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-gray-50">
