@@ -1,0 +1,59 @@
+<div class="flex font-sans text-gray-900 h-full bg-white">
+    <!-- Sidebar -->
+    <aside class="w-72 border-r border-gray-100 flex flex-col h-full">
+        <div class="p-10 border-b border-gray-50">
+            <h2 class="text-xl font-light tracking-[0.2em] uppercase">Dashboard</h2>
+            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">{{ currentUser()?.role }}</p>
+        </div>
+
+        <nav class="flex-grow p-6 space-y-2">
+            @if (currentUser()?.role === 'admin') {
+            <button (click)="activeView.set('shops')" [class.bg-gray-50]="activeView() === 'shops'"
+                [class.text-black]="activeView() === 'shops'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'shops'"></span>
+                <span>Gestion Boutiques</span>
+            </button>
+            <button (click)="activeView.set('users')" [class.bg-gray-50]="activeView() === 'users'"
+                [class.text-black]="activeView() === 'users'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'users'"></span>
+                <span>Gestion Utilisateurs</span>
+            </button>
+            } @else if (currentUser()?.role === 'shop') {
+            <button (click)="manageMyShop()"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                <span>Ma Boutique</span>
+            </button>
+            }
+        </nav>
+
+        <div class="p-10 border-t border-gray-50 mt-auto">
+            <div class="text-[10px] text-gray-300 uppercase tracking-widest mb-1">Connecté en tant que</div>
+            <div class="text-xs truncate font-medium text-gray-600">{{ currentUser()?.email }}</div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow overflow-y-auto bg-[#fafafa]">
+        <div class="max-w-6xl mx-auto px-10 py-16">
+
+            <div class="mb-16">
+                <h1 class="text-5xl font-extralight text-gray-900 mb-4 tracking-tighter">
+                    {{ activeView() === 'shops' ? 'Boutiques' : 'Utilisateurs' }}
+                </h1>
+                <div class="h-0.5 w-12 bg-black"></div>
+            </div>
+
+            <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                @if (activeView() === 'shops') {
+                <app-shop-list></app-shop-list>
+                } @else if (activeView() === 'users') {
+                <app-user-list></app-user-list>
+                }
+            </div>
+
+        </div>
+    </main>
+</div>

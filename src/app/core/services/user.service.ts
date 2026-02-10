@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'; // Added for the map operator
 import { environment } from '../../../environments/environment';
-import { User, UserAddress, UpdateProfileRequest, ChangePasswordRequest } from '../../shared/models/user.model';
+import { User, UserAddress, UpdateProfileRequest, ChangePasswordRequest, RegisterRequest, UserResponse } from '../../shared/models/user.model';
 
 @Injectable({
     providedIn: 'root'
@@ -60,5 +60,33 @@ export class UserService {
      */
     deleteAddress(id: string): Observable<any> {
         return this.http.patch(`${this.API_URL}/addresses/${id}/status`, { isActive: false });
+    }
+
+    /**
+     * Get all users (Admin only)
+     */
+    getAllUsers(params?: any): Observable<UserResponse> {
+        return this.http.get<UserResponse>(`${this.API_URL}/user/all`, { params });
+    }
+
+    /**
+     * Create fresh user (Admin only)
+     */
+    createUser(data: RegisterRequest): Observable<User> {
+        return this.http.post<User>(`${this.API_URL}/auth/register`, data);
+    }
+
+    /**
+     * Update user information (Admin only or self)
+     */
+    updateUserData(id: string, data: Partial<User>): Observable<User> {
+        return this.http.put<User>(`${this.API_URL}/user/${id}`, data);
+    }
+
+    /**
+     * Update user status (Admin only)
+     */
+    updateUserStatus(id: string, isActive: boolean): Observable<any> {
+        return this.http.put(`${this.API_URL}/user/update-status/${id}`, { isActive });
     }
 }

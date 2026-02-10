@@ -73,6 +73,23 @@ export class ProductAttributesComponent {
         return merged;
     });
 
+    // Attributes that are specific to the current variant and not part of the selection config
+    variantSpecificAttributes = computed(() => {
+        const variant = this.currentVariant();
+        if (!variant || !variant.attributes) return {};
+
+        const selectableKeys = this.getAttributeKeys().map(k => k.toLowerCase().trim());
+        const specific: { [key: string]: any } = {};
+
+        Object.entries(variant.attributes).forEach(([key, value]) => {
+            if (!selectableKeys.includes(key.toLowerCase().trim())) {
+                specific[key] = value;
+            }
+        });
+
+        return specific;
+    });
+
     getAttributeKeys(): string[] {
         return Object.keys(this.mergedAttributeConfig());
     }

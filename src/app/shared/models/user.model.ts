@@ -5,6 +5,7 @@ export interface User {
     surname?: string;
     email: string;
     role: 'admin' | 'shop' | 'user' | 'buyer';
+    isActive?: boolean;
 }
 
 export interface AuthResponse {
@@ -44,4 +45,12 @@ export interface UpdateProfileRequest {
 export interface ChangePasswordRequest {
     currentPassword: string;
     newPassword: string;
+}
+
+export interface UserResponse {
+    data: User[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
 }

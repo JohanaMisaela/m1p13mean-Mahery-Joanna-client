@@ -1,0 +1,128 @@
+<div class="space-y-8">
+    <!-- Upper Section: Add New User -->
+    <div *ngIf="showAddForm" class="bg-gray-50 border border-gray-200 p-6 shadow-sm">
+        <h3 class="text-lg font-light uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Ajouter un
+            Utilisateur</h3>
+
+        <div *ngIf="errorMessage()"
+            class="mb-6 p-4 bg-red-50 border-l-2 border-red-400 text-red-600 text-xs uppercase tracking-widest">
+            {{ errorMessage() }}
+        </div>
+
+        <form (submit)="createUser($event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Prénom</label>
+                <input name="name" [(ngModel)]="newUser.name" type="text" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Nom</label>
+                <input name="surname" [(ngModel)]="newUser.surname" type="text" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email</label>
+                <input name="email" [(ngModel)]="newUser.email" type="email" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Rôle</label>
+                <select name="role" [(ngModel)]="newUser.role"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+                    <option value="user">User</option>
+                    <option value="shop">Shop Owner</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Mot de passe (min 4 car.)</label>
+                <input name="password" [(ngModel)]="newUser.password" type="password" required minlength="4"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
+                <button type="button" (click)="showAddForm = false"
+                    class="text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Annuler</button>
+                <button type="submit"
+                    class="bg-black text-white px-8 py-3 text-[10px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-all">Créer
+                    l'utilisateur</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- User List Table -->
+    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-light text-gray-900 tracking-tight">Utilisateurs</h3>
+            <button (click)="showAddForm = !showAddForm"
+                class="text-[10px] uppercase tracking-widest font-medium border border-gray-200 px-4 py-2 hover:bg-gray-50 transition-all">
+                {{ showAddForm ? 'Fermer' : 'Nouvel Utilisateur' }}
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
+                        <th class="px-8 py-4 font-normal">Utilisateur</th>
+                        <th class="px-8 py-4 font-normal">Rôle</th>
+                        <th class="px-8 py-4 font-normal">Statut</th>
+                        <th class="px-8 py-4 font-normal text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    <tr *ngFor="let user of users()" class="hover:bg-gray-50 transition-colors group">
+                        <td class="px-8 py-6">
+                            <div class="font-medium text-gray-900">{{ user.name }} {{ user.surname || '' }}</div>
+                            <div class="text-gray-400 font-light text-xs">{{ user.email }}</div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span class="text-[10px] uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-1">{{
+                                user.role }}</span>
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex items-center space-x-2">
+                                <div [class]="user.isActive !== false ? 'bg-green-400' : 'bg-gray-300'"
+                                    class="w-1.5 h-1.5 rounded-full"></div>
+                                <span class="text-xs font-light">{{ user.isActive !== false ? 'Actif' :
+                                    'Inactif' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-6 text-right">
+                            <div
+                                class="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button (click)="toggleUserStatus(user)"
+                                    [class]="user.isActive !== false ? 'text-red-400 hover:text-red-600' : 'text-green-400 hover:text-green-600'"
+                                    class="text-[10px] uppercase tracking-widest font-medium">
+                                    {{ user.isActive !== false ? 'Désactiver' : 'Activer' }}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div
+            class="px-8 py-4 border-t border-gray-100 bg-white flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-400">
+            <div>
+                Total: <span class="text-gray-900 font-medium">{{ totalItems() }}</span> utilisateurs
+            </div>
+            <div class="flex items-center space-x-6">
+                <span class="font-light">Page <span class="text-gray-900 font-medium">{{ currentPage() }}</span> sur {{
+                    totalPages() }}</span>
+                <div class="flex space-x-2">
+                    <button (click)="changePage(currentPage() - 1 || 1)" type="button" [disabled]="currentPage() === 1"
+                        class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
+                        Précédent
+                    </button>
+                    <button (click)="changePage(currentPage() + 1)" type="button"
+                        [disabled]="currentPage() === totalPages()"
+                        class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
+                        Suivant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -59,3 +59,11 @@ export interface ProductResponse {
     limit: number;
     totalPages: number;
 }
+
+export interface ShopResponse {
+    data: Shop[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}

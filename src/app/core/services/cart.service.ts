@@ -20,7 +20,7 @@ export class CartService {
     items = computed(() => this.cartItems());
     totalCount = computed(() => this.cartItems().reduce((acc, item) => acc + item.quantity, 0));
     totalAmount = computed(() => this.cartItems().reduce((acc, item) => {
-        const price = item.variant ? item.variant.price : item.product.price;
+        const price = item.variant ? item.variant.price : (item.product.price || 0);
         return acc + (price * item.quantity);
     }, 0));
 

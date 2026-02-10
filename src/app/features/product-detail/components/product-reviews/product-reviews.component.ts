@@ -1,7 +1,7 @@
 
 import { Component, Input, Output, EventEmitter, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../../../core/services/product.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -11,7 +11,7 @@ import { User } from '../../../../shared/models/user.model';
 @Component({
     selector: 'app-product-reviews',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, FontAwesomeModule],
     templateUrl: './product-reviews.component.html',
     styleUrls: ['./product-reviews.component.scss']
 })

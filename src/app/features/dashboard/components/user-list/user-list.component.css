@@ -1,0 +1,7 @@
+input::placeholder {
+    color: #e5e7eb;
+}
+
+select {
+    cursor: pointer;
+}
