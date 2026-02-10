@@ -15,6 +15,10 @@ export class ShopService {
         return this.http.get<ShopResponse>(`${this.API_URL}/shop`, { params });
     }
 
+    createShop(ownerId: string, data: any): Observable<Shop> {
+        return this.http.post<Shop>(`${this.API_URL}/shop/${ownerId}`, data);
+    }
+
     getShopById(id: string): Observable<Shop> {
         return this.http.get<Shop>(`${this.API_URL}/shop/${id}`);
     }

@@ -36,6 +36,16 @@ export class UserListComponent implements OnInit {
     limit = signal<number>(10); // Default to 10 for dashboard lists
     errorMessage = signal<string | null>(null);
 
+    // Edit Modal State
+    isEditModalOpen = signal<boolean>(false);
+    editingUser = signal<User | null>(null);
+    editForm: Partial<User> = {
+        name: '',
+        surname: '',
+        email: '',
+        role: 'user'
+    };
+
     newUser: RegisterRequest = {
         name: '',
         surname: '',
@@ -94,6 +104,41 @@ export class UserListComponent implements OnInit {
         this.userService.updateUserStatus(id, newStatus).subscribe({
             next: () => this.loadUsers(),
             error: (err: any) => console.error('Error updating status', err)
+        });
+    }
+
+    openEditModal(user: User) {
+        this.editingUser.set(user);
+        this.editForm = {
+            name: user.name,
+            surname: user.surname || '',
+            email: user.email,
+            role: user.role
+        };
+        this.isEditModalOpen.set(true);
+        this.errorMessage.set(null);
+    }
+
+    closeEditModal() {
+        this.isEditModalOpen.set(false);
+        this.editingUser.set(null);
+    }
+
+    updateUser(event: Event) {
+        event.preventDefault();
+        const user = this.editingUser();
+        const id = user?._id || user?.id;
+        if (!id) return;
+
+        this.userService.updateUserData(id, this.editForm).subscribe({
+            next: () => {
+                this.loadUsers();
+                this.closeEditModal();
+            },
+            error: (err: any) => {
+                console.error('Error updating user', err);
+                this.errorMessage.set(err.error?.message || 'Erreur lors de la mise à jour');
+            }
         });
     }
 }

@@ -1,83 +1,141 @@
-<div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <h3 class="text-base font-semibold text-gray-800 uppercase tracking-wider">Liste des Boutiques</h3>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-medium">
-                <tr>
-                    <th class="px-6 py-3 text-left tracking-wider">Nom</th>
-                    <th class="px-6 py-3 text-left tracking-wider">Propriétaire</th>
-                    <th class="px-6 py-3 text-left tracking-wider">Statut</th>
-                    <th class="px-6 py-3 text-right tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                <tr *ngFor="let shop of shops()" class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div
-                                class="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                                <ng-container *ngIf="shop.gallery && shop.gallery.length; else noGallery">
-                                    <img [src]="shop.gallery[0]" class="h-10 w-10 rounded-full object-cover">
-                                </ng-container>
-                                <ng-template #noGallery>
-                                    <span class="text-xs">SHOP</span>
-                                </ng-template>
-                            </div>
-                            <div class="ml-4">
-                                <div class="font-medium text-gray-900">{{ shop.name }}</div>
-                                <div class="text-gray-500 text-xs">{{ shop.mallBoxNumber }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                        {{ shop.owner?.name || 'Inconnu' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span
-                            [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + (shop.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
-                            {{ shop.isActive ? 'Actif' : 'Inactif' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right space-x-4 flex justify-end items-center">
-                        <button (click)="toggleShopStatus(shop)"
-                            [class]="shop.isActive ? 'text-red-400 hover:text-red-600' : 'text-green-400 hover:text-green-600'"
-                            class="text-[10px] uppercase tracking-widest font-medium flex items-center space-x-2">
-                            <fa-icon [icon]="icons.status"></fa-icon>
-                            <span>{{ shop.isActive ? 'Désactiver' : 'Activer' }}</span>
-                        </button>
-                        <button (click)="manageShop(shop._id)"
-                            class="text-gray-900 hover:text-black font-medium border border-gray-200 px-3 py-1 rounded hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center space-x-2">
-                            <fa-icon [icon]="icons.edit"></fa-icon>
-                            <span>Gérer</span>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<div class="space-y-8">
+    <!-- Upper Section: Add New Shop -->
+    <div *ngIf="showAddForm" class="bg-gray-50 border border-gray-200 p-6 shadow-sm">
+        <h3 class="text-base font-light uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Ajouter une
+            Boutique</h3>
+
+        <div *ngIf="errorMessage()"
+            class="mb-6 p-4 bg-red-50 border-l-2 border-red-400 text-red-600 text-xs uppercase tracking-widest">
+            {{ errorMessage() }}
+        </div>
+
+        <form (submit)="createShop($event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Nom de la boutique</label>
+                <input name="name" [(ngModel)]="newShop.name" type="text" required placeholder="Ex: Ma Boutique Fashion"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Emplacement (Mall Box)</label>
+                <input name="mallBoxNumber" [(ngModel)]="newShop.mallBoxNumber" type="text" required
+                    placeholder="Ex: B-102"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Propriétaire</label>
+                <select name="owner" [(ngModel)]="newShop.owner" (change)="onOwnerChange()" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+                    <option value="" disabled selected>Sélectionner un propriétaire</option>
+                    <option *ngFor="let user of potentialOwners()" [value]="user._id || user.id">
+                        {{ user.name }} {{ user.surname || '' }} ({{ user.role }})
+                    </option>
+                </select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email de contact</label>
+                <input name="email" [(ngModel)]="newShop.email" type="email" placeholder="Ex: contact@boutique.com"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Téléphone</label>
+                <input name="phone" [(ngModel)]="newShop.phone" type="text" placeholder="Ex: +212 600 000 000"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1 md:col-span-2">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Description</label>
+                <textarea name="description" [(ngModel)]="newShop.description" rows="2"
+                    placeholder="Brève description de la boutique..."
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm resize-none"></textarea>
+            </div>
+            <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
+                <button type="button" (click)="toggleAddForm()"
+                    class="text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Annuler</button>
+                <button type="submit"
+                    class="bg-black text-white px-8 py-3 text-[10px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-all">Créer
+                    la boutique</button>
+            </div>
+        </form>
     </div>
 
-    <!-- Pagination Bar -->
-    <div
-        class="px-8 py-4 border-t border-gray-100 bg-white flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-400">
-        <div>
-            Total: <span class="text-gray-900 font-medium">{{ totalItems() }}</span> boutiques
+    <!-- Shop List Table -->
+    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-base font-light text-gray-900 uppercase tracking-widest">Liste des Boutiques</h3>
+            <button (click)="toggleAddForm()"
+                class="text-[10px] uppercase tracking-widest font-medium border border-gray-200 px-4 py-2 hover:bg-gray-50 transition-all">
+                {{ showAddForm ? 'Fermer' : 'Nouvelle Boutique' }}
+            </button>
         </div>
-        <div class="flex items-center space-x-6">
-            <span class="font-light">Page <span class="text-gray-900 font-medium">{{ currentPage() }}</span> sur {{
-                totalPages() }}</span>
-            <div class="flex space-x-2">
-                <button (click)="changePage(currentPage() - 1 || 1)" type="button" [disabled]="currentPage() === 1"
-                    class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
-                    Précédent
-                </button>
-                <button (click)="changePage(currentPage() + 1)" type="button"
-                    [disabled]="currentPage() === totalPages()"
-                    class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
-                    Suivant
-                </button>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-medium">
+                    <tr>
+                        <th class="px-6 py-3 text-left tracking-wider">Nom</th>
+                        <th class="px-6 py-3 text-left tracking-wider">Propriétaire</th>
+                        <th class="px-6 py-3 text-left tracking-wider">Statut</th>
+                        <th class="px-6 py-3 text-right tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                    <tr *ngFor="let shop of shops()" class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div
+                                    class="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                                    <ng-container *ngIf="shop.gallery && shop.gallery.length; else noGallery">
+                                        <img [src]="shop.gallery[0]" class="h-10 w-10 rounded-full object-cover">
+                                    </ng-container>
+                                    <ng-template #noGallery>
+                                        <span class="text-xs">SHOP</span>
+                                    </ng-template>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="font-medium text-gray-900">{{ shop.name }}</div>
+                                    <div class="text-gray-500 text-xs">{{ shop.mallBoxNumber }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                            {{ shop.owner?.name || 'Inconnu' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span
+                                [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + (shop.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
+                                {{ shop.isActive ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right space-x-4 flex justify-end items-center">
+
+                            <button (click)="manageShop(shop._id)"
+                                class="text-gray-900 hover:text-black font-medium border border-gray-200 px-3 py-1 rounded hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center space-x-2">
+                                <span>Gérer</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div
+            class="px-8 py-4 border-t border-gray-100 bg-white flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-400">
+            <div>
+                Total: <span class="text-gray-900 font-medium">{{ totalItems() }}</span> boutiques
+            </div>
+            <div class="flex items-center space-x-6">
+                <span class="font-light">Page <span class="text-gray-900 font-medium">{{ currentPage() }}</span> sur {{
+                    totalPages() }}</span>
+                <div class="flex space-x-2">
+                    <button (click)="changePage(currentPage() - 1 || 1)" type="button" [disabled]="currentPage() === 1"
+                        class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
+                        Précédent
+                    </button>
+                    <button (click)="changePage(currentPage() + 1)" type="button"
+                        [disabled]="currentPage() === totalPages()"
+                        class="p-2 border border-gray-100 hover:border-black transition-all disabled:opacity-30 disabled:hover:border-gray-100">
+                        Suivant
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
