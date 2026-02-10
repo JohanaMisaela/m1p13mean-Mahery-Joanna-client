@@ -80,7 +80,7 @@ export class UserService {
      * Update user information (Admin only or self)
      */
     updateUserData(id: string, data: Partial<User>): Observable<User> {
-        return this.http.put<User>(`${this.API_URL}/user/${id}`, data);
+        return this.http.put<User>(`${this.API_URL}/user/admin-update/${id}`, data);
     }
 
     /**

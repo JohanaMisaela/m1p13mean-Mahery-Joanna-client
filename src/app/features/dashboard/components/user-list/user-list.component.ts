@@ -36,8 +36,8 @@ export class UserListComponent implements OnInit {
     limit = signal<number>(10); // Default to 10 for dashboard lists
     errorMessage = signal<string | null>(null);
 
-    // Edit Modal State
-    isEditModalOpen = signal<boolean>(false);
+    // Edit Form State
+    isEditFormOpen = signal<boolean>(false);
     editingUser = signal<User | null>(null);
     editForm: Partial<User> = {
         name: '',
@@ -109,7 +109,8 @@ export class UserListComponent implements OnInit {
         });
     }
 
-    openEditModal(user: User) {
+    openEditForm(user: User) {
+        this.showAddForm = false; // Close add form if open
         this.editingUser.set(user);
         this.editForm = {
             name: user.name,
@@ -118,12 +119,14 @@ export class UserListComponent implements OnInit {
             contact: user.contact || '',
             role: user.role
         };
-        this.isEditModalOpen.set(true);
+        this.isEditFormOpen.set(true);
         this.errorMessage.set(null);
+        // Scroll to top to see the form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    closeEditModal() {
-        this.isEditModalOpen.set(false);
+    closeEditForm() {
+        this.isEditFormOpen.set(false);
         this.editingUser.set(null);
     }
 
@@ -136,7 +139,7 @@ export class UserListComponent implements OnInit {
         this.userService.updateUserData(id, this.editForm).subscribe({
             next: () => {
                 this.loadUsers();
-                this.closeEditModal();
+                this.closeEditForm();
             },
             error: (err: any) => {
                 console.error('Error updating user', err);

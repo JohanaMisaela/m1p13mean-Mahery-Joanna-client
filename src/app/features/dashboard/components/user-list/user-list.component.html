@@ -54,11 +54,62 @@
         </form>
     </div>
 
+    <!-- Upper Section: Edit User -->
+    <div *ngIf="isEditFormOpen()" class="bg-gray-50 border border-gray-200 p-6 shadow-sm">
+        <h3 class="text-base font-light uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Modifier
+            l'Utilisateur</h3>
+
+        <div *ngIf="errorMessage()"
+            class="mb-6 p-4 bg-red-50 border-l-2 border-red-400 text-red-600 text-xs uppercase tracking-widest">
+            {{ errorMessage() }}
+        </div>
+
+        <form (submit)="updateUser($event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Prénom</label>
+                <input name="edit-name" [(ngModel)]="editForm.name" type="text" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Nom</label>
+                <input name="edit-surname" [(ngModel)]="editForm.surname" type="text" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email</label>
+                <input name="edit-email" [(ngModel)]="editForm.email" type="email" required
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Rôle</label>
+                <select name="edit-role" [(ngModel)]="editForm.role"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+                    <option value="user">User</option>
+                    <option value="shop">Shop Owner</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Numéro de téléphone</label>
+                <input name="edit-contact" [(ngModel)]="editForm.contact" type="text"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="md:col-span-2 flex justify-end space-x-4 pt-4">
+                <button type="button" (click)="closeEditForm()"
+                    class="text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Annuler</button>
+                <button type="submit"
+                    class="bg-black text-white px-8 py-3 text-[10px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-all">Enregistrer
+                    les modifications</button>
+            </div>
+        </form>
+    </div>
+
     <!-- User List Table -->
     <div class="bg-white border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="text-xl font-light text-gray-900 tracking-tight">Utilisateurs</h3>
-            <button (click)="showAddForm = !showAddForm"
+            <h3 class="text-base font-light text-gray-900 uppercase tracking-widest">Liste des
+                Utilisateurs</h3>
+            <button (click)="showAddForm = !showAddForm; isEditFormOpen.set(false)"
                 class="text-[10px] uppercase tracking-widest font-medium border border-gray-200 px-4 py-2 hover:bg-gray-50 transition-all">
                 {{ showAddForm ? 'Fermer' : 'Nouvel Utilisateur' }}
             </button>
@@ -69,6 +120,7 @@
                 <thead>
                     <tr class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
                         <th class="px-8 py-4 font-normal">Utilisateur</th>
+                        <th class="px-8 py-4 font-normal">Contact</th>
                         <th class="px-8 py-4 font-normal">Rôle</th>
                         <th class="px-8 py-4 font-normal">Statut</th>
                         <th class="px-8 py-4 font-normal text-right">Actions</th>
@@ -81,7 +133,11 @@
                             <div class="text-gray-400 font-light text-xs">{{ user.email }}</div>
                         </td>
                         <td class="px-8 py-6">
-                            <span class="text-[10px] uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-1">{{
+                            <div class="text-gray-900 font-light text-xs">{{ user.contact || '-' }}</div>
+                        </td>
+                        <td class="px-8 py-6">
+                            <span *ngIf="user.role"
+                                class="text-[10px] uppercase tracking-widest text-gray-500 bg-gray-100 px-2 py-1">{{
                                 user.role }}</span>
                         </td>
                         <td class="px-8 py-6">
@@ -101,7 +157,7 @@
                                     <fa-icon [icon]="icons.power"></fa-icon>
                                     <span>{{ user.isActive !== false ? 'Désactiver' : 'Activer' }}</span>
                                 </button>
-                                <button (click)="openEditModal(user)"
+                                <button (click)="openEditForm(user)"
                                     class="text-[10px] uppercase tracking-widest font-medium text-blue-400 hover:text-blue-600 flex items-center space-x-2">
                                     <fa-icon [icon]="icons.edit"></fa-icon>
                                     <span>Modifier</span>
@@ -137,64 +193,4 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
-    <div *ngIf="isEditModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeEditModal()"></div>
-
-        <!-- Modal Content -->
-        <div class="relative bg-white w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
-            <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">Modifier l'utilisateur</h3>
-                <button (click)="closeEditModal()" class="text-gray-400 hover:text-black transition-colors">
-                    <fa-icon [icon]="icons.inactive"></fa-icon>
-                </button>
-            </div>
-
-            <form (submit)="updateUser($event)" class="p-8 space-y-6">
-                <!-- Error Message in Modal -->
-                <div *ngIf="errorMessage()"
-                    class="p-4 bg-red-50 border-l-2 border-red-400 text-red-600 text-[10px] uppercase tracking-widest">
-                    {{ errorMessage() }}
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Prénom</label>
-                    <input name="edit-name" [(ngModel)]="editForm.name" type="text" required
-                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Nom</label>
-                    <input name="edit-surname" [(ngModel)]="editForm.surname" type="text" required
-                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email</label>
-                    <input name="edit-email" [(ngModel)]="editForm.email" type="email" required
-                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Rôle</label>
-                    <select name="edit-role" [(ngModel)]="editForm.role"
-                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
-                        <option value="user">User</option>
-                        <option value="shop">Shop Owner</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Numéro de téléphone</label>
-                    <input name="edit-contact" [(ngModel)]="editForm.contact" type="text"
-                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
-                </div>
-
-                <div class="flex justify-end space-x-4 pt-4">
-                    <button type="button" (click)="closeEditModal()"
-                        class="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Annuler</button>
-                    <button type="submit"
-                        class="bg-black text-white px-8 py-3 text-[10px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-lg">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
