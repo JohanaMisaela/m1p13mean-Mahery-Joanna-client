@@ -1,163 +1,177 @@
-<div class="h-full flex flex-col bg-white overflow-hidden">
-    <!-- Loading State -->
+<div class="h-full bg-gray-50 flex overflow-hidden">
+    <!-- Mobile Filter Toggle -->
+    <button (click)="toggleSidebar()"
+        class="fixed bottom-4 right-4 z-50 lg:hidden bg-black text-white p-4 rounded-full shadow-lg">
+        <fa-icon [icon]="icons.filter"></fa-icon>
+    </button>
+
+    <!-- Sidebar Filters -->
+    <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [isOpen]="showFilterSidebar()"
+        [showShopFilter]="false" [currentPage]="currentPage()" [totalPages]="totalPages()" (close)="toggleSidebar()"
+        (reset)="resetFilters()" (pageChange)="onPageChange($event)">
+    </app-filter-sidebar>
+
+    <!-- Loading State (Global) -->
     @if (loading()) {
     <div class="flex-1 flex items-center justify-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
     </div>
     } @else {
-    <!-- Shop Header -->
-    <div class="bg-gray-50 border-b border-gray-100 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div class="flex flex-col md:flex-row items-center gap-10">
-                <!-- Shop Logo Box -->
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 lg:p-8 overflow-y-auto flex flex-col shop-products-container">
+
+        <!-- Shop Banner (Sticky at top of content) -->
+        <div class="bg-white border border-gray-100 p-6 mb-8 relative group shrink-0">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Shop Logo -->
                 <div
-                    class="w-32 h-32 bg-white flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden shrink-0">
+                    class="w-24 h-24 bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 shadow-inner shrink-0">
                     <img *ngIf="shop()?.gallery?.[0] || shop()?.logo" [src]="shop()?.gallery?.[0] || shop()?.logo"
                         class="w-full h-full object-cover">
                     <fa-icon *ngIf="!(shop()?.gallery?.[0] || shop()?.logo)" [icon]="icons.shop"
-                        class="text-4xl text-gray-200"></fa-icon>
+                        class="text-3xl text-gray-200"></fa-icon>
                 </div>
 
-                <div class="flex-1 text-center md:text-left">
-                    <div class="flex items-center justify-center md:justify-start gap-4 mb-4">
-                        <a routerLink="/shops"
-                            class="text-gray-400 hover:text-black transition-colors flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold">
-                            <fa-icon [icon]="icons.back"></fa-icon>
-                            Retour
-                        </a>
-                        <span class="w-1 h-1 bg-gray-200 rounded-full"></span>
-                        <span class="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-medium">{{
-                            shop()?.mallBoxNumber || 'Premium Merchant' }}</span>
+                <!-- Shop Info -->
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
+                        <div class="flex items-center gap-4">
+                            <h1 class="text-3xl font-black italic uppercase tracking-tighter">{{ shop()?.name }}</h1>
+                            <!-- Ratings -->
+                            <div class="flex items-center gap-1 bg-black text-white px-2 py-0.5 text-[10px] font-bold">
+                                <fa-icon [icon]="icons.star" class="text-[8px]"></fa-icon>
+                                <span>{{ shop()?.averageRating || 0 }}</span>
+                                <span class="text-gray-400 font-normal ml-1">({{ shop()?.totalRatings || 0 }})</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-3">
+                            <button
+                                class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-black transition-colors flex items-center gap-2">
+                                <fa-icon [icon]="icons.comment" class="text-[8px]"></fa-icon>
+                                Noter
+                            </button>
+                            <span class="w-1 h-1 bg-gray-200 rounded-full"></span>
+                            <button
+                                class="text-[10px] uppercase tracking-widest font-black text-red-400 hover:text-red-600 transition-colors flex items-center gap-2">
+                                <fa-icon [icon]="icons.report" class="text-[8px]"></fa-icon>
+                                Signaler
+                            </button>
+                        </div>
                     </div>
 
-                    <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tighter uppercase italic">
-                        {{ shop()?.name }}
-                    </h1>
-                    <p class="text-gray-500 text-lg font-light max-w-2xl mb-8 leading-relaxed">
-                        {{ shop()?.description || 'Bienvenue dans notre boutique exclusive.' }}
+                    <p class="text-gray-500 text-sm font-light mb-6 italic">{{ shop()?.slogan || 'Boutique exclusive' }}
                     </p>
 
-                    <!-- Contact Info -->
-                    <div class="flex flex-wrap justify-center md:justify-start gap-8">
-                        <div class="flex items-center gap-3 group">
-                            <div
-                                class="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all shadow-sm">
-                                <fa-icon [icon]="icons.phone" class="text-[10px]"></fa-icon>
+                    <!-- Details Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-gray-50">
+                        <!-- Hours -->
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[8px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Horaires</span>
+                            <div class="flex items-center gap-2 text-[10px] font-medium text-gray-600 uppercase">
+                                <fa-icon [icon]="icons.clock" class="text-gray-300"></fa-icon>
+                                {{ shop()?.openingHours || '8:00 - 18:00' }}
                             </div>
-                            <span class="text-xs font-medium text-gray-600 italic">{{ shop()?.phone || '+261 -- -- ---
-                                --'
-                                }}</span>
                         </div>
-                        <div class="flex items-center gap-3 group">
-                            <div
-                                class="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all shadow-sm">
-                                <fa-icon [icon]="icons.email" class="text-[10px]"></fa-icon>
+
+                        <!-- Contact -->
+                        <div class="flex flex-col">
+                            <span class="text-[8px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Contact /
+                                Social</span>
+                            <div class="flex items-center gap-4 text-[10px] text-gray-400">
+                                <a [href]="'tel:' + shop()?.phone" class="hover:text-black transition-colors"
+                                    title="Appeler">
+                                    <fa-icon [icon]="icons.phone"></fa-icon>
+                                </a>
+                                <a [href]="'mailto:' + shop()?.email" class="hover:text-black transition-colors"
+                                    title="Email">
+                                    <fa-icon [icon]="icons.email"></fa-icon>
+                                </a>
+                                <a *ngIf="shop()?.socialLinks?.facebook" [href]="shop()?.socialLinks?.facebook"
+                                    target="_blank" class="hover:text-black transition-colors" title="Facebook">
+                                    <fa-icon [icon]="icons.facebook"></fa-icon>
+                                </a>
+                                <a *ngIf="shop()?.socialLinks?.instagram" [href]="shop()?.socialLinks?.instagram"
+                                    target="_blank" class="hover:text-black transition-colors" title="Instagram">
+                                    <fa-icon [icon]="icons.instagram"></fa-icon>
+                                </a>
+                                <a *ngIf="shop()?.socialLinks?.tiktok" [href]="shop()?.socialLinks?.tiktok"
+                                    target="_blank" class="hover:text-black transition-colors" title="TikTok">
+                                    <fa-icon [icon]="icons.tiktok"></fa-icon>
+                                </a>
                             </div>
-                            <span class="text-xs font-medium text-gray-600 italic">{{ shop()?.email ||
-                                'contact@boutique.mg'
-                                }}</span>
+                        </div>
+
+                        <!-- Box Number -->
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[8px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Emplacement</span>
+                            <div class="flex items-center gap-2 text-[10px] font-medium text-gray-600 uppercase">
+                                <fa-icon [icon]="icons.location" class="text-gray-300"></fa-icon>
+                                Box {{ shop()?.mallBoxNumber }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex overflow-hidden">
-        <!-- Sidebar -->
-        <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [isOpen]="showFilterSidebar()"
-            [showShopFilter]="false" [currentPage]="currentPage()" [totalPages]="totalPages()" (close)="toggleSidebar()"
-            (reset)="resetFilters()" (pageChange)="onPageChange($event)"
-            class="shrink-0 h-full border-r border-gray-100">
-        </app-filter-sidebar>
-
-        <!-- Product Grid -->
-        <div class="flex-1 overflow-y-auto shop-products-container bg-white p-8 lg:p-12">
-            <!-- Header for Mobile -->
-            <div class="flex justify-between items-center mb-10 lg:hidden">
-                <button (click)="toggleSidebar()"
-                    class="flex items-center gap-3 px-6 py-3 bg-gray-50 text-[10px] uppercase tracking-widest font-black hover:bg-black hover:text-white transition-all border border-gray-100">
-                    <fa-icon [icon]="icons.filter" class="text-[8px]"></fa-icon>
-                    Filtres
-                </button>
-                <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
-                    {{ totalItems() }} PRODUITS
-                </div>
+        <!-- Product List Header -->
+        <div class="flex justify-between items-end mb-6 border-b border-gray-200 pb-4 shrink-0">
+            <div>
+                <h2 class="text-2xl font-bold uppercase tracking-wider">La Collection</h2>
+                <p class="text-gray-500 text-sm mt-1">{{ totalItems() }} produits trouvés</p>
             </div>
+            <a routerLink="/shops"
+                class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-black transition-colors flex items-center gap-2">
+                <fa-icon [icon]="icons.back" class="text-[8px]"></fa-icon>
+                Quitter la boutique
+            </a>
+        </div>
 
-            <!-- Desktop Header -->
-            <div class="hidden lg:flex justify-between items-end mb-16">
-                <div>
-                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Nos Articles</h2>
-                    <div class="w-12 h-1 bg-black"></div>
-                </div>
-                <div class="text-[10px] uppercase tracking-widest text-gray-400 font-black">
-                    Page {{ currentPage() }} sur {{ totalPages() }} — {{ totalItems() }} ARTICLES
-                </div>
-            </div>
-
-            <!-- Products Grid -->
+        <!-- Products Grid Area -->
+        <div class="flex-1 flex flex-col">
             @if (loadingProducts()) {
-            <div class="flex flex-col items-center justify-center py-20 gap-4">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-                <span class="text-[10px] uppercase tracking-widest text-gray-400 font-black italic">Mise à jour de la
-                    collection...</span>
+            <div class="flex-1 flex justify-center items-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
             </div>
             } @else {
             @if (products().length > 0) {
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
                 @for (product of products(); track product._id) {
                 <app-product-card [product]="product"></app-product-card>
                 }
             </div>
 
-            <!-- Pagination Container -->
-            <div class="mt-20 flex justify-center pb-10">
-                <div class="flex items-center gap-1 bg-gray-50 p-2 border border-gray-100">
-                    <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
-                        class="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400 transition-all">
-                        <fa-icon [icon]="icons.prev" class="text-[10px]"></fa-icon>
-                    </button>
-
-                    <div class="h-6 w-[1px] bg-gray-200 mx-2"></div>
-
-                    @for (page of [].constructor(totalPages()); track $index) {
-                    <button (click)="onPageChange($index + 1)" [class.bg-black]="currentPage() === $index + 1"
-                        [class.text-white]="currentPage() === $index + 1"
-                        class="w-10 h-10 text-[10px] font-black hover:bg-black hover:text-white transition-all">
-                        {{ $index + 1 }}
-                    </button>
-                    }
-
-                    <div class="h-6 w-[1px] bg-gray-200 mx-2"></div>
-
-                    <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-                        class="w-10 h-10 flex items-center justify-center hover:bg-black hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400 transition-all">
-                        <fa-icon [icon]="icons.next" class="text-[10px]"></fa-icon>
-                    </button>
-                </div>
+            <!-- Pagination (Fixed style like home) -->
+            <div class="mt-auto flex justify-center items-center gap-x-8 border-t border-gray-100 py-6 shrink-0">
+                <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
+                    class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
+                    <fa-icon [icon]="icons.prev"></fa-icon> Précédent
+                </button>
+                <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">
+                    <span class="text-black font-bold">{{ currentPage() }}</span> / {{ totalPages() }}
+                </span>
+                <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+                    class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
+                    Suivant <fa-icon [icon]="icons.next"></fa-icon>
+                </button>
             </div>
             } @else {
-            <!-- Empty State -->
-            <div class="max-w-md mx-auto py-32 text-center">
-                <div
-                    class="w-20 h-20 bg-gray-50 flex items-center justify-center mx-auto mb-10 border border-gray-100 shadow-inner">
-                    <fa-icon [icon]="icons.shop" class="text-2xl text-gray-200"></fa-icon>
-                </div>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-4">Collection Vide</h3>
-                <p class="text-gray-400 text-sm font-light leading-relaxed mb-10">
-                    Aucun produit ne correspond à vos critères pour cette boutique. Essayez de réinitialiser les
-                    filtres.
-                </p>
+            <!-- Standardized Empty State (from Home) -->
+            <div class="flex-1 flex flex-col items-center justify-center text-center py-20">
+                <p class="text-xl font-light text-gray-900 mb-2">Aucun produit trouvé</p>
+                <p class="text-gray-400 text-xs mb-8 tracking-widest">Essayez de modifier vos filtres de recherche</p>
                 <button (click)="resetFilters()"
-                    class="px-10 py-4 bg-black text-white text-[10px] uppercase tracking-widest font-black hover:bg-gray-900 transition-all">
+                    class="px-6 py-2 border-b-2 border-black text-black hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold tracking-[0.2em]">
                     Réinitialiser les filtres
                 </button>
             </div>
             }
             }
         </div>
-    </div>
+    </main>
     }
 </div>

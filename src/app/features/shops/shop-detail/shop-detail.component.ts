@@ -8,7 +8,8 @@ import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { Shop, Product, Category } from '../../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStore, faMapMarkerAlt, faPhone, faEnvelope, faClock, faFilter, faChevronRight, faChevronLeft, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faStore, faMapMarkerAlt, faPhone, faEnvelope, faClock, faFilter, faChevronRight, faChevronLeft, faArrowLeft, faStar, faFlag, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
+import { faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
 
@@ -50,7 +51,13 @@ export class PublicShopDetailComponent implements OnInit {
         filter: faFilter,
         next: faChevronRight,
         prev: faChevronLeft,
-        back: faArrowLeft
+        back: faArrowLeft,
+        star: faStar,
+        report: faFlag,
+        comment: faCommentAlt,
+        facebook: faFacebook,
+        instagram: faInstagram,
+        tiktok: faTiktok
     };
 
     // Filter Form

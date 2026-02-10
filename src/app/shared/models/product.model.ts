@@ -18,6 +18,14 @@ export interface Shop {
     isActive?: boolean;
     favoritedBy?: any[];
     logo?: string;
+    socialLinks?: {
+        facebook?: string;
+        instagram?: string;
+        tiktok?: string;
+    };
+    openingHours?: string;
+    averageRating?: number;
+    totalRatings?: number;
 }
 
 export interface ProductVariant {
