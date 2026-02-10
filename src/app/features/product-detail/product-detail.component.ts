@@ -4,9 +4,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
+import { CartService } from '../../core/services/cart.service';
 import { Product, ProductVariant } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ProductAttributesComponent } from './components/product-attributes/product-attributes.component';
 import { ProductReportComponent } from './components/product-report/product-report.component';
@@ -22,11 +23,13 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
 
   product = signal<Product | null>(null);
   isLoading = signal<boolean>(true);
   currentUser = this.authService.currentUser;
   currentImageIndex = signal<number>(0);
+  showAddedToCart = signal<boolean>(false);
 
   selectedAttributes = signal<{ [key: string]: string }>({});
 
@@ -39,18 +42,48 @@ export class ProductDetailComponent implements OnInit {
     const selectedKeys = Object.keys(selected);
     if (selectedKeys.length === 0) return null;
 
-    const variant = prod.variants.find(v => {
-      return Object.entries(v.attributes).every(([key, value]) => {
-        if (!selected[key]) return true;
+    // Helper: find value in selected object case-insensitively
+    const findValue = (searchKey: string) => {
+      const actualKey = Object.keys(selected).find(k => k.toLowerCase() === searchKey.toLowerCase());
+      return actualKey ? selected[actualKey] : undefined;
+    };
 
-        const val1 = value?.toString().toLowerCase();
-        const val2 = selected[key]?.toString().toLowerCase();
-        return val1 === val2;
+    // Find a variant that matches ALL selected attributes
+    const variant = prod.variants.find(v => {
+      // 1. Every selected attribute must match this variant
+      const matchesSelection = Object.entries(selected).every(([selKey, selValue]) => {
+        const variantKey = Object.keys(v.attributes).find(k => k.toLowerCase() === selKey.toLowerCase());
+        if (!variantKey) return false;
+        return v.attributes[variantKey]?.toString().toLowerCase() === selValue.toString().toLowerCase();
       });
+
+      if (!matchesSelection) return false;
+
+      // 2. Strict matching: Every variant attribute must be present in selection
+      // This prevents choosing a "default" variant when only one attribute is picked
+      const allAttributesPresent = Object.keys(v.attributes).every(vKey => {
+        return !!findValue(vKey);
+      });
+
+      return allAttributesPresent;
     }) || null;
 
     console.log('Current Variant detected:', variant?._id, 'for selection:', selected);
     return variant;
+  });
+
+  isSelectionComplete = computed(() => {
+    const prod = this.product();
+    const selected = this.selectedAttributes();
+    if (!prod || !prod.variants || prod.variants.length === 0) return true;
+
+    // Get all required keys from variants
+    const requiredKeys = new Set<string>();
+    prod.variants.forEach(v => Object.keys(v.attributes).forEach(k => requiredKeys.add(k.toLowerCase())));
+
+    // Check if every required key has a matching key in selected (case-insensitive)
+    const selectedKeys = Object.keys(selected).map(k => k.toLowerCase());
+    return Array.from(requiredKeys).every(rk => selectedKeys.includes(rk));
   });
 
   effectivePrice = computed(() => {
@@ -110,7 +143,8 @@ export class ProductDetailComponent implements OnInit {
     camera: faCamera,
     edit: faEdit,
     prev: faChevronLeft,
-    next: faChevronRight
+    next: faChevronRight,
+    check: faCheckCircle
   };
 
   constructor() {
@@ -202,6 +236,15 @@ export class ProductDetailComponent implements OnInit {
     if (prod) {
       this.loadProduct(prod._id, true);
     }
+  }
+
+  addToCart(): void {
+    const prod = this.product();
+    if (!prod) return;
+
+    this.cartService.addToCart(prod, this.currentVariant(), 1);
+    this.showAddedToCart.set(true);
+    setTimeout(() => this.showAddedToCart.set(false), 3000);
   }
 
   onAttributesUpdated(newAttributes: { [key: string]: string }): void {
