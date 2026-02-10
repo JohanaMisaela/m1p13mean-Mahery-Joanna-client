@@ -28,8 +28,12 @@ import { Shop } from '../../shared/models/product.model';
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                    <img *ngIf="shop.gallery?.length" [src]="shop.gallery[0]" class="h-10 w-10 rounded-full object-cover">
-                    <span *ngIf="!shop.gallery?.length" class="text-xs">SHOP</span>
+                    <ng-container *ngIf="shop.gallery && shop.gallery.length; else noGallery">
+                      <img [src]="shop.gallery[0]" class="h-10 w-10 rounded-full object-cover">
+                    </ng-container>
+                    <ng-template #noGallery>
+                      <span class="text-xs">SHOP</span>
+                    </ng-template>
                   </div>
                   <div class="ml-4">
                     <div class="font-medium text-gray-900">{{ shop.name }}</div>

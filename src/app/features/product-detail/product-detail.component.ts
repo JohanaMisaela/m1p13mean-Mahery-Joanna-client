@@ -22,17 +22,12 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private authService = inject(AuthService);
-  // fb is likely not needed anymore if only used for reportForm (unless used for something else? Checked, it was used for comment editing but that's gone too. Let's keep it if I missed something or remove if unused.)
-  // Wait, I see no other form groups in the truncated view. But let's check carefully.
-  // The provided view earlier showed `reportForm` initialization in constructor. `commentForm` etc were already removed.
-  // So `fb` might be unused now. I'll remove it to be clean.
 
   product = signal<Product | null>(null);
   isLoading = signal<boolean>(true);
   currentUser = this.authService.currentUser;
   currentImageIndex = signal<number>(0);
 
-  // Variant Selection
   selectedAttributes = signal<{ [key: string]: string }>({});
 
   currentVariant = computed(() => {
@@ -44,11 +39,8 @@ export class ProductDetailComponent implements OnInit {
     const selectedKeys = Object.keys(selected);
     if (selectedKeys.length === 0) return null;
 
-    // Find a variant where ALL of its attributes match our current selection
-    // We don't require selecting all possible attributes - just that what we selected matches
     const variant = prod.variants.find(v => {
       return Object.entries(v.attributes).every(([key, value]) => {
-        // If we haven't selected this attribute yet, it's not a mismatch
         if (!selected[key]) return true;
 
         const val1 = value?.toString().toLowerCase();
@@ -88,7 +80,6 @@ export class ProductDetailComponent implements OnInit {
     const baseImages = prod.images || [];
     const variantImages = (prod.variants || []).flatMap(v => v.images || []);
 
-    // Unique URLs
     return Array.from(new Set([...baseImages, ...variantImages]));
   });
 
@@ -124,11 +115,19 @@ export class ProductDetailComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      // Re-initialize image index when variant changes to ensure valid view
-      this.currentVariant();
-      untracked(() => {
-        this.currentImageIndex.set(0);
-      });
+      // When variant changes, try to jump to its first image
+      const variant = this.currentVariant();
+      if (variant && variant.images && variant.images.length > 0) {
+        const firstImg = variant.images[0];
+        const allImgs = this.allAvailableImages();
+        const idx = allImgs.indexOf(firstImg);
+
+        untracked(() => {
+          if (idx !== -1) {
+            this.currentImageIndex.set(idx);
+          }
+        });
+      }
     });
   }
 
@@ -148,7 +147,6 @@ export class ProductDetailComponent implements OnInit {
     const userId = user._id || user.id;
     const isFav = this.isFavorite();
 
-    // Optimistic Update
     const newFavoritedBy = isFav
       ? (prod.favoritedBy || []).filter(id => id !== userId)
       : [...(prod.favoritedBy || []), userId];
@@ -156,11 +154,9 @@ export class ProductDetailComponent implements OnInit {
     const updatedProd = { ...prod, favoritedBy: newFavoritedBy };
     this.product.set(updatedProd);
 
-    // Background API call
     this.productService.toggleProductFavorite(prod._id, !isFav).subscribe({
       error: (err) => {
         console.error('Favorite toggle error:', err);
-        // Revert on error
         this.product.set(prod);
       }
     });
@@ -179,8 +175,8 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
-        // Default to empty selection to show base product price/stock initially
         this.selectedAttributes.set({});
+        this.currentImageIndex.set(0);
 
         if (!silent) this.isLoading.set(false);
       },
@@ -222,13 +218,13 @@ export class ProductDetailComponent implements OnInit {
   }
 
   prevImage(): void {
-    const images = this.effectiveImages();
+    const images = this.allAvailableImages();
     if (images.length <= 1) return;
     this.currentImageIndex.update(idx => (idx === 0 ? images.length - 1 : idx - 1));
   }
 
   nextImage(): void {
-    const images = this.effectiveImages();
+    const images = this.allAvailableImages();
     if (images.length <= 1) return;
     this.currentImageIndex.update(idx => (idx === images.length - 1 ? 0 : idx + 1));
   }
@@ -236,37 +232,8 @@ export class ProductDetailComponent implements OnInit {
   setImageIndex(idx: number): void {
     const allImgs = this.allAvailableImages();
     if (idx < 0 || idx >= allImgs.length) return;
-
-    const clickedImageUrl = allImgs[idx];
-
-    // Check if the clicked image is in the current effective images
-    const effIdx = this.effectiveImages().indexOf(clickedImageUrl);
-    if (effIdx !== -1) {
-      // Image is in current set, just navigate to it
-      this.currentImageIndex.set(effIdx);
-    } else {
-      // Image is not in current effective images
-      // Check if it belongs to a variant or base product
-      const variant = this.imageToVariantMap().get(clickedImageUrl);
-
-      if (variant) {
-        // It's a variant image - select that variant's attributes to show its images
-        this.selectedAttributes.set({ ...variant.attributes });
-        // The effect will reset currentImageIndex to 0
-      } else {
-        // It's a base product image - clear variant selection to show base images
-        this.selectedAttributes.set({});
-        // Find the index in base product images
-        const baseImages = this.product()?.images || [];
-        const baseIdx = baseImages.indexOf(clickedImageUrl);
-        if (baseIdx !== -1) {
-          this.currentImageIndex.set(baseIdx);
-        }
-      }
-    }
+    this.currentImageIndex.set(idx);
   }
-
-
 
   openImage(url: string): void {
     window.open(url, '_blank');

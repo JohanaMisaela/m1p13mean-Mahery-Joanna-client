@@ -8,10 +8,10 @@
         <div class="bg-white rounded-xl shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8">
             <div class="flex flex-col gap-4">
                 <div class="relative aspect-square bg-white rounded-xl shadow-inner overflow-hidden group">
-                    <img [src]="effectiveImages()[currentImageIndex()] || 'assets/placeholder.png'" [alt]="prod.name"
+                    <img [src]="allAvailableImages()[currentImageIndex()] || 'assets/placeholder.png'" [alt]="prod.name"
                         class="w-full h-full object-contain p-4 transition-all duration-500 ease-in-out transform hover:scale-105">
 
-                    @if (effectiveImages().length > 1) {
+                    @if (allAvailableImages().length > 1) {
                     <button (click)="prevImage()"
                         class="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-10"
                         title="Précédent">
@@ -49,12 +49,12 @@
 
                 @if (allAvailableImages().length > 1) {
                 <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    @for (img of allAvailableImages(); track img) {
-                    <button (click)="setImageIndex($index)"
+                    @for (img of allAvailableImages(); track img; let i = $index) {
+                    <button (click)="setImageIndex(i)"
                         class="relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0"
-                        [class.border-black]="img === effectiveImages()[currentImageIndex()]"
-                        [class.border-transparent]="img !== effectiveImages()[currentImageIndex()]"
-                        [class.opacity-50]="img !== effectiveImages()[currentImageIndex()]">
+                        [class.border-black]="i === currentImageIndex()"
+                        [class.border-transparent]="i !== currentImageIndex()"
+                        [class.opacity-50]="i !== currentImageIndex()">
                         <img [src]="img" class="w-full h-full object-cover">
                     </button>
                     }

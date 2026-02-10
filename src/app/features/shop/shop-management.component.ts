@@ -62,10 +62,10 @@ import { PromotionFormModalComponent } from './promotion-form.component';
                class="group p-6 border border-gray-100 hover:border-black transition-all flex flex-col md:flex-row md:items-center justify-between">
             
             <div class="flex items-center mb-4 md:mb-0">
-               <div class="h-16 w-16 bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden">
-                   <img *ngIf="product.images?.length" [src]="product.images[0]" class="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all">
-                   <div *ngIf="!product.images?.length" class="h-full w-full flex items-center justify-center text-[10px] text-gray-300">NO IMG</div>
-               </div>
+                   <div class="h-16 w-16 bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden">
+                       <img *ngIf="product.images.length" [src]="product.images[0]" class="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all">
+                       <div *ngIf="!product.images.length" class="h-full w-full flex items-center justify-center text-[10px] text-gray-300">NO IMG</div>
+                   </div>
                <div class="ml-6">
                  <h4 class="font-medium text-lg">{{ product.name }}</h4>
                  <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500 uppercase tracking-tighter">
