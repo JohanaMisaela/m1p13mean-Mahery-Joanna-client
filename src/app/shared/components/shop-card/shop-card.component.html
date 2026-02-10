@@ -5,7 +5,7 @@
     @if (showFavoriteButton && currentUser) {
     <button type="button" (click)="toggleFavorite($event)"
         class="absolute top-8 right-8 z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 bg-white shadow-sm border border-gray-50"
-        [class.text-red-500]="isFavorited()" [class.text-gray-300]="!isFavorited()">
+        [ngClass]="isFavorited() ? 'text-red-500' : 'text-gray-300'">
         <fa-icon [icon]="icons.heart"></fa-icon>
     </button>
     }

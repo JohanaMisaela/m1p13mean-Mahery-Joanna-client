@@ -62,7 +62,7 @@
                 @if (shops().length > 0) {
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-4">
                     @for (shop of shops(); track shop._id) {
-                    <app-shop-card [shop]="shop" [showFavoriteButton]="true"
+                    <app-shop-card [shop]="shop" [showFavoriteButton]="true" [isFavorite]="true"
                         (favoriteToggle)="toggleShopFavorite($event)"></app-shop-card>
                     }
                 </div>
