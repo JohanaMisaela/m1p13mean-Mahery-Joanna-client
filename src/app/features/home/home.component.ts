@@ -12,10 +12,13 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../shared/components/filter-sidebar/filter-sidebar.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent],
+  standalone: true,
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

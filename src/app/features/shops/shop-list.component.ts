@@ -9,10 +9,13 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faFilter, faStore, faChevronLeft, faChevronRight, faSearch, faTimes, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../../core/services/auth.service';
 
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+
 @Component({
     selector: 'app-public-shop-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, PaginationComponent, EmptyStateComponent],
     templateUrl: './shop-list.component.html',
     styleUrl: './shop-list.component.css'
 })

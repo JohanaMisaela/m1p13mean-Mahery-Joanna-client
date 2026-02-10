@@ -10,13 +10,16 @@ import { Shop, Product, Category } from '../../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStore, faMapMarkerAlt, faPhone, faEnvelope, faClock, faFilter, faChevronRight, faChevronLeft, faArrowLeft, faStar, faFlag, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { StarRatingComponent } from '../../../shared/components/star-rating/star-rating.component';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
 
 @Component({
     selector: 'app-public-shop-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent],
     templateUrl: './shop-detail.component.html',
     styleUrl: './shop-detail.component.css'
 })
@@ -40,6 +43,7 @@ export class PublicShopDetailComponent implements OnInit {
     protected totalPages = signal<number>(1);
     protected totalItems = signal<number>(0);
     protected itemsPerPage = signal<number>(12);
+    protected userRating = signal<number>(0);
 
     // Icons
     protected icons = {
@@ -168,5 +172,16 @@ export class PublicShopDetailComponent implements OnInit {
         this.currentPage.set(1);
         const id = this.route.snapshot.paramMap.get('id');
         if (id) this.loadProducts(id);
+    }
+
+    submitRating(rating: number): void {
+        this.userRating.set(rating);
+        console.log('Submitting shop rating:', rating);
+        // Implement API call here in the future
+    }
+
+    openReportModal(): void {
+        console.log('Opening shop report modal');
+        // Implement report modal logic here
     }
 }

@@ -120,29 +120,16 @@
                 }
             </div>
             } @else {
-            <div class="flex-1 flex flex-col items-center justify-center text-center py-20 text-gray-500">
-                <p class="text-lg font-medium">Aucune boutique trouvée</p>
-                <p class="text-sm">Essayez de modifier vos filtres</p>
-                <button (click)="resetFilters()"
-                    class="mt-4 text-black underline font-bold uppercase text-xs">Réinitialiser</button>
-            </div>
+            <!-- Standardized Empty State -->
+            <app-empty-state title="Aucune boutique trouvée" message="Essayez de modifier vos filtres de recherche"
+                buttonText="Réinitialiser les filtres" [icon]="icons.shop" (action)="resetFilters()">
+            </app-empty-state>
             }
             }
         </div>
 
         <!-- Pagination -->
-        <div class="mt-auto  flex justify-center items-center gap-x-8 border-t border-gray-100">
-            <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
-                class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
-                <fa-icon [icon]="icons.prev"></fa-icon> Précédent
-            </button>
-            <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">
-                <span class="text-black font-bold">{{ currentPage() }}</span> / {{ totalPages() }}
-            </span>
-            <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-                class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
-                Suivant <fa-icon [icon]="icons.next"></fa-icon>
-            </button>
-        </div>
+        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)"></app-pagination>
     </main>
 </div>

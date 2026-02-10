@@ -18,10 +18,10 @@
     </div>
     } @else {
     <!-- Main Content Area -->
-    <main class="flex-1 p-4 lg:p-8 overflow-y-auto flex flex-col shop-products-container">
+    <main class="flex-1 px-4 lg:px-8 overflow-y-auto flex flex-col shop-products-container">
 
         <!-- Shop Banner (Sticky at top of content) -->
-        <div class="bg-white border border-gray-100 p-6 mb-8 relative group shrink-0">
+        <div class="bg-white border mt-4 border-gray-100 p-6 mb-8 relative group shrink-0">
             <div class="flex flex-col md:flex-row gap-8">
                 <!-- Shop Logo -->
                 <div
@@ -37,26 +37,25 @@
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
                         <div class="flex items-center gap-4">
                             <h1 class="text-3xl font-black italic uppercase tracking-tighter">{{ shop()?.name }}</h1>
-                            <!-- Ratings -->
-                            <div class="flex items-center gap-1 bg-black text-white px-2 py-0.5 text-[10px] font-bold">
-                                <fa-icon [icon]="icons.star" class="text-[8px]"></fa-icon>
-                                <span>{{ shop()?.averageRating || 0 }}</span>
-                                <span class="text-gray-400 font-normal ml-1">({{ shop()?.totalRatings || 0 }})</span>
-                            </div>
+                            <!-- Ratings Display -->
+                            <app-star-rating [rating]="shop()?.averageRating || 0"
+                                [totalRatings]="shop()?.totalRatings || 0" size="small"></app-star-rating>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="flex items-center gap-3">
-                            <button
-                                class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-black transition-colors flex items-center gap-2">
-                                <fa-icon [icon]="icons.comment" class="text-[8px]"></fa-icon>
-                                Noter
-                            </button>
-                            <span class="w-1 h-1 bg-gray-200 rounded-full"></span>
-                            <button
-                                class="text-[10px] uppercase tracking-widest font-black text-red-400 hover:text-red-600 transition-colors flex items-center gap-2">
-                                <fa-icon [icon]="icons.report" class="text-[8px]"></fa-icon>
-                                Signaler
+                            <!-- Interactive Rating -->
+                            <div class="flex flex-col items-end">
+                                <span class="text-[8px] uppercase tracking-widest font-black text-gray-400 mb-1">Noter
+                                    la boutique</span>
+                                <app-star-rating [interactive]="true" [rating]="userRating()"
+                                    (ratingChange)="submitRating($event)" size="small"></app-star-rating>
+                            </div>
+                            <span class="w-1 h-1 bg-gray-200 rounded-full mt-4"></span>
+                            <button (click)="openReportModal()"
+                                class="text-gray-400 hover:text-red-500 transition-colors mt-4"
+                                title="Signaler cette boutique">
+                                <fa-icon [icon]="icons.report"></fa-icon>
                             </button>
                         </div>
                     </div>
@@ -119,17 +118,7 @@
         </div>
 
         <!-- Product List Header -->
-        <div class="flex justify-between items-end mb-6 border-b border-gray-200 pb-4 shrink-0">
-            <div>
-                <h2 class="text-2xl font-bold uppercase tracking-wider">La Collection</h2>
-                <p class="text-gray-500 text-sm mt-1">{{ totalItems() }} produits trouvés</p>
-            </div>
-            <a routerLink="/shops"
-                class="text-[10px] uppercase tracking-widest font-black text-gray-400 hover:text-black transition-colors flex items-center gap-2">
-                <fa-icon [icon]="icons.back" class="text-[8px]"></fa-icon>
-                Quitter la boutique
-            </a>
-        </div>
+
 
         <!-- Products Grid Area -->
         <div class="flex-1 flex flex-col">
@@ -145,32 +134,17 @@
                 }
             </div>
 
-            <!-- Pagination (Fixed style like home) -->
-            <div class="mt-auto flex justify-center items-center gap-x-8 border-t border-gray-100 py-6 shrink-0">
-                <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
-                    class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
-                    <fa-icon [icon]="icons.prev"></fa-icon> Précédent
-                </button>
-                <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">
-                    <span class="text-black font-bold">{{ currentPage() }}</span> / {{ totalPages() }}
-                </span>
-                <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-                    class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
-                    Suivant <fa-icon [icon]="icons.next"></fa-icon>
-                </button>
-            </div>
+
             } @else {
-            <!-- Standardized Empty State (from Home) -->
-            <div class="flex-1 flex flex-col items-center justify-center text-center py-20">
-                <p class="text-xl font-light text-gray-900 mb-2">Aucun produit trouvé</p>
-                <p class="text-gray-400 text-xs mb-8 tracking-widest">Essayez de modifier vos filtres de recherche</p>
-                <button (click)="resetFilters()"
-                    class="px-6 py-2 border-b-2 border-black text-black hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold tracking-[0.2em]">
-                    Réinitialiser les filtres
-                </button>
-            </div>
+            <!-- Standardized Empty State -->
+            <app-empty-state title="Aucun produit trouvé" message="Essayez de modifier vos filtres de recherche"
+                buttonText="Réinitialiser les filtres" [icon]="icons.shop" (action)="resetFilters()">
+            </app-empty-state>
             }
+
             }
+            <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+                (pageChange)="onPageChange($event)"></app-pagination>
         </div>
     </main>
     }
