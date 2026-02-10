@@ -69,11 +69,7 @@
                             <fa-icon [icon]="icons.user" class="w-4"></fa-icon>
                             <span class="font-medium">Profil</span>
                         </a>
-                        <a routerLink="/profil" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.settings" class="w-4"></fa-icon>
-                            <span class="font-medium">Paramètres</span>
-                        </a>
+
                         <a routerLink="/cart" (click)="closeMenu()"
                             class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
                             <fa-icon [icon]="icons.cart" class="w-4"></fa-icon>
@@ -88,6 +84,11 @@
                             class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
                             <fa-icon [icon]="icons.heart" class="w-4"></fa-icon>
                             <span class="font-medium">Favoris</span>
+                        </a>
+                        <a routerLink="/profil" (click)="closeMenu()"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                            <fa-icon [icon]="icons.settings" class="w-4"></fa-icon>
+                            <span class="font-medium">Paramètres</span>
                         </a>
 
 

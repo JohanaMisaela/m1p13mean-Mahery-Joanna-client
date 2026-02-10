@@ -16,7 +16,7 @@ export interface Shop {
     phone?: string;
     email?: string;
     isActive?: boolean;
-    favoritedBy?: string[];
+    favoritedBy?: any[];
     logo?: string;
 }
 

@@ -89,7 +89,7 @@
 
                     <!-- Favorite Icon -->
                     <button (click)="toggleFavorite($event, shop)"
-                        class="absolute top-8 right-8 z-10 p-2 rounded-full transition-all duration-300 bg-white shadow-sm border border-gray-50"
+                        class="absolute top-8 right-8 z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 bg-white shadow-sm border border-gray-50"
                         [class.text-red-500]="isFavorited(shop)" [class.text-gray-300]="!isFavorited(shop)">
                         <fa-icon [icon]="icons.heart"></fa-icon>
                     </button>

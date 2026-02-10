@@ -9,10 +9,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
-    selector: 'app-favorites',
-    standalone: true,
-    imports: [CommonModule, RouterLink, ProductCardComponent, FontAwesomeModule],
-    template: `
+  selector: 'app-favorites',
+  standalone: true,
+  imports: [CommonModule, RouterLink, ProductCardComponent, FontAwesomeModule],
+  template: `
     <div class="min-h-screen bg-gray-50 pb-12">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200">
@@ -131,63 +131,52 @@ import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-ico
   `
 })
 export class FavoritesComponent implements OnInit {
-    private productService = inject(ProductService);
-    private shopService = inject(ShopService);
+  private productService = inject(ProductService);
+  private shopService = inject(ShopService);
 
-    activeTab = signal<'products' | 'shops'>('products');
-    products = signal<Product[]>([]);
-    shops = signal<Shop[]>([]);
-    isLoading = signal<boolean>(true);
+  activeTab = signal<'products' | 'shops'>('products');
+  products = signal<Product[]>([]);
+  shops = signal<Shop[]>([]);
+  isLoading = signal<boolean>(true);
 
-    icons = {
-        heart: faHeart,
-        store: faStore,
-        bag: faShoppingBag
-    };
+  icons = {
+    heart: faHeart,
+    store: faStore,
+    bag: faShoppingBag
+  };
 
-    ngOnInit() {
-        this.loadData();
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+
+    this.productService.getFavorites().subscribe({
+      next: (res: any) => {
+        const data = Array.isArray(res) ? res : (res.data || []);
+        this.products.set(data);
+        this.checkLoading();
+      },
+      error: () => this.checkLoading()
+    });
+
+    this.shopService.getFavorites().subscribe({
+      next: (res: any) => {
+        const data = Array.isArray(res) ? res : (res.data || []);
+        this.shops.set(data);
+        this.checkLoading();
+      },
+      error: () => this.checkLoading()
+    });
+  }
+
+
+  private loadCount = 0;
+  private checkLoading() {
+    this.loadCount++;
+    if (this.loadCount >= 2) {
+      this.isLoading.set(false);
     }
-
-    loadData() {
-        this.isLoading.set(true);
-
-        // Determine which data to load based on active tab or load both?
-        // Let's load both for now to show counts in tabs
-
-        // We can use forkJoin but strict dependency might not be needed.
-        // Let's just subscribe separately.
-
-        this.productService.getFavorites().subscribe({
-            next: (res: any) => {
-                // API might return array or object with data property
-                const data = Array.isArray(res) ? res : (res.data || []);
-                this.products.set(data);
-                this.checkLoading();
-            },
-            error: () => this.checkLoading()
-        });
-
-        this.shopService.getFavorites().subscribe({
-            next: (res: any) => {
-                const data = Array.isArray(res) ? res : (res.data || []);
-                this.shops.set(data);
-                this.checkLoading();
-            },
-            error: () => this.checkLoading()
-        });
-    }
-
-    // Simple check to turn off loading when at least one request finishes or delay?
-    // Ideally use forkJoin. 
-    // For simplicity, let's just create a counter or keep it simple.
-    // Actually, let's allow partial loading.
-
-    private loadCount = 0;
-    private checkLoading() {
-        this.loadCount++;
-        if (this.loadCount >= 2) {
-            this.isLoading.set(false);
-        }
-    }
+  }
 }

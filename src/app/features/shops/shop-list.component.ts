@@ -115,7 +115,12 @@ export class PublicShopListComponent implements OnInit {
     isFavorited(shop: Shop): boolean {
         const user = this.currentUser();
         if (!user || !shop.favoritedBy) return false;
-        return shop.favoritedBy.includes(user._id!);
+        const userId = user._id || user.id;
+
+        return shop.favoritedBy.some((fav: any) => {
+            const favId = typeof fav === 'string' ? fav : (fav._id || fav.id);
+            return favId === userId;
+        });
     }
 
     toggleFavorite(event: Event, shop: Shop): void {
@@ -123,30 +128,38 @@ export class PublicShopListComponent implements OnInit {
         event.stopPropagation();
 
         const user = this.currentUser();
-        if (!user) {
-            // Potentially redirect to login or show message
-            return;
-        }
+        if (!user) return;
+        const userId = user._id || user.id;
 
         const currentlyFavorited = this.isFavorited(shop);
+
+        // Optimistic Update: Do it immediately
+        const previousShops = this.shops();
+        this.shops.update(currentShops =>
+            currentShops.map(s => {
+                if (s._id === shop._id) {
+                    const favoritedBy = s.favoritedBy || [];
+                    const updatedFavoritedBy: any[] = currentlyFavorited
+                        ? favoritedBy.filter((fav: any) => {
+                            const favId = typeof fav === 'string' ? fav : (fav._id || fav.id);
+                            return favId !== userId;
+                        })
+                        : [...favoritedBy, userId];
+                    return {
+                        ...s,
+                        favoritedBy: updatedFavoritedBy
+                    } as Shop;
+                }
+                return s;
+            })
+        );
+
+        // API Call in background
         this.shopService.toggleFavorite(shop._id, !currentlyFavorited).subscribe({
-            next: () => {
-                // Optimistic UI update or reload
-                this.shops.update(currentShops =>
-                    currentShops.map(s => {
-                        if (s._id === shop._id) {
-                            const favoritedBy = s.favoritedBy || [];
-                            const updatedFavoritedBy: string[] = currentlyFavorited
-                                ? favoritedBy.filter(id => id !== user._id!)
-                                : [...favoritedBy, user._id!];
-                            return {
-                                ...s,
-                                favoritedBy: updatedFavoritedBy
-                            } as Shop;
-                        }
-                        return s;
-                    })
-                );
+            error: (err) => {
+                console.error('Failed to toggle favorite', err);
+                // Rollback on error
+                this.shops.set(previousShops);
             }
         });
     }
