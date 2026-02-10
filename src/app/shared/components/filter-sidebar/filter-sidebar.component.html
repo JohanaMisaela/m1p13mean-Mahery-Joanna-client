@@ -1,7 +1,7 @@
 <aside [class.translate-x-0]="isOpen" [class.-translate-x-full]="!isOpen"
-    class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:shadow-none border-r border-gray-200 h-full">
+    class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:shadow-none border-r border-gray-100 h-full flex flex-col">
 
-    <div class="p-6 h-full overflow-y-auto">
+    <div class="p-6 flex-1 overflow-y-auto">
         <div class="flex justify-between items-center mb-6 lg:hidden">
             <h2 class="text-xl font-bold uppercase">Filtres</h2>
             <button (click)="closeSidebar()">
@@ -23,39 +23,27 @@
             </div>
 
             <!-- Categories -->
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Catégorie</label>
-                <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                        <input type="radio" formControlName="category" value="" class="text-black focus:ring-black">
-                        <span class="text-sm">Toutes</span>
-                    </label>
+            <div class="space-y-2">
+                <label class="block text-[10px] uppercase text-gray-400 tracking-widest font-medium">Catégorie</label>
+                <select formControlName="category"
+                    class="w-full bg-gray-50 border-none px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all appearance-none cursor-pointer">
+                    <option value="">Toutes les catégories</option>
                     @for (cat of categories; track cat._id) {
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                        <input type="radio" formControlName="category" [value]="cat._id || cat.name"
-                            class="text-black focus:ring-black">
-                        <span class="text-sm">{{ cat.name }}</span>
-                    </label>
+                    <option [value]="cat._id || cat.name">{{ cat.name }}</option>
                     }
-                </div>
+                </select>
             </div>
 
             <!-- Shops -->
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Boutique</label>
-                <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                        <input type="radio" formControlName="shop" value="" class="text-black focus:ring-black">
-                        <span class="text-sm">Toutes</span>
-                    </label>
+            <div class="space-y-2">
+                <label class="block text-[10px] uppercase text-gray-400 tracking-widest font-medium">Boutique</label>
+                <select formControlName="shop"
+                    class="w-full bg-gray-50 border-none px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all appearance-none cursor-pointer">
+                    <option value="">Toutes les boutiques</option>
                     @for (shop of shops; track shop._id) {
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                        <input type="radio" formControlName="shop" [value]="shop._id"
-                            class="text-black focus:ring-black">
-                        <span class="text-sm">{{ shop.name }}</span>
-                    </label>
+                    <option [value]="shop._id">{{ shop.name }}</option>
                     }
-                </div>
+                </select>
             </div>
 
             <!-- Price Range -->
@@ -70,26 +58,36 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
-            <div class="pt-6 space-y-3">
+            <!-- Reset Button -->
+            <div class="pt-4">
                 <button type="button" (click)="resetFilters()"
                     class="w-full py-3 border border-gray-100 text-gray-400 text-[10px] uppercase tracking-widest font-medium hover:border-black hover:text-black transition-all">
                     Réinitialiser
                 </button>
-
-                <div class="border-t border-gray-100 pt-6">
-                    <a routerLink="/shops" (click)="closeSidebar()"
-                        class="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-black hover:text-white transition-all group no-underline">
-                        <div class="flex items-center gap-3">
-                            <fa-icon [icon]="icons.shop" class="text-xs"></fa-icon>
-                            <span class="text-[10px] uppercase tracking-widest font-semibold text-inherit">Toutes les
-                                boutiques</span>
-                        </div>
-                        <fa-icon [icon]="icons.search"
-                            class="text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></fa-icon>
-                    </a>
-                </div>
             </div>
         </form>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="border-t border-gray-50 mt-auto bg-white">
+        <!-- Boutiques Link -->
+        <div class="p-8">
+            <a routerLink="/shops" (click)="closeSidebar()"
+                class="flex items-center justify-between group no-underline">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                        <fa-icon [icon]="icons.shop" class="text-[10px]"></fa-icon>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-gray-300 uppercase tracking-widest mb-0.5">Explorer</span>
+                        <span
+                            class="text-xs font-medium text-gray-600 group-hover:text-black transition-colors uppercase tracking-widest">Boutiques</span>
+                    </div>
+                </div>
+                <fa-icon [icon]="icons.search"
+                    class="text-[8px] text-gray-300 group-hover:text-black transition-colors opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 duration-300"></fa-icon>
+            </a>
+        </div>
     </div>
 </aside>

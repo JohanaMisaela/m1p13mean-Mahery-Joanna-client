@@ -9,7 +9,7 @@ import { CategoryService } from '../../core/services/category.service';
 import { ShopService } from '../../core/services/shop.service';
 import { Product, Category, Shop } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../shared/components/filter-sidebar/filter-sidebar.component';
 
@@ -49,7 +49,8 @@ export class HomeComponent implements OnInit {
     star: faStar,
     shop: faStore,
     next: faChevronRight,
-    prev: faChevronLeft
+    prev: faChevronLeft,
+    search: faSearch
   };
 
   // Filter Form

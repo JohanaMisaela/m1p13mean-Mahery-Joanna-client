@@ -4,7 +4,7 @@
     <!-- Image -->
     <div class="relative aspect-[4/5] bg-gray-100 overflow-hidden cursor-pointer"
         [routerLink]="['/product', product._id]">
-        <img [src]="product.images[0] || 'assets/placeholder.png'" [alt]="product.name"
+        <img [src]="product.images?.[0] || 'assets/placeholder.png'" [alt]="product.name"
             class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500">
 
         @if (product.stock === 0) {
@@ -16,7 +16,7 @@
         @if (product.isOnSale && product.activePromotion) {
         <div
             class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs font-bold uppercase rounded shadow-sm">
-            -{{ product.activePromotion.discountPercentage }}%
+            -{{ product.activePromotion?.discountPercentage }}%
         </div>
         }
     </div>
@@ -70,7 +70,7 @@
                 <span class="text-xs text-gray-400 line-through">{{ product.price | currency:'MGA':'Ar ':'1.0-0'
                     }}</span>
                 <span class="text-lg font-bold text-red-600">
-                    {{ getDiscountedPrice(product.price, product.activePromotion.discountPercentage) |
+                    {{ getDiscountedPrice(product.price || 0, product.activePromotion?.discountPercentage || 0) |
                     currency:'MGA':'Ar ':'1.0-0' }}
                 </span>
                 } @else {

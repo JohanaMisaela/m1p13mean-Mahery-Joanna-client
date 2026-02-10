@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faTimes, faStore } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTimes, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { Category, Shop } from '../../models/product.model';
 
 @Component({
@@ -18,14 +18,19 @@ export class FilterSidebarComponent {
   @Input() categories: Category[] = [];
   @Input() shops: Shop[] = [];
   @Input() isOpen = false;
+  @Input() currentPage = 1;
+  @Input() totalPages = 1;
 
   @Output() close = new EventEmitter<void>();
   @Output() reset = new EventEmitter<void>();
+  @Output() pageChange = new EventEmitter<number>();
 
   protected icons = {
     search: faSearch,
     close: faTimes,
-    shop: faStore
+    shop: faStore,
+    prev: faChevronLeft,
+    next: faChevronRight
   };
 
   closeSidebar(): void {
@@ -34,5 +39,11 @@ export class FilterSidebarComponent {
 
   resetFilters(): void {
     this.reset.emit();
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.pageChange.emit(page);
+    }
   }
 }

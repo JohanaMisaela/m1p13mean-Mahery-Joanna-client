@@ -6,10 +6,11 @@
     </button>
 
     <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [shops]="shops()"
-        [isOpen]="showFilterSidebar()" (close)="toggleSidebar()" (reset)="resetFilters()">
+        [isOpen]="showFilterSidebar()" [currentPage]="currentPage()" [totalPages]="totalPages()"
+        (close)="toggleSidebar()" (reset)="resetFilters()" (pageChange)="onPageChange($event)">
     </app-filter-sidebar>
 
-    <main class="flex-1 p-4 lg:p-8 overflow-y-auto">
+    <main class="flex-1 p-4 lg:p-8 overflow-y-auto flex flex-col">
 
         <div class="flex justify-between items-end mb-6 border-b border-gray-200 pb-4">
             <div>
@@ -18,37 +19,44 @@
             </div>
         </div>
 
-        @if (loading()) {
-        <div class="flex justify-center items-center h-64">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
-        </div>
-        } @else {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            @for (product of products(); track product._id) {
-            <app-product-card [product]="product"></app-product-card>
-            } @empty {
-            <div class="col-span-full py-12 text-center text-gray-500">
-                <p class="text-lg font-medium">Aucun produit trouvé</p>
-                <p class="text-sm">Essayez de modifier vos filtres</p>
-                <button (click)="resetFilters()"
-                    class="mt-4 text-black underline font-bold uppercase text-xs">Réinitialiser</button>
+        <div class="flex-1 flex flex-col">
+            @if (loading()) {
+            <div class="flex-1 flex justify-center items-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
             </div>
+            } @else {
+            @if (products().length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @for (product of products(); track product._id) {
+                <app-product-card [product]="product"></app-product-card>
+                }
+            </div>
+            } @else {
+            <div class="flex-1 flex flex-col items-center justify-center text-center py-20">
+                <p class="text-xl font-light text-gray-900 mb-2">Aucun produit trouvé</p>
+                <p class="text-gray-400 text-xs mb-8  tracking-widest">Essayez de modifier vos filtres de
+                    recherche</p>
+                <button (click)="resetFilters()"
+                    class="px-6 py-2 border-b-2 border-black text-black hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold tracking-[0.2em]">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+            }
             }
         </div>
 
-        @if (totalPages() > 0) {
-        <div class="mt-8 flex justify-center items-center gap-4">
+        <div class="mt-auto  flex justify-center items-center gap-x-8 border-t border-gray-100">
             <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
-                class="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <fa-icon [icon]="icons.prev"></fa-icon>
+                class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
+                <fa-icon [icon]="icons.prev"></fa-icon> Précédent
             </button>
-            <span class="text-sm font-medium">Page {{ currentPage() }} sur {{ totalPages() }}</span>
+            <span class="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">
+                <span class="text-black font-bold">{{ currentPage() }}</span> / {{ totalPages() }}
+            </span>
             <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
-                class="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <fa-icon [icon]="icons.next"></fa-icon>
+                class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
+                Suivant <fa-icon [icon]="icons.next"></fa-icon>
             </button>
         </div>
-        }
-        }
     </main>
 </div>
