@@ -1,19 +1,29 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faStore, faEdit, faPowerOff, faCog } from '@fortawesome/free-solid-svg-icons';
 import { ShopService } from '../../../../core/services/shop.service';
 import { Shop, ShopResponse } from '../../../../shared/models/product.model';
 
 @Component({
   selector: 'app-shop-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './shop-list.component.html',
   styleUrl: './shop-list.component.css'
 })
 export class ShopListComponent implements OnInit {
   private readonly shopService = inject(ShopService);
   private readonly router = inject(Router);
+
+  // Icons
+  protected readonly icons = {
+    shop: faStore,
+    edit: faEdit,
+    status: faPowerOff,
+    manage: faCog
+  };
 
   shops = signal<Shop[]>([]);
 
@@ -47,5 +57,16 @@ export class ShopListComponent implements OnInit {
 
   manageShop(shopId: string) {
     this.router.navigate(['/admin/shop', shopId]);
+  }
+
+  toggleShopStatus(shop: Shop) {
+    const newStatus = !shop.isActive;
+    const id = shop._id || (shop as any).id;
+    if (!id) return;
+
+    this.shopService.updateStatus(id, newStatus).subscribe({
+      next: () => this.loadShops(),
+      error: (err: any) => console.error('Error updating shop status', err)
+    });
   }
 }

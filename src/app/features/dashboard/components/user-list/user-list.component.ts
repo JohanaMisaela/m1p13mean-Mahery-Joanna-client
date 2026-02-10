@@ -1,18 +1,30 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faEdit, faUserCircle, faShieldAlt, faCheckCircle, faTimesCircle, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 import { UserService } from '../../../../core/services/user.service';
 import { User, RegisterRequest, UserResponse } from '../../../../shared/models/user.model';
 
 @Component({
     selector: 'app-user-list',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, FontAwesomeModule],
     templateUrl: './user-list.component.html',
     styleUrl: './user-list.component.css'
 })
 export class UserListComponent implements OnInit {
     private readonly userService = inject(UserService);
+
+    // Icons
+    protected readonly icons = {
+        edit: faEdit,
+        user: faUserCircle,
+        admin: faShieldAlt,
+        active: faCheckCircle,
+        inactive: faTimesCircle,
+        power: faPowerOff
+    };
 
     users = signal<User[]>([]);
     showAddForm = false;

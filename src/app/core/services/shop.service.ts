@@ -22,4 +22,12 @@ export class ShopService {
     getFavorites(params?: any): Observable<any> {
         return this.http.get(`${this.API_URL}/shop/my/favorites`, { params });
     }
+
+    updateShop(id: string, data: any): Observable<Shop> {
+        return this.http.put<Shop>(`${this.API_URL}/shop/${id}`, data);
+    }
+
+    updateStatus(id: string, isActive: boolean): Observable<any> {
+        return this.http.patch(`${this.API_URL}/shop/${id}/status`, { isActive });
+    }
 }

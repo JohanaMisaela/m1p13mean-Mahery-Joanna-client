@@ -1,6 +1,6 @@
 <div class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-800 uppercase tracking-wider">Liste des Boutiques</h3>
+        <h3 class="text-base font-semibold text-gray-800 uppercase tracking-wider">Liste des Boutiques</h3>
     </div>
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -40,10 +40,17 @@
                             {{ shop.isActive ? 'Actif' : 'Inactif' }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-right space-x-4 flex justify-end items-center">
+                        <button (click)="toggleShopStatus(shop)"
+                            [class]="shop.isActive ? 'text-red-400 hover:text-red-600' : 'text-green-400 hover:text-green-600'"
+                            class="text-[10px] uppercase tracking-widest font-medium flex items-center space-x-2">
+                            <fa-icon [icon]="icons.status"></fa-icon>
+                            <span>{{ shop.isActive ? 'Désactiver' : 'Activer' }}</span>
+                        </button>
                         <button (click)="manageShop(shop._id)"
-                            class="text-gray-900 hover:text-black font-medium border border-gray-200 px-3 py-1 rounded hover:bg-gray-50 transition-all">
-                            Gérer
+                            class="text-gray-900 hover:text-black font-medium border border-gray-200 px-3 py-1 rounded hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center space-x-2">
+                            <fa-icon [icon]="icons.edit"></fa-icon>
+                            <span>Gérer</span>
                         </button>
                     </td>
                 </tr>

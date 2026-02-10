@@ -1,7 +1,7 @@
 <div class="space-y-8">
     <!-- Upper Section: Add New User -->
     <div *ngIf="showAddForm" class="bg-gray-50 border border-gray-200 p-6 shadow-sm">
-        <h3 class="text-lg font-light uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Ajouter un
+        <h3 class="text-base font-light uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Ajouter un
             Utilisateur</h3>
 
         <div *ngIf="errorMessage()"
@@ -81,19 +81,25 @@
                         </td>
                         <td class="px-8 py-6">
                             <div class="flex items-center space-x-2">
-                                <div [class]="user.isActive !== false ? 'bg-green-400' : 'bg-gray-300'"
-                                    class="w-1.5 h-1.5 rounded-full"></div>
-                                <span class="text-xs font-light">{{ user.isActive !== false ? 'Actif' :
-                                    'Inactif' }}</span>
+                                <fa-icon [icon]="user.isActive !== false ? icons.active : icons.inactive"
+                                    [class]="user.isActive !== false ? 'text-green-400' : 'text-gray-300'"
+                                    class="text-xs"></fa-icon>
+                                <span class="text-xs font-light">{{ user.isActive !== false ? 'Actif' : 'Inactif'
+                                    }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <div
-                                class="flex justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="flex justify-end space-x-4">
                                 <button (click)="toggleUserStatus(user)"
                                     [class]="user.isActive !== false ? 'text-red-400 hover:text-red-600' : 'text-green-400 hover:text-green-600'"
-                                    class="text-[10px] uppercase tracking-widest font-medium">
-                                    {{ user.isActive !== false ? 'Désactiver' : 'Activer' }}
+                                    class="text-[10px] uppercase tracking-widest font-medium flex items-center space-x-2">
+                                    <fa-icon [icon]="icons.power"></fa-icon>
+                                    <span>{{ user.isActive !== false ? 'Désactiver' : 'Activer' }}</span>
+                                </button>
+                                <button
+                                    class="text-[10px] uppercase tracking-widest font-medium text-blue-400 hover:text-blue-600 flex items-center space-x-2">
+                                    <fa-icon [icon]="icons.edit"></fa-icon>
+                                    <span>Modifier</span>
                                 </button>
                             </div>
                         </td>
