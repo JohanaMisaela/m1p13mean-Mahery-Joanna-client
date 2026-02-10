@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTimes, faStore } from '@fortawesome/free-solid-svg-icons';
 import { Category, Shop } from '../../models/product.model';
 
 @Component({
   selector: 'app-filter-sidebar',
-  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule, RouterLink],
   standalone: true,
   templateUrl: './filter-sidebar.component.html',
   styleUrl: './filter-sidebar.component.scss'
@@ -23,7 +24,8 @@ export class FilterSidebarComponent {
 
   protected icons = {
     search: faSearch,
-    close: faTimes
+    close: faTimes,
+    shop: faStore
   };
 
   closeSidebar(): void {

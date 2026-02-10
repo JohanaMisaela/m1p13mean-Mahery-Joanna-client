@@ -1,16 +1,26 @@
-<header class="bg-white shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <!-- Logo -->
-        <a routerLink="/" class="text-2xl font-bold text-gray-900 no-underline hover:text-gray-700 cursor-pointer">
-            E-Commerce
-        </a>
+<header class="bg-white shadow-sm w-full">
+    <div class="max-w-4/5 mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-12">
+            <!-- Logo -->
+            <a routerLink="/" class="text-2xl font-bold text-gray-900 no-underline hover:text-gray-700 cursor-pointer">
+                E-Commerce
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a routerLink="/" routerLinkActive="text-black font-semibold" [routerLinkActiveOptions]="{exact: true}"
+                    class="text-[11px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors no-underline">Produits</a>
+                <a routerLink="/shops" routerLinkActive="text-black font-semibold"
+                    class="text-[11px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors no-underline">Boutiques</a>
+            </nav>
+        </div>
 
 
 
         <div class="flex items-center gap-4">
             @if (currentUser()) {
             <div class="relative">
-                <button (click)="toggleMenu()" class="flex items-center gap-2 p-2 rounded-full transition-colors ">
+                <button (click)="toggleMenu()" class="flex items-center gap-6 p-2 rounded-full transition-colors ">
                     <span class="hidden md:block font-medium text-gray-700">{{ currentUser()?.name }} {{
                         currentUser()?.surname }}</span>
                     <fa-icon [icon]="isMenuOpen ? icons.close : icons.menu" class="text-xl text-gray-700"></fa-icon>

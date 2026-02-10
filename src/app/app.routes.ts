@@ -56,6 +56,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/shop/shop-management.component').then(m => m.ShopManagementComponent)
             },
             {
+                path: 'shops',
+                loadComponent: () => import('./features/shops/shop-list.component').then(m => m.PublicShopListComponent)
+            },
+            {
                 path: 'cart',
                 canActivate: [roleGuard],
                 data: { roles: ['user', 'shop', 'admin'] },

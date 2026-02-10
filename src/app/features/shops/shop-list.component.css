@@ -1,0 +1,23 @@
+:host {
+    display: block;
+    height: calc(100vh - 73px);
+    overflow: hidden;
+}
+
+/* Custom scrollbar for main area */
+main::-webkit-scrollbar {
+    width: 6px;
+}
+
+main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
