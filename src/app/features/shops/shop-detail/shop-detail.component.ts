@@ -16,11 +16,12 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { StarRatingComponent } from '../../../shared/components/star-rating/star-rating.component';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
+import { ShopReportComponent } from '../components/shop-report/shop-report.component';
 
 @Component({
     selector: 'app-public-shop-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent, ShopReportComponent],
     templateUrl: './shop-detail.component.html',
     styleUrl: './shop-detail.component.css'
 })
@@ -48,16 +49,8 @@ export class PublicShopDetailComponent implements OnInit {
     protected totalItems = signal<number>(0);
     protected itemsPerPage = signal<number>(12);
     protected userRating = signal<number>(0);
-    protected showReportModal = signal<boolean>(false);
 
-    protected reportForm: FormGroup;
-
-    constructor() {
-        this.reportForm = this.fb.group({
-            reason: ['', Validators.required],
-            description: ['']
-        });
-    }
+    constructor() { }
 
     // Icons
     protected icons = {
@@ -211,36 +204,6 @@ export class PublicShopDetailComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Rating error:', err);
-            }
-        });
-    }
-
-    openReportModal(): void {
-        if (this.currentUser()) {
-            this.showReportModal.set(true);
-        } else {
-            // Optional: redirect to login or show message
-            alert('Connectez-vous pour signaler cette boutique');
-        }
-    }
-
-    closeReportModal(): void {
-        this.showReportModal.set(false);
-        this.reportForm.reset();
-    }
-
-    submitReport(): void {
-        const shop = this.shop();
-        if (this.reportForm.invalid || !this.currentUser() || !shop) return;
-
-        this.shopService.reportShop(shop._id, this.reportForm.value).subscribe({
-            next: () => {
-                alert('Signalement envoyé avec succès');
-                this.closeReportModal();
-            },
-            error: (err) => {
-                console.error('Report error:', err);
-                alert('Erreur lors de l\'envoi du signalement');
             }
         });
     }

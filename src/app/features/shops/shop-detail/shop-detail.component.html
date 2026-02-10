@@ -49,12 +49,9 @@
                                 <app-star-rating [interactive]="true" [rating]="userRating()"
                                     (ratingChange)="submitRating($event)" size="small"></app-star-rating>
                             </div>
-                            <span class="w-1 h-1 bg-gray-200 rounded-full mt-4"></span>
-                            <button (click)="openReportModal()"
-                                class="text-gray-400 hover:text-red-500 transition-colors mt-4"
-                                title="Signaler cette boutique">
-                                <fa-icon [icon]="icons.report"></fa-icon>
-                            </button>
+                            @if (shop() && currentUser()) {
+                            <app-shop-report [shopId]="shop()!._id" [currentUser]="currentUser()"></app-shop-report>
+                            }
                         </div>
                     </div>
 
