@@ -72,7 +72,7 @@ import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-ico
             
             <div *ngFor="let shop of shops()" 
                  class="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden group cursor-pointer"
-                 [routerLink]="['/shop', shop._id]">
+                 [routerLink]="['/boutique', shop._id]">
               
               <!-- Shop Banner/Header -->
               <div class="h-24 bg-gray-100 relative group-hover:bg-gray-200 transition-colors">

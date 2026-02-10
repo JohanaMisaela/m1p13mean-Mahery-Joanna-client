@@ -84,7 +84,7 @@
             @if (shops().length > 0) {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 @for (shop of shops(); track shop._id) {
-                <a [routerLink]="['/shops', shop._id]"
+                <a [routerLink]="['/shop', shop._id]"
                     class="group bg-white border border-gray-100 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full relative">
 
                     <!-- Favorite Icon -->

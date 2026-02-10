@@ -9,7 +9,12 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
+                pathMatch: 'full',
                 loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+            },
+            {
+                path: 'shop/:id',
+                loadComponent: () => import('./features/shops/shop-detail/shop-detail.component').then(m => m.PublicShopDetailComponent)
             },
             {
                 path: 'product/:id',

@@ -1,0 +1,46 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.shop-products-container {
+    scrollbar-width: thin;
+    scrollbar-color: #f3f4f6 transparent;
+}
+
+.shop-products-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.shop-products-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.shop-products-container::-webkit-scrollbar-thumb {
+    background-color: #f3f4f6;
+    border-radius: 20px;
+}
+
+/* Specific styling for the header */
+h1 {
+    letter-spacing: -0.05em;
+}
+
+.italic {
+    font-style: italic;
+}
+
+/* Smooth transition for loading state */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

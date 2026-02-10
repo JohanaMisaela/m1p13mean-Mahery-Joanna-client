@@ -18,6 +18,7 @@ export class FilterSidebarComponent {
   @Input() categories: Category[] = [];
   @Input() shops: Shop[] = [];
   @Input() isOpen = false;
+  @Input() showShopFilter = true;
   @Input() currentPage = 1;
   @Input() totalPages = 1;
 
