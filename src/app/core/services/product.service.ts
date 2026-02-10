@@ -50,6 +50,16 @@ export class ProductService {
         return this.http.post(`${this.API_URL}/products/${productId}/favorite`, { favorite });
     }
 
+    getFavorites(params?: any): Observable<any> {
+        let httpParams = new HttpParams();
+        if (params) {
+            Object.keys(params).forEach(key => {
+                if (params[key]) httpParams = httpParams.append(key, params[key]);
+            });
+        }
+        return this.http.get(`${this.API_URL}/products/my/favorites`, { params: httpParams });
+    }
+
     // Ratings
     rateProduct(productId: string, rating: number): Observable<any> {
         return this.http.post(`${this.API_URL}/product-ranking/${productId}`, { rating });

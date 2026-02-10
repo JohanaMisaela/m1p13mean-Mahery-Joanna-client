@@ -32,6 +32,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
             },
             {
+                path: 'favorites',
+                canActivate: [roleGuard],
+                data: { roles: ['user', 'shop', 'admin'] },
+                loadComponent: () => import('./features/favorites/favorites.component').then(m => m.FavoritesComponent)
+            },
+            {
                 path: 'orders',
                 canActivate: [roleGuard],
                 data: { roles: ['user', 'shop', 'admin'] },

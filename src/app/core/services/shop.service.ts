@@ -18,4 +18,8 @@ export class ShopService {
     getShopById(id: string): Observable<Shop> {
         return this.http.get<Shop>(`${this.API_URL}/shop/${id}`);
     }
+
+    getFavorites(params?: any): Observable<any> {
+        return this.http.get(`${this.API_URL}/shop/my/favorites`, { params });
+    }
 }
