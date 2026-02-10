@@ -6,7 +6,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ShopService } from '../../core/services/shop.service';
 import { Shop } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faFilter, faStore, faChevronLeft, faChevronRight, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faStore, faChevronLeft, faChevronRight, faSearch, faTimes, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-public-shop-list',
@@ -17,7 +18,9 @@ import { faFilter, faStore, faChevronLeft, faChevronRight, faSearch, faTimes } f
 })
 export class PublicShopListComponent implements OnInit {
     private readonly shopService = inject(ShopService);
+    private readonly authService = inject(AuthService);
     private readonly fb = inject(FormBuilder);
+    protected currentUser = this.authService.currentUser;
 
     // Signals
     protected shops = signal<Shop[]>([]);
@@ -37,7 +40,8 @@ export class PublicShopListComponent implements OnInit {
         next: faChevronRight,
         prev: faChevronLeft,
         search: faSearch,
-        close: faTimes
+        close: faTimes,
+        heart: faHeart
     };
 
     // Filter Form
@@ -106,5 +110,44 @@ export class PublicShopListComponent implements OnInit {
         this.filterForm.patchValue({ search: '' });
         this.currentPage.set(1);
         this.loadShops();
+    }
+
+    isFavorited(shop: Shop): boolean {
+        const user = this.currentUser();
+        if (!user || !shop.favoritedBy) return false;
+        return shop.favoritedBy.includes(user._id!);
+    }
+
+    toggleFavorite(event: Event, shop: Shop): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const user = this.currentUser();
+        if (!user) {
+            // Potentially redirect to login or show message
+            return;
+        }
+
+        const currentlyFavorited = this.isFavorited(shop);
+        this.shopService.toggleFavorite(shop._id, !currentlyFavorited).subscribe({
+            next: () => {
+                // Optimistic UI update or reload
+                this.shops.update(currentShops =>
+                    currentShops.map(s => {
+                        if (s._id === shop._id) {
+                            const favoritedBy = s.favoritedBy || [];
+                            const updatedFavoritedBy: string[] = currentlyFavorited
+                                ? favoritedBy.filter(id => id !== user._id!)
+                                : [...favoritedBy, user._id!];
+                            return {
+                                ...s,
+                                favoritedBy: updatedFavoritedBy
+                            } as Shop;
+                        }
+                        return s;
+                    })
+                );
+            }
+        });
     }
 }

@@ -34,4 +34,8 @@ export class ShopService {
     updateStatus(id: string, isActive: boolean): Observable<any> {
         return this.http.patch(`${this.API_URL}/shop/${id}/status`, { isActive });
     }
+
+    toggleFavorite(shopId: string, favorite: boolean): Observable<any> {
+        return this.http.post(`${this.API_URL}/shop/${shopId}/favorite`, { favorite });
+    }
 }

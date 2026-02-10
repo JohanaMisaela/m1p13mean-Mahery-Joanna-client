@@ -85,18 +85,33 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 @for (shop of shops(); track shop._id) {
                 <a [routerLink]="['/shops', shop._id]"
-                    class="group bg-white border border-gray-100 p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full">
+                    class="group bg-white border border-gray-100 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full relative">
+
+                    <!-- Favorite Icon -->
+                    <button (click)="toggleFavorite($event, shop)"
+                        class="absolute top-8 right-8 z-10 p-2 rounded-full transition-all duration-300 bg-white shadow-sm border border-gray-50"
+                        [class.text-red-500]="isFavorited(shop)" [class.text-gray-300]="!isFavorited(shop)">
+                        <fa-icon [icon]="icons.heart"></fa-icon>
+                    </button>
+
+                    <!-- Shop Image/Icon Box -->
                     <div
-                        class="w-12 h-12 bg-gray-50 flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors">
-                        <fa-icon [icon]="icons.shop" class="text-lg"></fa-icon>
+                        class="w-16 h-16 bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-black group-hover:text-white transition-all duration-500 overflow-hidden border border-gray-100 shadow-inner">
+                        <img *ngIf="shop.gallery?.[0] || shop.logo" [src]="shop.gallery?.[0] || shop.logo"
+                            class="w-full h-full object-cover transition-all duration-700">
+                        <fa-icon *ngIf="!(shop.gallery?.[0] || shop.logo)" [icon]="icons.shop"
+                            class="text-xl"></fa-icon>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2 truncate">{{ shop.name }}</h3>
-                    <p class="text-gray-400 text-sm font-light leading-relaxed line-clamp-3 mb-6 flex-1 italic">
+
+                    <h3 class="text-xl font-medium text-gray-900 mb-2 truncate">{{ shop.name }}</h3>
+
+                    <p class="text-gray-500 text-sm font-light leading-relaxed line-clamp-3 mb-8 flex-1">
                         {{ shop.description || 'Bienvenue dans notre boutique exclusive.' }}
                     </p>
+
                     <div class="flex items-center justify-between pt-6 border-t border-gray-50">
                         <span
-                            class="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">Voir
+                            class="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors font-black">Voir
                             les produits</span>
                         <fa-icon [icon]="icons.next"
                             class="text-gray-300 group-hover:translate-x-1 transition-transform text-[10px]"></fa-icon>
@@ -105,25 +120,18 @@
                 }
             </div>
             } @else {
-            <div class="flex-1 flex flex-col items-center justify-center text-center py-20">
-                <div class="mb-6 opacity-20">
-                    <fa-icon [icon]="icons.shop" class="text-6xl text-gray-400"></fa-icon>
-                </div>
-                <p class="text-3xl font-light text-gray-900 mb-2">Aucune boutique trouvée</p>
-                <p class="text-gray-400 text-sm mb-8 uppercase tracking-widest">Essayez de modifier vos filtres de
-                    recherche</p>
+            <div class="flex-1 flex flex-col items-center justify-center text-center py-20 text-gray-500">
+                <p class="text-lg font-medium">Aucune boutique trouvée</p>
+                <p class="text-sm">Essayez de modifier vos filtres</p>
                 <button (click)="resetFilters()"
-                    class="px-10 py-4 border border-black text-black hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold tracking-[0.2em]">
-                    Réinitialiser les filtres
-                </button>
+                    class="mt-4 text-black underline font-bold uppercase text-xs">Réinitialiser</button>
             </div>
             }
             }
         </div>
 
         <!-- Pagination -->
-        @if (!loading() && totalPages() > 1) {
-        <div class="mt-auto py-10 flex justify-center items-center gap-8 border-t border-gray-100">
+        <div class="mt-auto  flex justify-center items-center gap-x-8 border-t border-gray-100">
             <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
                 class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
                 <fa-icon [icon]="icons.prev"></fa-icon> Précédent
@@ -136,6 +144,5 @@
                 Suivant <fa-icon [icon]="icons.next"></fa-icon>
             </button>
         </div>
-        }
     </main>
 </div>

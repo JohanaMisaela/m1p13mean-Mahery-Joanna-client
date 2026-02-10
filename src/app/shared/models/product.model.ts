@@ -16,6 +16,8 @@ export interface Shop {
     phone?: string;
     email?: string;
     isActive?: boolean;
+    favoritedBy?: string[];
+    logo?: string;
 }
 
 export interface ProductVariant {
