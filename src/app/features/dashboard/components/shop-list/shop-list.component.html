@@ -32,14 +32,16 @@
                 </select>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email de contact</label>
-                <input name="email" [(ngModel)]="newShop.email" type="email" placeholder="Ex: contact@boutique.com"
-                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Email de contact (Lié au
+                    propriétaire)</label>
+                <input name="email" [(ngModel)]="newShop.email" type="email" readonly
+                    class="w-full border-b border-gray-200 bg-gray-50/50 py-2 focus:border-black outline-none transition-colors text-sm cursor-not-allowed">
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Téléphone</label>
-                <input name="phone" [(ngModel)]="newShop.phone" type="text" placeholder="Ex: +212 600 000 000"
-                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Téléphone (Lié au
+                    propriétaire)</label>
+                <input name="phone" [(ngModel)]="newShop.phone" type="text" readonly
+                    class="w-full border-b border-gray-200 bg-gray-50/50 py-2 focus:border-black outline-none transition-colors text-sm cursor-not-allowed">
             </div>
             <div class="space-y-1 md:col-span-2">
                 <label class="text-[10px] uppercase text-gray-400 tracking-widest">Description</label>

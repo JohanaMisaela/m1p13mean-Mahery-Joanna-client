@@ -35,6 +35,11 @@
                 </select>
             </div>
             <div class="space-y-1">
+                <label class="text-[10px] uppercase text-gray-400 tracking-widest">Numéro de téléphone</label>
+                <input name="contact" [(ngModel)]="newUser.contact" type="text"
+                    class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
+            </div>
+            <div class="space-y-1">
                 <label class="text-[10px] uppercase text-gray-400 tracking-widest">Mot de passe (min 4 car.)</label>
                 <input name="password" [(ngModel)]="newUser.password" type="password" required minlength="4"
                     class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
@@ -176,6 +181,11 @@
                         <option value="shop">Shop Owner</option>
                         <option value="admin">Admin</option>
                     </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase text-gray-400 tracking-widest">Numéro de téléphone</label>
+                    <input name="edit-contact" [(ngModel)]="editForm.contact" type="text"
+                        class="w-full border-b border-gray-200 bg-transparent py-2 focus:border-black outline-none transition-colors text-sm">
                 </div>
 
                 <div class="flex justify-end space-x-4 pt-4">

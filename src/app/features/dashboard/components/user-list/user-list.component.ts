@@ -43,6 +43,7 @@ export class UserListComponent implements OnInit {
         name: '',
         surname: '',
         email: '',
+        contact: '',
         role: 'user'
     };
 
@@ -50,6 +51,7 @@ export class UserListComponent implements OnInit {
         name: '',
         surname: '',
         email: '',
+        contact: '',
         password: '',
         role: 'user'
     };
@@ -86,7 +88,7 @@ export class UserListComponent implements OnInit {
             next: () => {
                 this.loadUsers();
                 this.showAddForm = false;
-                this.newUser = { name: '', surname: '', email: '', password: '', role: 'user' };
+                this.newUser = { name: '', surname: '', email: '', contact: '', password: '', role: 'user' };
             },
             error: (err: any) => {
                 console.error('Error creating user', err);
@@ -113,6 +115,7 @@ export class UserListComponent implements OnInit {
             name: user.name,
             surname: user.surname || '',
             email: user.email,
+            contact: user.contact || '',
             role: user.role
         };
         this.isEditModalOpen.set(true);

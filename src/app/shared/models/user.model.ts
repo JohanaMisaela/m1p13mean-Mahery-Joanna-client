@@ -4,6 +4,7 @@ export interface User {
     name: string;
     surname?: string;
     email: string;
+    contact?: string;
     role: 'admin' | 'shop' | 'user' | 'buyer';
     isActive?: boolean;
 }
@@ -23,6 +24,7 @@ export interface RegisterRequest {
     surname?: string;
     email: string;
     password: string;
+    contact?: string;
     role?: 'admin' | 'shop' | 'user';
 }
 

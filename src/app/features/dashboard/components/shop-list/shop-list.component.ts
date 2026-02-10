@@ -76,8 +76,9 @@ export class ShopListComponent implements OnInit {
 
   onOwnerChange() {
     const owner = this.potentialOwners().find(u => (u._id || (u as any).id) === this.newShop.owner);
-    if (owner && owner.email) {
-      this.newShop.email = owner.email;
+    if (owner) {
+      if (owner.email) this.newShop.email = owner.email;
+      if (owner.contact) this.newShop.phone = owner.contact;
     }
   }
 
