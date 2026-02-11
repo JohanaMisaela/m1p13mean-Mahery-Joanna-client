@@ -40,10 +40,7 @@
                             }
                         </div>
 
-                        <div class="mb-12">
-                            <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
-                                (pageChange)="onPageChange($event)"></app-pagination>
-                        </div>
+
                         } @else {
                         <!-- Standardized Empty State -->
                         <app-empty-state title="Aucun produit trouvé"
@@ -52,6 +49,8 @@
                         </app-empty-state>
                         }
                         }
+                        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+                            (pageChange)="onPageChange($event)"></app-pagination>
                     </div>
                     }
                 </div>
