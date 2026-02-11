@@ -1,11 +1,12 @@
 :host {
     display: block;
-    height: calc(100vh - 73px);
+    height: 100%;
 }
 
 .shop-products-container {
     scrollbar-width: thin;
     scrollbar-color: #e5e7eb transparent;
+    scroll-behavior: smooth;
 }
 
 .shop-products-container::-webkit-scrollbar {

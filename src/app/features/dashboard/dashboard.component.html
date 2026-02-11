@@ -1,12 +1,12 @@
-<div class="flex font-sans text-gray-900 h-full bg-white">
+<div class="flex font-sans text-gray-900 h-full bg-white overflow-hidden">
     <!-- Sidebar -->
-    <aside class="w-72 border-r border-gray-100 flex flex-col h-full">
+    <aside class="w-72 border-r border-gray-100 flex flex-col h-full bg-white flex-shrink-0">
         <div class="p-10 border-b border-gray-50">
             <h2 class="text-xl font-light tracking-[0.2em] uppercase">Dashboard</h2>
             <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">{{ currentUser()?.role }}</p>
         </div>
 
-        <nav class="flex-grow p-6 space-y-2">
+        <nav class="flex-grow p-6 space-y-2 overflow-y-auto">
             @if (currentUser()?.role === 'admin') {
             <button (click)="activeView.set('shops')" [class.bg-gray-50]="activeView() === 'shops'"
                 [class.text-black]="activeView() === 'shops'"
@@ -40,29 +40,33 @@
 
     <!-- Main Content Area -->
     <main class="flex-grow overflow-y-auto bg-[#fafafa]">
-        <div class="max-w-[95%] mx-auto px-10 py-8">
+        <div class="min-h-full flex flex-col">
+            <div class="flex-grow max-w-[95%] mx-auto px-10 py-8 w-full">
 
-            <div class="mb-16">
-                <h1 class="text-2xl font-extralight text-gray-900 mb-4 tracking-tighter">
-                    @switch (activeView()) {
-                    @case ('shops') { Boutiques }
-                    @case ('users') { Utilisateurs }
-                    @case ('myShops') { Mes Boutiques }
+                <div class="mb-16">
+                    <h1 class="text-2xl font-extralight text-gray-900 mb-4 tracking-tighter">
+                        @switch (activeView()) {
+                        @case ('shops') { Boutiques }
+                        @case ('users') { Utilisateurs }
+                        @case ('myShops') { Mes Boutiques }
+                        }
+                    </h1>
+                    <div class="h-0.5 w-12 bg-black"></div>
+                </div>
+
+                <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    @if (activeView() === 'shops') {
+                    <app-shop-list></app-shop-list>
+                    } @else if (activeView() === 'users') {
+                    <app-user-list></app-user-list>
+                    } @else if (activeView() === 'myShops') {
+                    <app-shop-list [onlyMyShops]="true"></app-shop-list>
                     }
-                </h1>
-                <div class="h-0.5 w-12 bg-black"></div>
-            </div>
+                </div>
 
-            <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                @if (activeView() === 'shops') {
-                <app-shop-list></app-shop-list>
-                } @else if (activeView() === 'users') {
-                <app-user-list></app-user-list>
-                } @else if (activeView() === 'myShops') {
-                <app-shop-list [onlyMyShops]="true"></app-shop-list>
-                }
             </div>
-
+            <!-- Local Footer inside scrollable area -->
+            <app-footer></app-footer>
         </div>
     </main>
 </div>

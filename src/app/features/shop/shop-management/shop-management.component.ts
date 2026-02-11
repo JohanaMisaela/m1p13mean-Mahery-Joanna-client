@@ -12,13 +12,19 @@ import { VariantFormComponent } from '../variant-form/variant-form.component';
 import { PromotionFormModalComponent } from '../promotion-form/promotion-form.component';
 import { ShopHeaderComponent } from '../components/shop-header/shop-header.component';
 import { ShopSettingsFormComponent } from '../components/shop-settings-form/shop-settings-form.component';
+import { FooterComponent } from '../../../core/layout/footer/footer.component';
 
 @Component({
     selector: 'app-shop-management',
     standalone: true,
-    imports: [CommonModule, RouterModule, ProductFormComponent, VariantFormComponent, PromotionFormModalComponent, ShopHeaderComponent, ShopSettingsFormComponent], // Add RouterModule here
+    imports: [CommonModule, RouterModule, ProductFormComponent, VariantFormComponent, PromotionFormModalComponent, ShopHeaderComponent, ShopSettingsFormComponent, FooterComponent], // Add FooterComponent here
     templateUrl: './shop-management.component.html',
-    styleUrls: []
+    styles: [`
+        :host {
+            display: block;
+            height: 100%;
+        }
+    `]
 })
 export class ShopManagementComponent implements OnInit {
     private readonly shopService = inject(ShopService);

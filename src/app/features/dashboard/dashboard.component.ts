@@ -6,11 +6,12 @@ import { ShopService } from '../../core/services/shop.service';
 
 import { ShopListComponent } from './components/shop-list/shop-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
+import { FooterComponent } from '../../core/layout/footer/footer.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ShopListComponent, UserListComponent],
+  imports: [CommonModule, ShopListComponent, UserListComponent, FooterComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

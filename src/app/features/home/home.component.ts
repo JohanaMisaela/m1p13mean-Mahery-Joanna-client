@@ -14,11 +14,12 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
 import { FilterSidebarComponent } from '../../shared/components/filter-sidebar/filter-sidebar.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { FooterComponent } from '../../core/layout/footer/footer.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, FooterComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

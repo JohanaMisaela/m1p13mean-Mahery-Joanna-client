@@ -12,13 +12,19 @@ import { AuthService } from '../../core/services/auth.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ShopCardComponent } from '../../shared/components/shop-card/shop-card.component';
+import { FooterComponent } from '../../core/layout/footer/footer.component';
 
 @Component({
     selector: 'app-public-shop-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, PaginationComponent, EmptyStateComponent, ShopCardComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, PaginationComponent, EmptyStateComponent, ShopCardComponent, FooterComponent],
     templateUrl: './shop-list.component.html',
-    styleUrl: './shop-list.component.css'
+    styles: [`
+        :host {
+            display: block;
+            height: 100%;
+        }
+    `]
 })
 export class PublicShopListComponent implements OnInit {
     private readonly shopService = inject(ShopService);

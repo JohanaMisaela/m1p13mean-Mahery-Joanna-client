@@ -18,11 +18,12 @@ import { ProductCardComponent } from '../../../shared/components/product-card/pr
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
 import { ShopReportComponent } from '../components/shop-report/shop-report.component';
 import { ShopHeaderComponent } from '../../shop/components/shop-header/shop-header.component';
+import { FooterComponent } from '../../../core/layout/footer/footer.component';
 
 @Component({
     selector: 'app-public-shop-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent, ShopReportComponent, ShopHeaderComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, ShopHeaderComponent, PaginationComponent, FilterSidebarComponent, EmptyStateComponent, FooterComponent, StarRatingComponent, ShopReportComponent],
     templateUrl: './shop-detail.component.html',
     styleUrl: './shop-detail.component.css'
 })
