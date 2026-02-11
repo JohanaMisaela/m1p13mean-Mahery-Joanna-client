@@ -13,8 +13,8 @@
     <!-- Shop Image/Icon Box -->
     <div
         class="w-16 h-16 bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-black group-hover:text-white transition-all duration-500 overflow-hidden border border-gray-100 shadow-inner">
-        @if (shop.gallery?.[0] || shop.logo) {
-        <img [src]="shop.gallery?.[0] || shop.logo" class="w-full h-full object-cover transition-all duration-700">
+        @if (shop.logo || shop.gallery?.[0]) {
+        <img [src]="shop.logo || shop.gallery?.[0]" class="w-full h-full object-cover transition-all duration-700">
         } @else {
         <fa-icon [icon]="icons.shop" class="text-xl"></fa-icon>
         }

@@ -174,7 +174,8 @@
                 }
 
                 @case ('settings') {
-                <app-shop-settings-form [shop]="shop()" (save)="saveShopSettings($event)"></app-shop-settings-form>
+                <app-shop-settings-form [shop]="shop()" [currentUser]="currentUser()!"
+                    (save)="saveShopSettings($event)"></app-shop-settings-form>
                 }
 
                 @case ('orders') {

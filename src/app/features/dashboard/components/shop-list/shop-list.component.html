@@ -86,8 +86,8 @@
                             <div class="flex items-center">
                                 <div
                                     class="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                                    <ng-container *ngIf="shop.gallery && shop.gallery.length; else noGallery">
-                                        <img [src]="shop.gallery[0]" class="h-10 w-10 rounded-full object-cover">
+                                    <ng-container *ngIf="shop.logo">
+                                        <img [src]="shop.logo" class="h-10 w-10 rounded-full object-cover">
                                     </ng-container>
                                     <ng-template #noGallery>
                                         <span class="text-xs">SHOP</span>
