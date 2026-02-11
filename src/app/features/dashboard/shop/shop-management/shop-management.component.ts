@@ -1,23 +1,20 @@
 import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router'; // Ensure RouterModule is imported here
-import { ShopService } from '../../../core/services/shop.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { ProductService } from '../../../core/services/product.service';
-import { ProductVariantService } from '../../../core/services/product-variant.service';
-import { PromotionService } from '../../../core/services/promotion.service';
-import { Shop, Product } from '../../../shared/models/product.model';
-import { ProductFormComponent } from '../product-form/product-form.component';
-import { VariantFormComponent } from '../variant-form/variant-form.component';
-import { PromotionFormModalComponent } from '../promotion-form/promotion-form.component';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ShopService } from '../../../../core/services/shop.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ProductService } from '../../../../core/services/product.service';
+import { ProductVariantService } from '../../../../core/services/product-variant.service';
+import { PromotionService } from '../../../../core/services/promotion.service';
+import { Shop, Product } from '../../../../shared/models/product.model';
 import { ShopHeaderComponent } from '../components/shop-header/shop-header.component';
 import { ShopSettingsFormComponent } from '../components/shop-settings-form/shop-settings-form.component';
-import { FooterComponent } from '../../../core/layout/footer/footer.component';
+import { FooterComponent } from '../../../../core/layout/footer/footer.component';
 
 @Component({
     selector: 'app-shop-management',
     standalone: true,
-    imports: [CommonModule, RouterModule, ProductFormComponent, VariantFormComponent, PromotionFormModalComponent, ShopHeaderComponent, ShopSettingsFormComponent, FooterComponent], // Add FooterComponent here
+    imports: [CommonModule, RouterModule, ShopHeaderComponent, ShopSettingsFormComponent, FooterComponent],
     templateUrl: './shop-management.component.html',
     styles: [`
         :host {
@@ -41,7 +38,7 @@ export class ShopManagementComponent implements OnInit {
 
 
     currentUser = this.authService.currentUser;
-    activeView = signal<'preview' | 'settings' | 'products' | 'promotions' | 'orders' | 'reports'>('products'); // Default to products for now or preview
+    activeView = signal<'preview' | 'settings' | 'products' | 'promotions' | 'orders' | 'reports'>('products');
 
     shop = signal<Shop | null>(null);
     products = signal<Product[]>([]);
@@ -66,9 +63,7 @@ export class ShopManagementComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
-        // Initialization logic that doesn't require HTTP calls
-    }
+    ngOnInit() { }
 
     loadShop(id: string) {
         this.shopService.getShopById(id).subscribe(s => this.shop.set(s));
@@ -148,7 +143,6 @@ export class ShopManagementComponent implements OnInit {
         this.shopService.updateShop(id, data).subscribe({
             next: (updatedShop) => {
                 this.shop.set(updatedShop);
-                // Optionally show success message
                 alert('Paramètres de la boutique mis à jour !');
             },
             error: (err) => console.error('Error updating shop', err)
@@ -156,8 +150,6 @@ export class ShopManagementComponent implements OnInit {
     }
 
     onRatingChange(rating: number) {
-        // In admin/management mode, we might just log or allow rating if desired.
-        // For now, let's allow the owner to rate their own shop if the backend allows it (usually not, but for preview/testing)
         const id = this.shop()?._id;
         if (!id) return;
 

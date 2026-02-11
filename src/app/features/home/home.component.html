@@ -6,14 +6,12 @@
     </button>
 
     <div class="flex-1 flex min-h-0 overflow-hidden">
-        <!-- Sidebar -->
         <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [shops]="shops()"
             [isOpen]="showFilterSidebar()" [currentPage]="currentPage()" [totalPages]="totalPages()"
             (close)="toggleSidebar()" (reset)="resetFilters()" (pageChange)="onPageChange($event)"
             class="h-full flex-shrink-0">
         </app-filter-sidebar>
 
-        <!-- Main Content Area -->
         <main class="flex-grow overflow-y-auto">
             <div class="min-h-full flex flex-col ">
                 <div class="flex-grow px-4 lg:px-8 pt-4 lg:pt-8">
@@ -50,7 +48,6 @@
                             (pageChange)="onPageChange($event)"></app-pagination>
                     </div>
                 </div>
-                <!-- Local Footer -->
                 <app-footer></app-footer>
             </div>
         </main>

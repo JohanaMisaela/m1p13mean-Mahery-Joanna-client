@@ -32,19 +32,12 @@ export class ShopCardComponent {
     }
 
     isFavorited(): boolean {
-        // If isFavorite is explicitly set, use that
         if (this.isFavorite) {
-            console.log('Shop card - isFavorite input is true for:', this.shop.name);
             return true;
         }
 
         const user = this.currentUser;
         if (!user || !this.shop || !this.shop.favoritedBy) {
-            console.log('Shop card - No user, shop, or favoritedBy:', {
-                user: !!user,
-                shop: !!this.shop,
-                favoritedBy: this.shop?.favoritedBy
-            });
             return false;
         }
 
@@ -54,13 +47,6 @@ export class ShopCardComponent {
             return favId === userId;
         });
 
-        console.log('Shop card - Checking favoritedBy:', {
-            shopName: this.shop.name,
-            shopId: this.shop._id,
-            userId: userId,
-            favoritedBy: this.shop.favoritedBy,
-            isFavorited: result
-        });
         return result;
     }
 

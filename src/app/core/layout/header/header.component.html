@@ -1,7 +1,6 @@
 <header class="bg-white shadow-sm w-full">
     <div class="max-w-4/5 mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div class="flex items-center gap-12">
-            <!-- Logo -->
             <a routerLink="/" class="text-2xl font-bold text-gray-900 no-underline hover:text-gray-700 cursor-pointer">
                 E-Commerce
             </a>
@@ -29,9 +28,7 @@
 
                     <div class="py-2">
 
-                        <!-- Admin Logic -->
                         @if (currentUser()?.role === 'admin' || currentUser()?.role === 'shop') {
-                        <!-- Admin Dashboard -->
                         <a routerLink="/dashboard" (click)="closeMenu()"
                             class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
                             <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
@@ -39,9 +36,6 @@
                         </a>
                         }
 
-
-
-                        <!-- User Links (Visible to ALL) -->
                         <a routerLink="/profil" (click)="closeMenu()"
                             class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
                             <fa-icon [icon]="icons.user" class="w-4"></fa-icon>
@@ -72,7 +66,6 @@
 
                         <div class="border-t border-gray-100 my-1 mx-2"></div>
 
-                        <!-- Logout -->
                         <button (click)="logout()"
                             class="w-full text-left flex items-center gap-3 px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
                             <fa-icon [icon]="icons.logout" class="w-4"></fa-icon>

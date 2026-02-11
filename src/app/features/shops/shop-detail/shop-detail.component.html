@@ -1,19 +1,16 @@
 <div class="flex-1 flex flex-col font-sans text-gray-900 bg-gray-50 overflow-hidden min-h-0">
-    <!-- Mobile Filter Toggle -->
     <button (click)="toggleSidebar()"
         class="fixed bottom-0 right-0 z-50 lg:hidden bg-black text-white p-6 shadow-lg hover:bg-gray-800 transition-all active:scale-95">
         <fa-icon [icon]="icons.filter"></fa-icon>
     </button>
 
     <div class="flex-1 flex min-h-0 overflow-hidden">
-        <!-- Sidebar Filters -->
         <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [isOpen]="showFilterSidebar()"
             [showShopFilter]="false" [currentPage]="currentPage()" [totalPages]="totalPages()" (close)="toggleSidebar()"
             (reset)="resetFilters()" (pageChange)="onPageChange($event)" class="h-full flex-shrink-0" sidebarLink="/"
             sidebarLabel="Produits" sidebarNavText="Retour">
         </app-filter-sidebar>
 
-        <!-- Main Content Area -->
         <main class="flex-grow overflow-y-auto shop-products-container">
             <div class="min-h-full flex flex-col">
                 <div class="flex-grow px-4 lg:px-8">
@@ -22,11 +19,9 @@
                         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
                     </div>
                     } @else {
-                    <!-- Shop Banner (Sticky at top of content) -->
                     <app-shop-header [shop]="shop()" [currentUser]="currentUser()!" [userRating]="userRating()"
                         (ratingChange)="submitRating($event)"></app-shop-header>
 
-                    <!-- Products Grid Area -->
                     <div class="flex-1 flex flex-col">
                         @if (loadingProducts()) {
                         <div class="flex-1 flex justify-center items-center py-20">
@@ -42,7 +37,6 @@
 
 
                         } @else {
-                        <!-- Standardized Empty State -->
                         <app-empty-state title="Aucun produit trouvé"
                             message="Essayez de modifier vos filtres de recherche"
                             buttonText="Réinitialiser les filtres" [icon]="icons.shop" (action)="resetFilters()">
@@ -54,7 +48,6 @@
                     </div>
                     }
                 </div>
-                <!-- Local Footer -->
                 <app-footer></app-footer>
             </div>
         </main>

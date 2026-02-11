@@ -42,15 +42,12 @@ export class ProductDetailComponent implements OnInit {
     const selectedKeys = Object.keys(selected);
     if (selectedKeys.length === 0) return null;
 
-    // Helper: find value in selected object case-insensitively
     const findValue = (searchKey: string) => {
       const actualKey = Object.keys(selected).find(k => k.toLowerCase() === searchKey.toLowerCase());
       return actualKey ? selected[actualKey] : undefined;
     };
 
-    // Find a variant that matches ALL selected attributes
     const variant = prod.variants.find(v => {
-      // 1. Every selected attribute must match this variant
       const matchesSelection = Object.entries(selected).every(([selKey, selValue]) => {
         const variantKey = Object.keys(v.attributes).find(k => k.toLowerCase() === selKey.toLowerCase());
         if (!variantKey) return false;
@@ -59,8 +56,6 @@ export class ProductDetailComponent implements OnInit {
 
       if (!matchesSelection) return false;
 
-      // 2. Strict matching: Every variant attribute must be present in selection
-      // This prevents choosing a "default" variant when only one attribute is picked
       const allAttributesPresent = Object.keys(v.attributes).every(vKey => {
         return !!findValue(vKey);
       });
@@ -68,7 +63,6 @@ export class ProductDetailComponent implements OnInit {
       return allAttributesPresent;
     }) || null;
 
-    console.log('Current Variant detected:', variant?._id, 'for selection:', selected);
     return variant;
   });
 
@@ -77,11 +71,9 @@ export class ProductDetailComponent implements OnInit {
     const selected = this.selectedAttributes();
     if (!prod || !prod.variants || prod.variants.length === 0) return true;
 
-    // Get all required keys from variants
     const requiredKeys = new Set<string>();
     prod.variants.forEach(v => Object.keys(v.attributes).forEach(k => requiredKeys.add(k.toLowerCase())));
 
-    // Check if every required key has a matching key in selected (case-insensitive)
     const selectedKeys = Object.keys(selected).map(k => k.toLowerCase());
     return Array.from(requiredKeys).every(rk => selectedKeys.includes(rk));
   });
@@ -156,7 +148,6 @@ export class ProductDetailComponent implements OnInit {
     });
 
     effect(() => {
-      // When variant changes, try to jump to its first image
       const variant = this.currentVariant();
       if (variant && variant.images && variant.images.length > 0) {
         const firstImg = variant.images[0];
@@ -196,16 +187,11 @@ export class ProductDetailComponent implements OnInit {
     this.product.set(updatedProd);
 
     this.productService.toggleProductFavorite(prod._id, !isFav).subscribe({
-      error: (err) => {
-        console.error('Favorite toggle error:', err);
-        this.product.set(prod);
-      }
+      error: () => this.product.set(prod)
     });
   }
 
-  ngOnInit(): void {
-    // Initialization logic that doesn't require HTTP calls
-  }
+  ngOnInit(): void { }
 
   loadAll(id: string, silent: boolean = false): void {
     if (!silent) this.isLoading.set(true);

@@ -1,8 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Shop } from '../../../../shared/models/product.model';
-import { User } from '../../../../shared/models/user.model';
+import { Shop } from '../../../../../shared/models/product.model';
+import { User } from '../../../../../shared/models/user.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTimes, faUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
 

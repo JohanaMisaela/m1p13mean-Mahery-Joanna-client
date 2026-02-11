@@ -62,15 +62,13 @@ export class ProductReviewsComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        // Initialization logic that doesn't require HTTP calls
-    }
+    ngOnInit(): void { }
 
 
     loadComments(id: string): void {
         this.productService.getComments(id).subscribe({
             next: (res: any) => this.comments.set(res.data || []),
-            error: (err) => console.error('Error loading comments:', err)
+            error: () => { }
         });
     }
 
@@ -98,9 +96,7 @@ export class ProductReviewsComponent implements OnInit {
                 this.loadUserRating(this.productId);
                 this.reviewsUpdated.emit();
             },
-            error: (err) => {
-                console.error('Rating error:', err);
-            }
+            error: () => { }
         });
     }
 
@@ -134,8 +130,7 @@ export class ProductReviewsComponent implements OnInit {
                 this.loadComments(this.productId);
                 this.reviewsUpdated.emit();
             },
-            error: (err) => {
-                console.error('Comment error:', err);
+            error: () => {
                 this.comments.set(previousComments);
                 alert('Erreur lors de l\'envoi du commentaire. Veuillez réessayer.');
             }
@@ -170,7 +165,6 @@ export class ProductReviewsComponent implements OnInit {
         const updatedText = this.editCommentForm.value.comment;
         const updatedImages = this.editSelectedImages();
 
-        // Optimistic Update
         this.comments.set(previousComments.map(c =>
             c._id === commentId
                 ? { ...c, comment: updatedText, images: updatedImages }
@@ -190,8 +184,7 @@ export class ProductReviewsComponent implements OnInit {
                 this.loadComments(this.productId);
                 this.reviewsUpdated.emit();
             },
-            error: (err) => {
-                console.error('Update comment error:', err);
+            error: () => {
                 this.comments.set(previousComments);
                 alert('Erreur lors de la modification');
             }
@@ -209,8 +202,7 @@ export class ProductReviewsComponent implements OnInit {
                 this.loadComments(this.productId);
                 this.reviewsUpdated.emit();
             },
-            error: (err) => {
-                console.error('Delete comment error:', err);
+            error: () => {
                 this.comments.set(previousComments);
                 alert('Erreur lors de la suppression');
             }

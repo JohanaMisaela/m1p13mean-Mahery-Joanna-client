@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStore, faMapMarkerAlt, faPhone, faEnvelope, faClock, faStar, faFlag, faCommentAlt, faChevronLeft, faChevronRight, faImages } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
-import { Shop } from '../../../../shared/models/product.model';
-import { User } from '../../../../shared/models/user.model';
-import { StarRatingComponent } from '../../../../shared/components/star-rating/star-rating.component';
-import { ShopReportComponent } from '../../../../features/shops/components/shop-report/shop-report.component';
+import { Shop } from '../../../../../shared/models/product.model';
+import { User } from '../../../../../shared/models/user.model';
+import { StarRatingComponent } from '../../../../../shared/components/star-rating/star-rating.component';
+import { ShopReportComponent } from '../../../../shops/components/shop-report/shop-report.component';
 
 @Component({
     selector: 'app-shop-header',

@@ -17,7 +17,7 @@ import { StarRatingComponent } from '../../../shared/components/star-rating/star
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
 import { ShopReportComponent } from '../components/shop-report/shop-report.component';
-import { ShopHeaderComponent } from '../../shop/components/shop-header/shop-header.component';
+import { ShopHeaderComponent } from '../../dashboard/shop/components/shop-header/shop-header.component';
 import { FooterComponent } from '../../../core/layout/footer/footer.component';
 
 @Component({
@@ -37,15 +37,12 @@ export class PublicShopDetailComponent implements OnInit {
 
     protected currentUser = this.authService.currentUser;
 
-    // Signals
     protected shop = signal<Shop | null>(null);
     protected products = signal<Product[]>([]);
     protected categories = signal<Category[]>([]);
     protected loading = signal<boolean>(true);
     protected loadingProducts = signal<boolean>(false);
     protected showFilterSidebar = signal<boolean>(false);
-
-    // Pagination
     protected currentPage = signal<number>(1);
     protected totalPages = signal<number>(1);
     protected totalItems = signal<number>(0);
@@ -67,7 +64,6 @@ export class PublicShopDetailComponent implements OnInit {
         });
     }
 
-    // Icons
     protected icons = {
         shop: faStore,
         location: faMapMarkerAlt,
@@ -86,7 +82,6 @@ export class PublicShopDetailComponent implements OnInit {
         tiktok: faTiktok
     };
 
-    // Filter Form
     protected filterForm: FormGroup = this.fb.group({
         search: [''],
         category: [''],
@@ -114,10 +109,7 @@ export class PublicShopDetailComponent implements OnInit {
                 this.shop.set(shop);
                 this.loading.set(false);
             },
-            error: (err) => {
-                console.error('Error loading shop', err);
-                this.loading.set(false);
-            }
+            error: () => this.loading.set(false)
         });
     }
 
@@ -133,7 +125,7 @@ export class PublicShopDetailComponent implements OnInit {
             next: (res: any) => {
                 this.categories.set(Array.isArray(res) ? res : res.data || []);
             },
-            error: (err) => console.error('Error loading categories', err)
+            error: () => { }
         });
     }
 
@@ -165,10 +157,7 @@ export class PublicShopDetailComponent implements OnInit {
                 }
                 this.loadingProducts.set(false);
             },
-            error: (err) => {
-                console.error('Error loading products', err);
-                this.loadingProducts.set(false);
-            }
+            error: () => this.loadingProducts.set(false)
         });
     }
 
@@ -205,13 +194,8 @@ export class PublicShopDetailComponent implements OnInit {
 
         this.userRating.set(rating);
         this.shopService.rateShop(shop._id, rating).subscribe({
-            next: () => {
-                // Refresh shop to get updated average rating/total ratings
-                this.loadShop(shop._id);
-            },
-            error: (err) => {
-                console.error('Rating error:', err);
-            }
+            next: () => this.loadShop(shop._id),
+            error: () => { }
         });
     }
 }

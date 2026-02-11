@@ -115,7 +115,6 @@ export class ProductAttributesComponent {
             current[key] = value;
         }
 
-        console.log('Selection Change:', current);
         this.selectionChange.emit(current);
     }
 

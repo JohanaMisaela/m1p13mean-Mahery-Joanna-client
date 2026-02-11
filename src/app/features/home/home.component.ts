@@ -33,20 +33,16 @@ export class HomeComponent implements OnInit {
 
   protected readonly currentUser = this.authService.currentUser;
 
-  // Signals
   protected products = signal<Product[]>([]);
   protected categories = signal<Category[]>([]);
   protected shops = signal<Shop[]>([]);
   protected loading = signal<boolean>(false);
   protected showFilterSidebar = signal<boolean>(false);
-
-  // Pagination
   protected currentPage = signal<number>(1);
   protected totalPages = signal<number>(1);
   protected totalItems = signal<number>(0);
-  protected itemsPerPage = signal<number>(12); // Adjustable
+  protected itemsPerPage = signal<number>(12);
 
-  // Icons
   protected icons = {
     filter: faFilter,
     cart: faCartPlus,
@@ -57,7 +53,6 @@ export class HomeComponent implements OnInit {
     search: faSearch
   };
 
-  // Filter Form
   protected filterForm: FormGroup = this.fb.group({
     search: [''],
     category: [''],
@@ -76,7 +71,6 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Debounce search input
     this.filterForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged()
@@ -90,7 +84,7 @@ export class HomeComponent implements OnInit {
       next: (cats: any) => {
         this.categories.set(Array.isArray(cats) ? cats : cats.data || []);
       },
-      error: (err) => console.error('Error loading categories', err)
+      error: () => { }
     });
   }
 
@@ -99,7 +93,7 @@ export class HomeComponent implements OnInit {
       next: (shops: any) => {
         this.shops.set(Array.isArray(shops) ? shops : shops.data || []);
       },
-      error: (err) => console.error('Error loading shops', err)
+      error: () => { }
     });
   }
 
@@ -107,7 +101,6 @@ export class HomeComponent implements OnInit {
     this.loading.set(true);
     const filters = this.filterForm.value;
 
-    // Clean filters
     const params: any = {
       page: this.currentPage(),
       limit: this.itemsPerPage()
@@ -122,8 +115,6 @@ export class HomeComponent implements OnInit {
 
     this.productService.getProducts(params).subscribe({
       next: (response: any) => {
-        // Handle pagination response wrapper
-        // Assumes backend returns { data: [], total: number, totalPages: number, page: number }
         const data = Array.isArray(response) ? response : (response.data || []);
         this.products.set(data);
 
@@ -134,10 +125,7 @@ export class HomeComponent implements OnInit {
 
         this.loading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading products', err);
-        this.loading.set(false);
-      }
+      error: () => this.loading.set(false)
     });
   }
 
@@ -145,7 +133,6 @@ export class HomeComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
       this.loadProducts();
-      // Scroll to top of product grid
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -156,7 +143,7 @@ export class HomeComponent implements OnInit {
 
   resetFilters(): void {
     this.filterForm.reset();
-    this.currentPage.set(1); // Reset to first page on filter reset
+    this.currentPage.set(1);
     this.loadProducts();
   }
 

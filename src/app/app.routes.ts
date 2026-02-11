@@ -48,17 +48,12 @@ export const routes: Routes = [
                 data: { roles: ['user', 'shop', 'admin'] },
                 loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
             },
-            {
-                path: 'shop',
-                canActivate: [roleGuard],
-                data: { roles: ['shop', 'admin'] },
-                loadComponent: () => import('./features/shop/shop-dashboard/shop-dashboard.component').then(m => m.ShopDashboardComponent)
-            },
+
             {
                 path: 'admin/shop/:id',
                 canActivate: [roleGuard],
                 data: { roles: ['admin', 'shop'] },
-                loadComponent: () => import('./features/shop/shop-management/shop-management.component').then(m => m.ShopManagementComponent)
+                loadComponent: () => import('./features/dashboard/shop/shop-management/shop-management.component').then(m => m.ShopManagementComponent)
             },
             {
                 path: 'shops',
