@@ -1,52 +1,58 @@
-<div class="flex font-sans text-gray-900 h-full bg-gray-50 overflow-hidden">
+<div class="flex-1 flex flex-col font-sans text-gray-900 bg-gray-50 overflow-hidden min-h-0">
 
     <button (click)="toggleSidebar()"
-        class="fixed bottom-4 right-4 z-50 lg:hidden bg-black text-white p-4 rounded-full shadow-lg">
+        class="fixed bottom-0 right-0 z-50 lg:hidden bg-black text-white p-6 shadow-lg hover:bg-gray-800 transition-all active:scale-95">
         <fa-icon [icon]="icons.filter"></fa-icon>
     </button>
 
-    <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [shops]="shops()"
-        [isOpen]="showFilterSidebar()" [currentPage]="currentPage()" [totalPages]="totalPages()"
-        (close)="toggleSidebar()" (reset)="resetFilters()" (pageChange)="onPageChange($event)">
-    </app-filter-sidebar>
+    <div class="flex-1 flex min-h-0 overflow-hidden">
+        <!-- Sidebar -->
+        <app-filter-sidebar [filterForm]="filterForm" [categories]="categories()" [shops]="shops()"
+            [isOpen]="showFilterSidebar()" [currentPage]="currentPage()" [totalPages]="totalPages()"
+            (close)="toggleSidebar()" (reset)="resetFilters()" (pageChange)="onPageChange($event)"
+            class="h-full flex-shrink-0">
+        </app-filter-sidebar>
 
-    <main class="flex-grow overflow-y-auto">
-        <div class="min-h-full flex flex-col">
-            <div class="flex-grow p-4 lg:p-8">
-                <div class="flex justify-between items-end mb-6 border-b border-gray-200 pb-4">
-                    <div>
-                        <h1 class="text-2xl font-bold uppercase tracking-wider">Nos Produits</h1>
-                        <p class="text-gray-500 text-sm mt-1">{{ products().length }} produits trouvés</p>
+        <!-- Main Content Area -->
+        <main class="flex-grow overflow-y-auto">
+            <div class="min-h-full flex flex-col ">
+                <div class="flex-grow p-4 lg:p-8">
+                    <div class="flex justify-between items-end mb-6 border-b border-gray-200 pb-4">
+                        <div>
+                            <h1 class="text-2xl font-bold uppercase tracking-wider">Nos Produits</h1>
+                            <p class="text-gray-500 text-sm mt-1">{{ products().length }} produits trouvés</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="flex-1 flex flex-col">
-                    @if (loading()) {
-                    <div class="flex-1 flex justify-center items-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
-                    </div>
-                    } @else {
-                    @if (products().length > 0) {
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        @for (product of products(); track product._id) {
-                        <app-product-card [product]="product"></app-product-card>
+                    <div class="flex-1 flex flex-col">
+                        @if (loading()) {
+                        <div class="flex-1 flex justify-center items-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+                        </div>
+                        } @else {
+                        @if (products().length > 0) {
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            @for (product of products(); track product._id) {
+                            <app-product-card [product]="product"></app-product-card>
+                            }
+                        </div>
+                        } @else {
+                        <app-empty-state title="Aucun produit trouvé"
+                            message="Essayez de modifier vos filtres de recherche"
+                            buttonText="Réinitialiser les filtres" [icon]="icons.filter" (action)="resetFilters()">
+                        </app-empty-state>
+                        }
                         }
                     </div>
-                    } @else {
-                    <app-empty-state title="Aucun produit trouvé" message="Essayez de modifier vos filtres de recherche"
-                        buttonText="Réinitialiser les filtres" [icon]="icons.filter" (action)="resetFilters()">
-                    </app-empty-state>
-                    }
-                    }
-                </div>
 
-                <div class="mt-8">
-                    <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
-                        (pageChange)="onPageChange($event)"></app-pagination>
+                    <div class="mt-8">
+                        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+                            (pageChange)="onPageChange($event)"></app-pagination>
+                    </div>
                 </div>
+                <!-- Local Footer -->
+                <app-footer></app-footer>
             </div>
-            <!-- Local Footer -->
-            <app-footer></app-footer>
-        </div>
-    </main>
+        </main>
+    </div>
 </div>

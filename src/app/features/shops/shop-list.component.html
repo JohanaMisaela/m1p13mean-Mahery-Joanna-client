@@ -1,111 +1,116 @@
-<div class="h-full bg-gray-50 flex overflow-hidden">
+<div class="flex-1 flex flex-col font-sans text-gray-900 bg-gray-50 overflow-hidden min-h-0">
 
     <!-- Mobile Filter Toggle -->
     <button (click)="toggleSidebar()"
-        class="fixed bottom-4 right-4 z-50 lg:hidden bg-black text-white p-4 rounded-full shadow-lg">
+        class="fixed bottom-0 right-0 z-50 lg:hidden bg-black text-white p-6 shadow-lg hover:bg-gray-800 transition-all active:scale-95">
         <fa-icon [icon]="icons.filter"></fa-icon>
     </button>
 
-    <!-- Sidebar Search/Filter -->
-    <aside [class.translate-x-0]="showFilterSidebar()"
-        class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto transition-transform duration-300 ease-in-out h-full flex flex-col">
+    <div class="flex-1 flex min-h-0 overflow-hidden">
+        <!-- Sidebar Search/Filter -->
+        <aside [class.translate-x-0]="showFilterSidebar()"
+            class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto lg:shadow-none transition-transform duration-300 ease-in-out h-full flex flex-col flex-shrink-0">
 
-        <div class="p-6 pt-24 lg:pt-6 flex-1 overflow-y-auto">
-            <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-                <h2 class="text-xs uppercase tracking-[0.2em] font-medium text-gray-400">Filtres</h2>
-                <button (click)="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-black">
-                    <fa-icon [icon]="icons.close"></fa-icon>
-                </button>
-            </div>
-
-            <form [formGroup]="filterForm" class="space-y-8">
-                <!-- Search -->
-                <div class="space-y-2">
-                    <label class="text-[10px] uppercase text-gray-400 tracking-widest font-medium">Recherche</label>
-                    <div class="relative">
-                        <input type="text" formControlName="search" placeholder="Nom de boutique..."
-                            class="w-full bg-gray-50 border-none px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all placeholder:text-gray-300">
-                        <fa-icon [icon]="icons.search"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></fa-icon>
-                    </div>
-                </div>
-
-                <!-- Reset -->
-                <div class="pt-4">
-                    <button type="button" (click)="resetFilters()"
-                        class="w-full py-3 border border-gray-100 text-gray-400 text-[10px] uppercase tracking-widest font-medium hover:border-black hover:text-black transition-all">
-                        Réinitialiser
+            <!-- Sidebar Header -->
+            <div class="p-6 pt-24 lg:pt-6 border-b border-gray-50 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs uppercase tracking-[0.2em] font-medium text-gray-400">Filtres</h2>
+                    <button (click)="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-black">
+                        <fa-icon [icon]="icons.close"></fa-icon>
                     </button>
                 </div>
-            </form>
-        </div>
-
-        <!-- Sidebar Footer -->
-        <div class="border-t border-gray-50 mt-auto bg-white">
-            <!-- Navigation back -->
-            <div class="p-8">
-                <a routerLink="/" (click)="toggleSidebar()"
-                    class="flex items-center justify-between group no-underline">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-8 h-8 bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                            <fa-icon [icon]="icons.prev" class="text-[10px]"></fa-icon>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-[10px] text-gray-300 uppercase tracking-widest mb-0.5">Retour</span>
-                            <span
-                                class="text-xs font-medium text-gray-600 group-hover:text-black transition-colors uppercase tracking-widest">Produits</span>
-                        </div>
-                    </div>
-                </a>
             </div>
-        </div>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto bg-gray-50">
-        <div class="min-h-full flex flex-col">
-            <div class="flex-grow p-4 lg:p-8">
-
-                <div class="flex justify-between items-end mb-10 border-b border-gray-100 pb-6">
-                    <div>
-                        <h1 class="text-3xl font-light text-gray-900 tracking-tight">Nos Boutiques</h1>
-                        <p class="text-gray-400 text-xs mt-2 uppercase tracking-widest">{{ totalItems() }} boutiques
-                            partenaires</p>
+            <!-- Sidebar Body (Scrollable) -->
+            <div class="flex-grow overflow-y-auto p-6">
+                <form [formGroup]="filterForm" class="space-y-8">
+                    <!-- Search -->
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase text-gray-400 tracking-widest font-medium">Recherche</label>
+                        <div class="relative">
+                            <input type="text" formControlName="search" placeholder="Nom de boutique..."
+                                class="w-full bg-gray-50 border-none px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all placeholder:text-gray-300">
+                            <fa-icon [icon]="icons.search"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></fa-icon>
+                        </div>
                     </div>
+
+                    <!-- Reset -->
+                    <div class="pt-4">
+                        <button type="button" (click)="resetFilters()"
+                            class="w-full py-3 border border-gray-100 text-gray-400 text-[10px] uppercase tracking-widest font-medium hover:border-black hover:text-black transition-all">
+                            Réinitialiser
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="border-t border-gray-50 mt-auto bg-white flex-shrink-0">
+                <!-- Navigation back -->
+                <div class="p-8">
+                    <a routerLink="/" (click)="toggleSidebar()"
+                        class="flex items-center justify-between group no-underline">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                                <fa-icon [icon]="icons.prev" class="text-[10px]"></fa-icon>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-gray-300 uppercase tracking-widest mb-0.5">Retour</span>
+                                <span
+                                    class="text-xs font-medium text-gray-600 group-hover:text-black transition-colors uppercase tracking-widest">Produits</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
+            </div>
+        </aside>
 
-                <div class="flex-1 flex flex-col">
-                    @if (loading()) {
-                    <div class="flex-1 flex items-center justify-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-black"></div>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-50">
+            <div class="min-h-full flex flex-col">
+                <div class="flex-grow p-4 lg:p-8">
+
+                    <div class="flex justify-between items-end mb-10 border-b border-gray-100 pb-6">
+                        <div>
+                            <h1 class="text-3xl font-light text-gray-900 tracking-tight">Nos Boutiques</h1>
+                            <p class="text-gray-400 text-xs mt-2 uppercase tracking-widest">{{ totalItems() }} boutiques
+                                partenaires</p>
+                        </div>
                     </div>
-                    } @else {
-                    @if (shops().length > 0) {
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        @for (shop of shops(); track shop._id) {
-                        <app-shop-card [shop]="shop" (favoriteToggle)="toggleFavorite($event)"></app-shop-card>
+
+                    <div class="flex-1 flex flex-col">
+                        @if (loading()) {
+                        <div class="flex-1 flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-black"></div>
+                        </div>
+                        } @else {
+                        @if (shops().length > 0) {
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            @for (shop of shops(); track shop._id) {
+                            <app-shop-card [shop]="shop" (favoriteToggle)="toggleFavorite($event)"></app-shop-card>
+                            }
+                        </div>
+                        } @else {
+                        <!-- Standardized Empty State -->
+                        <app-empty-state title="Aucune boutique trouvée"
+                            message="Essayez de modifier vos filtres de recherche"
+                            buttonText="Réinitialiser les filtres" [icon]="icons.shop" (action)="resetFilters()">
+                        </app-empty-state>
+                        }
                         }
                     </div>
-                    } @else {
-                    <!-- Standardized Empty State -->
-                    <app-empty-state title="Aucune boutique trouvée"
-                        message="Essayez de modifier vos filtres de recherche" buttonText="Réinitialiser les filtres"
-                        [icon]="icons.shop" (action)="resetFilters()">
-                    </app-empty-state>
-                    }
-                    }
+
+                    <!-- Pagination -->
+                    <div class="mt-8">
+                        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+                            (pageChange)="onPageChange($event)"></app-pagination>
+                    </div>
                 </div>
 
-                <!-- Pagination -->
-                <div class="mt-8">
-                    <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
-                        (pageChange)="onPageChange($event)"></app-pagination>
-                </div>
+                <!-- Footer inside scrollable area -->
+                <app-footer></app-footer>
             </div>
-
-            <!-- Footer inside scrollable area -->
-            <app-footer></app-footer>
-        </div>
-    </main>
-</div>
+        </main>
+    </div>

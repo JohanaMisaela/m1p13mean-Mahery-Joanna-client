@@ -1,16 +1,19 @@
 <aside [class.translate-x-0]="isOpen" [class.-translate-x-full]="!isOpen"
     class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:shadow-none border-r border-gray-100 h-full flex flex-col">
 
-    <div class="p-6 flex-1 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6 lg:hidden">
+    <!-- Sidebar Header (Title) -->
+    <div class="p-6 border-b border-gray-50 flex-shrink-0">
+        <div class="flex justify-between items-center lg:hidden">
             <h2 class="text-xl font-bold uppercase">Filtres</h2>
             <button (click)="closeSidebar()">
                 <fa-icon [icon]="icons.close"></fa-icon>
             </button>
         </div>
+        <h2 class="hidden lg:block text-xl font-bold uppercase tracking-wide">Filtres</h2>
+    </div>
 
-        <h2 class="hidden lg:block text-xl font-bold uppercase mb-6 tracking-wide">Filtres</h2>
-
+    <!-- Sidebar Body (Scrollable Filters) -->
+    <div class="flex-grow overflow-y-auto p-6">
         <form [formGroup]="filterForm" class="space-y-6">
             <!-- Search -->
             <div>
@@ -71,20 +74,22 @@
     </div>
 
     <!-- Sidebar Footer -->
-    <div class="border-t border-gray-50 mt-auto bg-white">
-        <!-- Boutiques Link -->
+    <div class="border-t border-gray-50 mt-auto bg-white flex-shrink-0">
+        <!-- Navigation Link -->
         <div class="p-8">
-            <a routerLink="/shops" (click)="closeSidebar()"
+            <a [routerLink]="sidebarLink" (click)="closeSidebar()"
                 class="flex items-center justify-between group no-underline">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-8 h-8 bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                        <fa-icon [icon]="icons.shop" class="text-[10px]"></fa-icon>
+                        <fa-icon [icon]="sidebarLink === '/' ? icons.prev : icons.shop" class="text-[10px]"></fa-icon>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-[10px] text-gray-300 uppercase tracking-widest mb-0.5">Explorer</span>
+                        <span class="text-[10px] text-gray-300 uppercase tracking-widest mb-0.5">{{ sidebarNavText
+                            }}</span>
                         <span
-                            class="text-xs font-medium text-gray-600 group-hover:text-black transition-colors uppercase tracking-widest">Boutiques</span>
+                            class="text-xs font-medium text-gray-600 group-hover:text-black transition-colors uppercase tracking-widest">{{
+                            sidebarLabel }}</span>
                     </div>
                 </div>
                 <fa-icon [icon]="icons.search"

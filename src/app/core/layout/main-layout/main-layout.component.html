@@ -1,5 +1,6 @@
 <app-header class="w-full shrink-0" />
-<main class="flex-grow flex flex-col relative min-h-0 min-w-0">
+<main class="flex-grow flex flex-col relative min-h-0 min-w-0" [class.overflow-y-auto]="!hasSidebar()"
+    [class.overflow-hidden]="hasSidebar()">
     <router-outlet />
 </main>
 @if (!hasSidebar()) {

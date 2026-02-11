@@ -11,7 +11,12 @@ import { Category, Shop } from '../../models/product.model';
   imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule, RouterLink],
   standalone: true,
   templateUrl: './filter-sidebar.component.html',
-  styleUrl: './filter-sidebar.component.scss'
+  styles: [`
+    :host {
+      display: block;
+      height: 100%;
+    }
+  `]
 })
 export class FilterSidebarComponent {
   @Input({ required: true }) filterForm!: FormGroup;
@@ -21,6 +26,10 @@ export class FilterSidebarComponent {
   @Input() showShopFilter = true;
   @Input() currentPage = 1;
   @Input() totalPages = 1;
+
+  @Input() sidebarLink = '/shops';
+  @Input() sidebarLabel = 'Boutiques';
+  @Input() sidebarNavText = 'Explorer';
 
   @Output() close = new EventEmitter<void>();
   @Output() reset = new EventEmitter<void>();

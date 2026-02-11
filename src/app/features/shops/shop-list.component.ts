@@ -21,7 +21,10 @@ import { FooterComponent } from '../../core/layout/footer/footer.component';
     templateUrl: './shop-list.component.html',
     styles: [`
         :host {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
             height: 100%;
         }
     `]
