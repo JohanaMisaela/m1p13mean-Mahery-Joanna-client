@@ -1,98 +1,210 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="flex font-sans text-gray-900 h-screen bg-white overflow-hidden">
 
-    <!-- Header -->
-    <div class="mb-8 flex justify-between items-end border-b border-gray-100 pb-6">
-        <div>
-            <h1 class="text-4xl font-light text-gray-900 mb-2">{{ shop()?.name }}</h1>
-            <p class="text-gray-500 italic">{{ shop()?.slogan }}</p>
+    <!-- Sidebar -->
+    <aside class="w-72 border-r border-gray-100 flex flex-col h-full bg-white flex-shrink-0">
+        <div class="p-10 border-b border-gray-50">
+            <h2 class="text-xl font-light tracking-[0.2em] uppercase">Administration</h2>
+            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest break-words">{{ shop()?.name }}</p>
         </div>
-        <div class="flex space-x-4">
-            <button (click)="openProductForm()"
-                class="bg-black text-white px-6 py-2 uppercase tracking-widest text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-95">
-                Ajouter Produit
+
+        <nav class="flex-grow p-6 space-y-2 overflow-y-auto">
+            <!-- Preview -->
+            <button (click)="activeView.set('preview')" [class.bg-gray-50]="activeView() === 'preview'"
+                [class.text-black]="activeView() === 'preview'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'preview'"></span>
+                <span>Aperçu du Shop</span>
             </button>
-            <button (click)="openPromotionForm()"
-                class="border border-black text-black px-6 py-2 uppercase tracking-widest text-sm hover:bg-gray-50 transition-all active:scale-95">
-                Nouvelle Promotion
+
+            <!-- Settings -->
+            <button (click)="activeView.set('settings')" [class.bg-gray-50]="activeView() === 'settings'"
+                [class.text-black]="activeView() === 'settings'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'settings'"></span>
+                <span>Paramètres</span>
             </button>
-        </div>
-    </div>
 
-    <!-- Stats Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="p-6 bg-gray-50 border border-gray-100">
-            <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Produits</span>
-            <span class="text-2xl font-semibold">{{ products().length }}</span>
-        </div>
-        <div class="p-6 bg-gray-50 border border-gray-100">
-            <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Status Boutique</span>
-            <span
-                [class]="'text-sm font-bold ' + (shop()?.isActive ? 'text-green-600' : 'text-red-600') + ' uppercase tracking-widest'">
-                {{ shop()?.isActive ? 'Actif' : 'Inactif' }}
-            </span>
-        </div>
-        <div class="p-6 bg-gray-50 border border-gray-100">
-            <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Emplacement</span>
-            <span class="text-sm font-medium uppercase tracking-wider">{{ shop()?.mallBoxNumber }}</span>
-        </div>
-    </div>
+            <!-- Products -->
+            <button (click)="activeView.set('products')" [class.bg-gray-50]="activeView() === 'products'"
+                [class.text-black]="activeView() === 'products'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'products'"></span>
+                <span>Gestion Produits</span>
+            </button>
 
-    <!-- Product List -->
-    <div class="bg-white">
-        <h3 class="text-lg font-semibold mb-6 uppercase tracking-widest border-l-4 border-black pl-4">Gestion des
-            Produits</h3>
+            <!-- Promotions -->
+            <button (click)="activeView.set('promotions')" [class.bg-gray-50]="activeView() === 'promotions'"
+                [class.text-black]="activeView() === 'promotions'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'promotions'"></span>
+                <span>Gestion Promotions</span>
+            </button>
 
-        <div class="grid grid-cols-1 gap-4">
-            <div *ngFor="let product of products()"
-                class="group p-6 border border-gray-100 hover:border-black transition-all flex flex-col md:flex-row md:items-center justify-between">
+            <!-- Orders -->
+            <button (click)="activeView.set('orders')" [class.bg-gray-50]="activeView() === 'orders'"
+                [class.text-black]="activeView() === 'orders'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'orders'"></span>
+                <span>Gestion Commandes</span>
+            </button>
 
-                <div class="flex items-center mb-4 md:mb-0">
-                    <div class="h-16 w-16 bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden">
-                        <img *ngIf="product.images?.length" [src]="product.images?.[0]"
-                            class="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all">
-                        <div *ngIf="!product.images?.length"
-                            class="h-full w-full flex items-center justify-center text-[10px] text-gray-300">NO IMG
+            <!-- Reports (Admin Only) -->
+            @if (currentUser()?.role === 'admin') {
+            <button (click)="activeView.set('reports')" [class.bg-gray-50]="activeView() === 'reports'"
+                [class.text-black]="activeView() === 'reports'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'reports'"></span>
+                <span>Gestion Rapport</span>
+            </button>
+            }
+        </nav>
+
+        <div class="p-10 border-t border-gray-50 mt-auto">
+            <a routerLink="/dashboard"
+                class="text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors flex items-center space-x-2 cursor-pointer">
+                <span>← Retour au Dashboard</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow overflow-y-auto bg-[#fafafa]">
+        <div class="max-w-[95%] mx-auto px-10 py-16">
+
+            <!-- Page Header -->
+            <div class="mb-12">
+                <h1 class="text-4xl font-extralight text-gray-900 mb-4 tracking-tighter">
+                    @switch (activeView()) {
+                    @case ('preview') { Aperçu }
+                    @case ('settings') { Paramètres }
+                    @case ('products') { Produits }
+                    @case ('promotions') { Promotions }
+                    @case ('orders') { Commandes }
+                    @case ('reports') { Signalements }
+                    }
+                </h1>
+                <div class="h-0.5 w-12 bg-black"></div>
+            </div>
+
+            <!-- Shop Stats (Visible only on products/settings maybe? Or make a dashboard overview later) -->
+            <!-- For now, keep stats in products view as per old layout -->
+
+            <!-- Content Area -->
+            <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                @switch (activeView()) {
+                @case ('products') {
+                <div class="bg-white p-8 border border-gray-100 shadow-sm">
+                    <!-- Products Header -->
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Total
+                                Produits</span>
+                            <span class="text-2xl font-semibold">{{ products().length }}</span>
                         </div>
+                        <button (click)="openProductForm()"
+                            class="bg-black text-white px-6 py-3 uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-lg active:scale-95">
+                            Ajouter Produit
+                        </button>
                     </div>
-                    <div class="ml-6">
-                        <h4 class="font-medium text-lg">{{ product.name }}</h4>
-                        <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500 uppercase tracking-tighter">
-                            <span>{{ product.price | currency:'AR ':'symbol':'1.0-0' }}</span>
-                            <span>•</span>
-                            <span>Stock: {{ product.stock }}</span>
-                            <span *ngIf="!product.isActive" class="text-red-500 font-bold ml-2">[INACTIF]</span>
+
+                    <!-- Product Grid -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <div *ngFor="let product of products()"
+                            class="group p-6 border border-gray-100 hover:border-black transition-all flex flex-col md:flex-row md:items-center justify-between bg-white">
+
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <div class="h-16 w-16 bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden">
+                                    <img *ngIf="product.images?.length" [src]="product.images?.[0]"
+                                        class="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all">
+                                    <div *ngIf="!product.images?.length"
+                                        class="h-full w-full flex items-center justify-center text-[10px] text-gray-300">
+                                        NO IMG
+                                    </div>
+                                </div>
+                                <div class="ml-6">
+                                    <h4 class="font-medium text-lg">{{ product.name }}</h4>
+                                    <div
+                                        class="flex items-center space-x-4 mt-1 text-sm text-gray-500 uppercase tracking-tighter">
+                                        <span>{{ product.price | currency:'AR ':'symbol':'1.0-0' }}</span>
+                                        <span>•</span>
+                                        <span>Stock: {{ product.stock }}</span>
+                                        <span *ngIf="!product.isActive"
+                                            class="text-red-500 font-bold ml-2">[INACTIF]</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-2">
+                                <button (click)="openProductForm(product)"
+                                    class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Editer</button>
+                                <button (click)="openVariantForm(product._id)"
+                                    class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Variantes</button>
+                                <button (click)="toggleStatus(product)"
+                                    [class]="'text-xs uppercase tracking-widest border px-4 py-2 transition-all ' + (product.isActive ? 'border-red-100 text-red-400 hover:bg-red-500 hover:text-white' : 'border-green-100 text-green-400 hover:bg-green-500 hover:text-white')">
+                                    {{ product.isActive ? 'Désactiver' : 'Activer' }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div *ngIf="products().length === 0"
+                            class="py-20 text-center border-2 border-dashed border-gray-100">
+                            <p class="text-gray-400 italic">Aucun produit pour cette boutique.</p>
                         </div>
                     </div>
                 </div>
+                }
 
-                <div class="flex space-x-2">
-                    <button (click)="openProductForm(product)"
-                        class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Editer</button>
-                    <button (click)="openVariantForm(product._id)"
-                        class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Variantes</button>
-                    <button (click)="toggleStatus(product)"
-                        [class]="'text-xs uppercase tracking-widest border px-4 py-2 transition-all ' + (product.isActive ? 'border-red-100 text-red-400 hover:bg-red-500 hover:text-white' : 'border-green-100 text-green-400 hover:bg-green-500 hover:text-white')">
-                        {{ product.isActive ? 'Désactiver' : 'Activer' }}
-                    </button>
+                @case ('promotions') {
+                <div class="bg-white p-8 border border-gray-100 shadow-sm">
+                    <div class="flex justify-end mb-8">
+                        <button (click)="openPromotionForm()"
+                            class="bg-black text-white px-6 py-3 uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-lg active:scale-95">
+                            Nouvelle Promotion
+                        </button>
+                    </div>
+                    <div class="py-20 text-center border-2 border-dashed border-gray-100">
+                        <p class="text-gray-400 italic">Gestion des promotions à venir...</p>
+                    </div>
                 </div>
-            </div>
+                }
 
-            <div *ngIf="products().length === 0" class="py-20 text-center border-2 border-dashed border-gray-100">
-                <p class="text-gray-400 italic">Aucun produit pour cette boutique.</p>
+                @case ('preview') {
+                <app-shop-header [shop]="shop()" [currentUser]="currentUser()!"
+                    (ratingChange)="onRatingChange($event)"></app-shop-header>
+                }
+
+                @case ('settings') {
+                <app-shop-settings-form [shop]="shop()" (save)="saveShopSettings($event)"></app-shop-settings-form>
+                }
+
+                @case ('orders') {
+                <div class="bg-white p-8 border border-gray-100 shadow-sm">
+                    <div class="py-20 text-center border-2 border-dashed border-gray-100">
+                        <p class="text-gray-400 italic">Gestion des commandes à venir...</p>
+                    </div>
+                </div>
+                }
+
+                @case ('reports') {
+                <div class="bg-white p-8 border border-gray-100 shadow-sm">
+                    <div class="py-20 text-center border-2 border-dashed border-gray-100">
+                        <p class="text-gray-400 italic">Gestion des signalements à venir...</p>
+                    </div>
+                </div>
+                }
+                }
             </div>
         </div>
-    </div>
-
-    <!-- Modals -->
-    <app-product-form *ngIf="showProductForm()" [editMode]="!!selectedProduct" [initialData]="selectedProduct"
-        (close)="showProductForm.set(false)" (save)="saveProduct($event)">
-    </app-product-form>
-
-    <app-variant-form *ngIf="showVariantForm()" (close)="showVariantForm.set(false)" (save)="saveVariant($event)">
-    </app-variant-form>
-
-    <app-promotion-form *ngIf="showPromotionForm()" (close)="showPromotionForm.set(false)"
-        (save)="savePromotion($event)">
-    </app-promotion-form>
-
+    </main>
 </div>
+
+<!-- Modals -->
+<app-product-form *ngIf="showProductForm()" [editMode]="!!selectedProduct" [initialData]="selectedProduct"
+    (close)="showProductForm.set(false)" (save)="saveProduct($event)">
+</app-product-form>
+
+<app-variant-form *ngIf="showVariantForm()" (close)="showVariantForm.set(false)" (save)="saveVariant($event)">
+</app-variant-form>
+
+<app-promotion-form *ngIf="showPromotionForm()" (close)="showPromotionForm.set(false)" (save)="savePromotion($event)">
+</app-promotion-form>

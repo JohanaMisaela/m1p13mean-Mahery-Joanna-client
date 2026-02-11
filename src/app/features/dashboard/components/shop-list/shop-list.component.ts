@@ -22,6 +22,7 @@ export class ShopListComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly currentUser = this.authService.currentUser;
 
   // Icons
   protected readonly icons = {
