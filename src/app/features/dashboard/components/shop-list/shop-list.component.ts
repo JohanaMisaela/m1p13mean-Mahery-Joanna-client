@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStore, faEdit, faPowerOff, faCog } from '@fortawesome/free-solid-svg-icons';
 import { ShopService } from '../../../../core/services/shop.service';
 import { UserService } from '../../../../core/services/user.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Shop, ShopResponse } from '../../../../shared/models/product.model';
 import { User } from '../../../../shared/models/user.model';
 
@@ -19,6 +20,7 @@ import { User } from '../../../../shared/models/user.model';
 export class ShopListComponent implements OnInit {
   private readonly shopService = inject(ShopService);
   private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   // Icons
@@ -28,6 +30,8 @@ export class ShopListComponent implements OnInit {
     status: faPowerOff,
     manage: faCog
   };
+
+  @Input() onlyMyShops = false;
 
   shops = signal<Shop[]>([]);
   showAddForm = false;
@@ -54,10 +58,15 @@ export class ShopListComponent implements OnInit {
   }
 
   loadShops() {
-    const params = {
+    const params: any = {
       page: this.currentPage(),
       limit: this.limit()
     };
+
+    const user = this.authService.currentUser();
+    if (user && (user.role === 'shop' || this.onlyMyShops)) {
+      params.owner = user._id || user.id;
+    }
     this.shopService.getShops(params).subscribe(res => {
       this.shops.set(res.data);
       this.totalItems.set(res.total);

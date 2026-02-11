@@ -20,13 +20,16 @@
                 <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'users'"></span>
                 <span>Gestion Utilisateurs</span>
             </button>
-            } @else if (currentUser()?.role === 'shop') {
-            <button (click)="manageMyShop()"
+            }
+            @if (currentUser()?.role === 'admin' || currentUser()?.role === 'shop') {
+            <button (click)="activeView.set('myShops')" [class.bg-gray-50]="activeView() === 'myShops'"
+                [class.text-black]="activeView() === 'myShops'"
                 class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
-                <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
-                <span>Ma Boutique</span>
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'myShops'"></span>
+                <span>Mes Boutique</span>
             </button>
             }
+
         </nav>
 
         <div class="p-10 border-t border-gray-50 mt-auto">
@@ -37,11 +40,15 @@
 
     <!-- Main Content Area -->
     <main class="flex-grow overflow-y-auto bg-[#fafafa]">
-        <div class="max-w-[95%] mx-auto px-10 py-16">
+        <div class="max-w-[95%] mx-auto px-10 py-8">
 
             <div class="mb-16">
-                <h1 class="text-5xl font-extralight text-gray-900 mb-4 tracking-tighter">
-                    {{ activeView() === 'shops' ? 'Boutiques' : 'Utilisateurs' }}
+                <h1 class="text-2xl font-extralight text-gray-900 mb-4 tracking-tighter">
+                    @switch (activeView()) {
+                    @case ('shops') { Boutiques }
+                    @case ('users') { Utilisateurs }
+                    @case ('myShops') { Mes Boutiques }
+                    }
                 </h1>
                 <div class="h-0.5 w-12 bg-black"></div>
             </div>
@@ -51,6 +58,8 @@
                 <app-shop-list></app-shop-list>
                 } @else if (activeView() === 'users') {
                 <app-user-list></app-user-list>
+                } @else if (activeView() === 'myShops') {
+                <app-shop-list [onlyMyShops]="true"></app-shop-list>
                 }
             </div>
 

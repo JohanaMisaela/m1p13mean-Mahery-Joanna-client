@@ -30,38 +30,16 @@
                     <div class="py-2">
 
                         <!-- Admin Logic -->
-                        @if (currentUser()?.role === 'admin') {
+                        @if (currentUser()?.role === 'admin' || currentUser()?.role === 'shop') {
                         <!-- Admin Dashboard -->
                         <a routerLink="/dashboard" (click)="closeMenu()"
                             class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
                             <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
                             <span class="font-medium">Administration</span>
                         </a>
-                        <!-- Shop Dashboard for Admin -->
-                        <a routerLink="/shop" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.shop" class="w-4"></fa-icon>
-                            <span class="font-medium">Gestion Boutique</span>
-                        </a>
-                        <div class="border-t border-gray-100 my-1 mx-2"></div>
                         }
 
-                        <!-- Shop Logic -->
-                        @if (currentUser()?.role === 'shop') {
-                        <!-- Shop Dashboard -->
-                        <a routerLink="/shop" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.shop" class="w-4"></fa-icon>
-                            <span class="font-medium">Ma Boutique</span>
-                        </a>
-                        <!-- Dashboard (Product/Orders) if different from shop or same route -->
-                        <a routerLink="/dashboard" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
-                            <span class="font-medium">Dashboard Vendeur</span>
-                        </a>
-                        <div class="border-t border-gray-100 my-1 mx-2"></div>
-                        }
+
 
                         <!-- User Links (Visible to ALL) -->
                         <a routerLink="/profil" (click)="closeMenu()"

@@ -20,14 +20,14 @@ export class DashboardComponent {
   private readonly router = inject(Router);
 
   protected readonly currentUser = this.authService.currentUser;
-  activeView = signal<'shops' | 'users'>('shops');
+  activeView = signal<'shops' | 'users' | 'myShops'>('shops');
 
-  manageMyShop() {
-    this.shopService.getShops().subscribe(res => {
-      const myShop = res.data.find((s: any) => s.owner?._id === this.currentUser()?._id);
-      if (myShop) {
-        this.router.navigate(['/admin/shop', myShop._id]);
-      }
-    });
+  constructor() {
+    const user = this.authService.currentUser();
+    if (user && user.role === 'shop') {
+      this.activeView.set('myShops');
+    }
   }
+
+
 }
