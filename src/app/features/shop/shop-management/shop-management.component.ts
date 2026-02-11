@@ -28,6 +28,9 @@ export class ShopManagementComponent implements OnInit {
     private readonly authService = inject(AuthService);
     private readonly route = inject(ActivatedRoute);
 
+    protected userRating = signal<number>(0);
+
+
     currentUser = this.authService.currentUser;
     activeView = signal<'preview' | 'settings' | 'products' | 'promotions' | 'orders' | 'reports'>('products'); // Default to products for now or preview
 
@@ -46,11 +49,21 @@ export class ShopManagementComponent implements OnInit {
         if (shopId) {
             this.loadShop(shopId);
             this.loadProducts(shopId);
+            if (this.currentUser()) {
+                this.loadUserRating(shopId);
+            }
         }
     }
 
     loadShop(id: string) {
         this.shopService.getShopById(id).subscribe(s => this.shop.set(s));
+    }
+
+    loadUserRating(shopId: string) {
+        this.shopService.getMyShopRating(shopId).subscribe({
+            next: (res) => this.userRating.set(res?.rating || 0),
+            error: () => this.userRating.set(0)
+        });
     }
 
     loadProducts(shopId: string) {
@@ -134,6 +147,7 @@ export class ShopManagementComponent implements OnInit {
         if (!id) return;
 
         this.shopService.rateShop(id, rating).subscribe(() => {
+            this.userRating.set(rating);
             this.loadShop(id);
         });
     }

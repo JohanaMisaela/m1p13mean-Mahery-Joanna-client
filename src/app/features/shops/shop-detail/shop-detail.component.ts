@@ -17,11 +17,12 @@ import { StarRatingComponent } from '../../../shared/components/star-rating/star
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../../shared/components/filter-sidebar/filter-sidebar.component';
 import { ShopReportComponent } from '../components/shop-report/shop-report.component';
+import { ShopHeaderComponent } from '../../shop/components/shop-header/shop-header.component';
 
 @Component({
     selector: 'app-public-shop-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent, ShopReportComponent],
+    imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, StarRatingComponent, ShopReportComponent, ShopHeaderComponent],
     templateUrl: './shop-detail.component.html',
     styleUrl: './shop-detail.component.css'
 })
