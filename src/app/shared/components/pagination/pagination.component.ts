@@ -8,7 +8,7 @@ import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons
   standalone: true,
   imports: [CommonModule, FontAwesomeModule],
   template: `
-    <div class="flex justify-center items-center gap-x-8 border-t border-gray-100 ">
+    <div class="flex justify-center items-center gap-x-8  ">
       <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
         class="text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-black transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
         <fa-icon [icon]="icons.prev"></fa-icon> Précédent
