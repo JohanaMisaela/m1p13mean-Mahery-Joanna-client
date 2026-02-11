@@ -1,5 +1,5 @@
 
-import { Component, Input, Output, EventEmitter, inject, signal, OnInit, computed, effect } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, OnInit, computed, effect, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -51,15 +51,19 @@ export class ProductReviewsComponent implements OnInit {
         this.editCommentForm = this.fb.group({
             comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
         });
+
+        afterNextRender(() => {
+            if (this.productId) {
+                this.loadComments(this.productId);
+                if (this.currentUser) {
+                    this.loadUserRating(this.productId);
+                }
+            }
+        });
     }
 
     ngOnInit(): void {
-        if (this.productId) {
-            this.loadComments(this.productId);
-            if (this.currentUser) {
-                this.loadUserRating(this.productId);
-            }
-        }
+        // Initialization logic that doesn't require HTTP calls
     }
 
 

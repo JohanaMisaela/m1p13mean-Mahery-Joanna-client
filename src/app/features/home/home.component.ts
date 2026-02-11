@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -67,11 +67,15 @@ export class HomeComponent implements OnInit {
     isOnSale: [false]
   });
 
-  ngOnInit(): void {
-    this.loadCategories();
-    this.loadShops();
-    this.loadProducts();
+  constructor() {
+    afterNextRender(() => {
+      this.loadCategories();
+      this.loadShops();
+      this.loadProducts();
+    });
+  }
 
+  ngOnInit(): void {
     // Debounce search input
     this.filterForm.valueChanges.pipe(
       debounceTime(500),

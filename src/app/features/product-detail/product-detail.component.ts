@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed, effect, untracked } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect, untracked, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -148,6 +148,13 @@ export class ProductDetailComponent implements OnInit {
   };
 
   constructor() {
+    afterNextRender(() => {
+      const productId = this.route.snapshot.paramMap.get('id');
+      if (productId) {
+        this.loadAll(productId);
+      }
+    });
+
     effect(() => {
       // When variant changes, try to jump to its first image
       const variant = this.currentVariant();
@@ -197,10 +204,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.loadAll(productId);
-    }
+    // Initialization logic that doesn't require HTTP calls
   }
 
   loadAll(id: string, silent: boolean = false): void {

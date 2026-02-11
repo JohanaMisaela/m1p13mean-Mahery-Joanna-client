@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, Input } from '@angular/core';
+import { Component, OnInit, inject, signal, Input, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -54,8 +54,14 @@ export class ShopListComponent implements OnInit {
   currentPage = signal<number>(1);
   limit = signal<number>(10);
 
+  constructor() {
+    afterNextRender(() => {
+      this.loadShops();
+    });
+  }
+
   ngOnInit() {
-    this.loadShops();
+    // Initialization logic that doesn't require HTTP calls
   }
 
   loadShops() {

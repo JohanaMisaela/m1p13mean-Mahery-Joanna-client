@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -63,9 +63,13 @@ export class PublicShopListComponent implements OnInit {
         isActive: [true]
     });
 
-    ngOnInit(): void {
-        this.loadShops();
+    constructor() {
+        afterNextRender(() => {
+            this.loadShops();
+        });
+    }
 
+    ngOnInit(): void {
         this.filterForm.valueChanges.pipe(
             debounceTime(500),
             distinctUntilChanged()

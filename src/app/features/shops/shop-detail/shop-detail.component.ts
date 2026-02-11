@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -52,7 +52,20 @@ export class PublicShopDetailComponent implements OnInit {
     protected itemsPerPage = signal<number>(12);
     protected userRating = signal<number>(0);
 
-    constructor() { }
+    constructor() {
+        afterNextRender(() => {
+            const id = this.route.snapshot.paramMap.get('id');
+            if (id) {
+                this.loadShop(id);
+                this.loadCategories();
+                this.loadProducts(id);
+
+                if (this.currentUser()) {
+                    this.loadUserRating(id);
+                }
+            }
+        });
+    }
 
     // Icons
     protected icons = {
@@ -85,14 +98,6 @@ export class PublicShopDetailComponent implements OnInit {
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id');
         if (id) {
-            this.loadShop(id);
-            this.loadCategories();
-            this.loadProducts(id);
-
-            if (this.currentUser()) {
-                this.loadUserRating(id);
-            }
-
             this.filterForm.valueChanges.pipe(
                 debounceTime(500),
                 distinctUntilChanged()

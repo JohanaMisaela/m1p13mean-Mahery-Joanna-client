@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
@@ -45,8 +45,14 @@ export class FavoritesComponent implements OnInit {
     bag: faShoppingBag
   };
 
+  constructor() {
+    afterNextRender(() => {
+      this.loadData();
+    });
+  }
+
   ngOnInit() {
-    this.loadData();
+    // Initialization logic that doesn't require HTTP calls
   }
 
   switchTab(tab: 'products' | 'shops') {

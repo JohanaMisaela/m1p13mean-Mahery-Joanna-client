@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -56,8 +56,14 @@ export class UserListComponent implements OnInit {
         role: 'user'
     };
 
+    constructor() {
+        afterNextRender(() => {
+            this.loadUsers();
+        });
+    }
+
     ngOnInit() {
-        this.loadUsers();
+        // Initialization logic that doesn't require HTTP calls
     }
 
     loadUsers() {

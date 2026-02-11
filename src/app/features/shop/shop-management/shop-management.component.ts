@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'; // Ensure RouterModule is imported here
 import { ShopService } from '../../../core/services/shop.service';
@@ -53,15 +53,21 @@ export class ShopManagementComponent implements OnInit {
     selectedProduct: any = null;
     currentProductId: string = '';
 
-    ngOnInit() {
-        const shopId = this.route.snapshot.paramMap.get('id');
-        if (shopId) {
-            this.loadShop(shopId);
-            this.loadProducts(shopId);
-            if (this.currentUser()) {
-                this.loadUserRating(shopId);
+    constructor() {
+        afterNextRender(() => {
+            const shopId = this.route.snapshot.paramMap.get('id');
+            if (shopId) {
+                this.loadShop(shopId);
+                this.loadProducts(shopId);
+                if (this.currentUser()) {
+                    this.loadUserRating(shopId);
+                }
             }
-        }
+        });
+    }
+
+    ngOnInit() {
+        // Initialization logic that doesn't require HTTP calls
     }
 
     loadShop(id: string) {
