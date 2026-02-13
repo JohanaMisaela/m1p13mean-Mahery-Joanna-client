@@ -22,6 +22,7 @@ export class ProductManagementComponent implements OnChanges {
     @Input() shopId!: string;
     @Input() products: Product[] = [];
     @Input() categories: Category[] = [];
+    @Input() promotions: any[] = [];
     @Input() currentPage: number = 1;
     @Input() total: number = 0;
     @Input() limit: number = 20;

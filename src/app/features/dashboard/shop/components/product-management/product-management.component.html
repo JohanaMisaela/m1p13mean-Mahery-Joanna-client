@@ -24,7 +24,7 @@
                     <!-- VIEW MODE -->
                     <!-- Product Row Component -->
                     <tr app-product-list-item class="group hover:bg-gray-50 transition-colors"
-                        *ngIf="editingProductId !== product._id" [product]="product"
+                        *ngIf="editingProductId !== product._id" [product]="product" [promotions]="promotions"
                         [isExpanded]="expandedProductId === product._id" [isEditing]="editingProductId === product._id"
                         [reportCount]="productReportCounts()[product._id] || 0"
                         (expandToggle)="toggleExpand(product._id)" (statusToggle)="onToggleStatus(product)"

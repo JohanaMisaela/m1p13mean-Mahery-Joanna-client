@@ -79,6 +79,11 @@
                                                 class="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
                                                 {{ v.sku || 'SANS SKU' }}
                                             </span>
+                                            <!-- Promotion Badge -->
+                                            <span *ngIf="isVariantInPromotion(v._id)"
+                                                class="text-[8px] font-black px-2 py-0.5 rounded-full bg-red-500 text-white tracking-widest animate-pulse">
+                                                -{{ getVariantPromotionDiscount(v._id) }}% PROMO
+                                            </span>
                                             <!-- Status Badge + Toggle -->
                                             <div class="flex items-center gap-2">
                                                 <span
@@ -117,7 +122,22 @@
                                             <div
                                                 class="text-[8px] uppercase font-bold text-gray-300 tracking-wider mb-1">
                                                 Prix de vente</div>
-                                            <div class="text-sm font-black text-black">
+
+                                            <!-- Price with Promotion -->
+                                            <div *ngIf="isVariantInPromotion(v._id)" class="flex flex-col gap-1">
+                                                <div class="text-xs font-bold text-gray-400 line-through">
+                                                    {{ v.price }} <span class="text-[9px]">Ar</span>
+                                                </div>
+                                                <div class="text-sm font-black text-red-600">
+                                                    {{ v.price * (1 - getVariantPromotionDiscount(v._id) / 100) |
+                                                    number:'1.0-0' }}
+                                                    <span class="text-[10px] text-red-500 font-medium">Ar</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Regular Price -->
+                                            <div *ngIf="!isVariantInPromotion(v._id)"
+                                                class="text-sm font-black text-black">
                                                 {{ v.price }} <span
                                                     class="text-[10px] text-gray-400 font-medium">Ar</span>
                                             </div>

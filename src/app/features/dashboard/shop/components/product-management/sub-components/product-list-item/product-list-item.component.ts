@@ -13,6 +13,7 @@ export class ProductManagementListItemComponent {
     private variantService = inject(ProductVariantService);
 
     @Input() product!: Product;
+    @Input() promotions: any[] = [];
     @Input() isExpanded = false;
     @Input() isEditing = false;
     @Input() reportCount = 0;
@@ -39,5 +40,14 @@ export class ProductManagementListItemComponent {
             variant.isActive = !variant.isActive;
             this.refresh.emit();
         });
+    }
+
+    isVariantInPromotion(variantId: string): boolean {
+        return this.promotions.some(promo => promo.products?.includes(variantId));
+    }
+
+    getVariantPromotionDiscount(variantId: string): number {
+        const promo = this.promotions.find(promo => promo.products?.includes(variantId));
+        return promo?.discountPercentage || 0;
     }
 }

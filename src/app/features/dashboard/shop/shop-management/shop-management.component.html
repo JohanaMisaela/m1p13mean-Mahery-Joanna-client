@@ -93,8 +93,8 @@
                         </div>
 
                         <app-product-management [products]="products()" [categories]="categories()"
-                            [shopId]="shop()?._id!" [currentPage]="productPage()" [total]="productTotal()"
-                            [limit]="productLimit()" [isAddingProduct]="isAddingProduct()"
+                            [promotions]="promotions()" [shopId]="shop()?._id!" [currentPage]="productPage()"
+                            [total]="productTotal()" [limit]="productLimit()" [isAddingProduct]="isAddingProduct()"
                             [isSavingProduct]="isSavingProduct()" (editProduct)="openProductForm($event)"
                             (toggleStatus)="toggleStatus($event)" (manageVariants)="openVariantForm($event._id)"
                             (refresh)="onRefresh()" (pageChange)="onProductPageChange($event)"
