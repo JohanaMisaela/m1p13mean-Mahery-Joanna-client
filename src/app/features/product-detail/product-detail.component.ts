@@ -108,6 +108,34 @@ export class ProductDetailComponent implements OnInit {
     return Array.from(new Set([...baseImages, ...variantImages]));
   });
 
+  // Main horizontal thumbnails: product base images + first image of each variant
+  filteredThumbnails = computed(() => {
+    const prod = this.product();
+    if (!prod) return [];
+
+    const baseImages = prod.images || [];
+    const variantFirstImages = (prod.variants || [])
+      .map(v => v.images?.[0])
+      .filter(img => !!img);
+
+    // Filter out duplicates (variant images that might also be in base images)
+    return Array.from(new Set([...baseImages, ...variantFirstImages]));
+  });
+
+  // Vertical side gallery: additional images for the selected variant
+  // Only shown when the selected image belongs to a variant and has more than 1 image
+  sideGalleryImages = computed(() => {
+    const prod = this.product();
+    const currentImg = this.allAvailableImages()[this.currentImageIndex()];
+    if (!prod || !currentImg) return [];
+
+    const variant = this.imageToVariantMap().get(currentImg);
+    if (!variant || !variant.images || variant.images.length <= 1) return [];
+
+    // Return all images of this variant
+    return variant.images;
+  });
+
   imageToVariantMap = computed(() => {
     const prod = this.product();
     const map = new Map<string, ProductVariant>();
@@ -199,7 +227,14 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
-        this.selectedAttributes.set({});
+
+        // Pre-select first variant attributes if they exist
+        if (product.variants && product.variants.length > 0) {
+          this.selectedAttributes.set({ ...product.variants[0].attributes });
+        } else {
+          this.selectedAttributes.set({});
+        }
+
         this.currentImageIndex.set(0);
 
         if (!silent) this.isLoading.set(false);

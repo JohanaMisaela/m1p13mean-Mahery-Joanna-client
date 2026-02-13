@@ -6,60 +6,79 @@
     } @else if (product(); as prod) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8">
-            <div class="flex flex-col gap-4">
-                <div class="relative aspect-square bg-white rounded-xl shadow-inner overflow-hidden group">
-                    <img [src]="allAvailableImages()[currentImageIndex()] || 'assets/placeholder.png'" [alt]="prod.name"
-                        class="w-full h-full object-contain p-4 transition-all duration-500 ease-in-out transform hover:scale-105">
-
-                    @if (allAvailableImages().length > 1) {
-                    <button (click)="prevImage()"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-10"
-                        title="Précédent">
-                        <fa-icon [icon]="icons.prev"></fa-icon>
-                    </button>
-                    <button (click)="nextImage()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-10"
-                        title="Suivant">
-                        <fa-icon [icon]="icons.next"></fa-icon>
-                    </button>
-                    }
-
-                    @if (currentUser()) {
-                    <button (click)="toggleFavorite()"
-                        class="absolute top-4 right-4 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart z-10"
-                        title="Favoris">
-                        <fa-icon [icon]="icons.heart" [class.text-red-500]="isFavorite()"
-                            [class.text-gray-300]="!isFavorite()"
-                            class="text-xl group-hover/heart:scale-110 transition-transform"></fa-icon>
-                    </button>
-                    }
-
-                    @if (prod.isOnSale && prod.activePromotion) {
-                    <div
-                        class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold uppercase rounded shadow-md">
-                        -{{ prod.activePromotion.discountPercentage }}%
-                    </div>
-                    }
-                    @if (effectiveStock() === 0) {
-                    <div class="absolute inset-0 bg-white/60 flex items-center justify-center">
-                        <span class="bg-black text-white px-4 py-2 text-sm font-bold uppercase">Épuisé</span>
-                    </div>
-                    }
-                </div>
-
-                @if (allAvailableImages().length > 1) {
-                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    @for (img of allAvailableImages(); track img; let i = $index) {
-                    <button (click)="setImageIndex(i)"
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Vertical Side Gallery (Additional Images for selected variant) -->
+                @if (sideGalleryImages().length > 1) {
+                <div class="hidden lg:flex flex-col gap-2 w-20 overflow-y-auto scrollbar-hide py-2">
+                    @for (img of sideGalleryImages(); track img; let i = $index) {
+                    <button (click)="setImageIndex(allAvailableImages().indexOf(img))"
                         class="relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0"
-                        [class.border-black]="i === currentImageIndex()"
-                        [class.border-transparent]="i !== currentImageIndex()"
-                        [class.opacity-50]="i !== currentImageIndex()">
+                        [class.border-black]="allAvailableImages().indexOf(img) === currentImageIndex()"
+                        [class.border-transparent]="allAvailableImages().indexOf(img) !== currentImageIndex()"
+                        [class.opacity-50]="allAvailableImages().indexOf(img) !== currentImageIndex()">
                         <img [src]="img" class="w-full h-full object-cover">
                     </button>
                     }
                 </div>
                 }
+
+                <div class="flex-1 flex flex-col gap-4">
+                    <div class="relative aspect-square bg-white rounded-xl shadow-inner overflow-hidden group">
+                        <img [src]="allAvailableImages()[currentImageIndex()] || 'assets/placeholder.png'"
+                            [alt]="prod.name"
+                            class="w-full h-full object-contain p-4 transition-all duration-500 ease-in-out transform hover:scale-105">
+
+                        @if (allAvailableImages().length > 1) {
+                        <button (click)="prevImage()"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-10"
+                            title="Précédent">
+                            <fa-icon [icon]="icons.prev"></fa-icon>
+                        </button>
+                        <button (click)="nextImage()"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-10"
+                            title="Suivant">
+                            <fa-icon [icon]="icons.next"></fa-icon>
+                        </button>
+                        }
+
+                        @if (currentUser()) {
+                        <button (click)="toggleFavorite()"
+                            class="absolute top-4 right-4 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart z-10"
+                            title="Favoris">
+                            <fa-icon [icon]="icons.heart" [class.text-red-500]="isFavorite()"
+                                [class.text-gray-300]="!isFavorite()"
+                                class="text-xl group-hover/heart:scale-110 transition-transform"></fa-icon>
+                        </button>
+                        }
+
+                        @if (prod.isOnSale && prod.activePromotion) {
+                        <div
+                            class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold uppercase rounded shadow-md">
+                            -{{ prod.activePromotion.discountPercentage }}%
+                        </div>
+                        }
+                        @if (effectiveStock() === 0) {
+                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center">
+                            <span class="bg-black text-white px-4 py-2 text-sm font-bold uppercase">Épuisé</span>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Horizontal Thumbnails (Base + First image of each variant) -->
+                    @if (filteredThumbnails().length > 1) {
+                    <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        @for (img of filteredThumbnails(); track img; let i = $index) {
+                        <button (click)="setImageIndex(allAvailableImages().indexOf(img))"
+                            class="relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0"
+                            [class.border-black]="allAvailableImages().indexOf(img) === currentImageIndex()"
+                            [class.border-transparent]="allAvailableImages().indexOf(img) !== currentImageIndex()"
+                            [class.opacity-50]="allAvailableImages().indexOf(img) !== currentImageIndex()">
+                            <img [src]="img" class="w-full h-full object-cover">
+                        </button>
+                        }
+                    </div>
+                    }
+                </div>
             </div>
 
             <div class="p-8 flex flex-col">
