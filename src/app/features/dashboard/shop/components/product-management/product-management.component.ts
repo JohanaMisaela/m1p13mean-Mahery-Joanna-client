@@ -7,11 +7,12 @@ import { ReportService } from '../../../../../core/services/report.service';
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { ProductFormComponent } from './sub-components/product-form/product-form.component';
 import { ImageManagementModalComponent } from './sub-components/image-management-modal/image-management-modal.component';
+import { ProductManagementListItemComponent } from './sub-components/product-list-item/product-list-item.component';
 
 @Component({
     selector: 'app-product-management',
     standalone: true,
-    imports: [CommonModule, PaginationComponent, FormsModule, ProductFormComponent, ImageManagementModalComponent],
+    imports: [CommonModule, PaginationComponent, FormsModule, ProductFormComponent, ImageManagementModalComponent, ProductManagementListItemComponent],
     templateUrl: './product-management.component.html',
 })
 export class ProductManagementComponent implements OnChanges {
