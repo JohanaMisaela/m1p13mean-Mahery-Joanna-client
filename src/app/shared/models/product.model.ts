@@ -26,6 +26,7 @@ export interface Shop {
     openingHours?: string;
     averageRating?: number;
     totalRatings?: number;
+    pendingReportCount?: number;
 }
 
 export interface ProductVariant {

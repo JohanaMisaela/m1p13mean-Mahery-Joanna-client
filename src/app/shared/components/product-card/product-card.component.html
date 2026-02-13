@@ -39,6 +39,12 @@
             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
                 {{ product.category.name || 'Catégorie' }}
             </span>
+            } @else if (product.categories && product.categories.length > 0) {
+            @for (cat of product.categories; track cat._id) {
+            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
+                {{ cat.name }}
+            </span>
+            }
             } @else {
             <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Aucune catégorie</span>
             }
