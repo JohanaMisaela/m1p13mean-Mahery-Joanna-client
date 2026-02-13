@@ -47,6 +47,7 @@ export interface Product {
     stock?: number;
     images?: string[];
     category: any;
+    categories?: Category[];
     tags: string[];
     shop: any;
     averageRating: number;
@@ -61,6 +62,7 @@ export interface Product {
     };
     attributeConfig?: { [key: string]: string[] };
     variants?: ProductVariant[];
+    reportCount?: number;
     createdAt?: string;
     updatedAt?: string;
 }

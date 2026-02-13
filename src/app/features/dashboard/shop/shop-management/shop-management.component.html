@@ -92,50 +92,14 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4">
-                            <div *ngFor="let product of products()"
-                                class="group p-6 border border-gray-100 hover:border-black transition-all flex flex-col md:flex-row md:items-center justify-between bg-white">
-
-                                <div class="flex items-center mb-4 md:mb-0">
-                                    <div
-                                        class="h-16 w-16 bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden">
-                                        <img *ngIf="product.images?.length" [src]="product.images?.[0]"
-                                            class="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all">
-                                        <div *ngIf="!product.images?.length"
-                                            class="h-full w-full flex items-center justify-center text-[10px] text-gray-300">
-                                            NO IMG
-                                        </div>
-                                    </div>
-                                    <div class="ml-6">
-                                        <h4 class="font-medium text-lg">{{ product.name }}</h4>
-                                        <div
-                                            class="flex items-center space-x-4 mt-1 text-sm text-gray-500 uppercase tracking-tighter">
-                                            <span>{{ product.price | currency:'AR ':'symbol':'1.0-0' }}</span>
-                                            <span>•</span>
-                                            <span>Stock: {{ product.stock }}</span>
-                                            <span *ngIf="!product.isActive"
-                                                class="text-red-500 font-bold ml-2">[INACTIF]</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex space-x-2">
-                                    <button (click)="openProductForm(product)"
-                                        class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Editer</button>
-                                    <button (click)="openVariantForm(product._id)"
-                                        class="text-xs uppercase tracking-widest border border-gray-200 px-4 py-2 hover:bg-black hover:text-white transition-all">Variantes</button>
-                                    <button (click)="toggleStatus(product)"
-                                        [class]="'text-xs uppercase tracking-widest border px-4 py-2 transition-all ' + (product.isActive ? 'border-red-100 text-red-400 hover:bg-red-500 hover:text-white' : 'border-green-100 text-green-400 hover:bg-green-500 hover:text-white')">
-                                        {{ product.isActive ? 'Désactiver' : 'Activer' }}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div *ngIf="products().length === 0"
-                                class="py-20 text-center border-2 border-dashed border-gray-100">
-                                <p class="text-gray-400 italic">Aucun produit pour cette boutique.</p>
-                            </div>
-                        </div>
+                        <app-product-management [products]="products()" [categories]="categories()"
+                            [currentPage]="productPage()" [total]="productTotal()" [limit]="productLimit()"
+                            [isAddingProduct]="isAddingProduct()" (editProduct)="openProductForm($event)"
+                            (toggleStatus)="toggleStatus($event)" (manageVariants)="openVariantForm($event._id)"
+                            (refresh)="onRefresh()" (pageChange)="onProductPageChange($event)"
+                            (saveNewProduct)="saveProduct($event)" (cancelAddProduct)="isAddingProduct.set(false)"
+                            (openAddProduct)="openProductForm()">
+                        </app-product-management>
                     </div>
                     }
 
@@ -172,11 +136,7 @@
                     }
 
                     @case ('reports') {
-                    <div class="bg-white p-8 border border-gray-100 shadow-sm">
-                        <div class="py-20 text-center border-2 border-dashed border-gray-100">
-                            <p class="text-gray-400 italic">Gestion des signalements à venir...</p>
-                        </div>
-                    </div>
+                    <app-report-management [shopId]="shop()?._id!"></app-report-management>
                     }
                     }
                 </div>
