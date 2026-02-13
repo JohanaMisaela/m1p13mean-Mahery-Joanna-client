@@ -59,7 +59,9 @@
 
                         <div class="grid grid-cols-1 gap-4 pl-3.5">
                             <div *ngFor="let v of product.variants"
-                                class="group/v-card flex items-center bg-white border border-gray-100 rounded-xl p-4 transition-all hover:border-gray-200 hover:shadow-md">
+                                class="group/v-card flex items-center bg-white border border-gray-100 rounded-xl p-4 transition-all hover:border-gray-200 hover:shadow-md"
+                                [class.opacity-60]="v.isActive === false"
+                                [class.grayscale-[0.5]]="v.isActive === false">
 
                                 <!-- Variant Image -->
                                 <div
@@ -71,17 +73,29 @@
                                 <!-- Variant Details -->
                                 <div class="ml-6 flex-grow grid grid-cols-12 gap-6 items-center">
                                     <!-- SKU & Attributes -->
-                                    <div class="col-span-6 space-y-2">
-                                        <div class="flex items-center gap-2">
+                                    <div class="col-span-12 lg:col-span-5 space-y-2">
+                                        <div class="flex items-center gap-3">
                                             <span
                                                 class="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
                                                 {{ v.sku || 'SANS SKU' }}
                                             </span>
-                                            <span
-                                                [class]="v.isActive ? 'text-green-500 bg-green-50' : 'text-red-500 bg-red-50'"
-                                                class="text-[9px] font-black px-2 py-0.5 rounded-full border border-current tracking-widest transition-colors">
-                                                {{ v.isActive ? 'ACTIF' : 'INACTIF' }}
-                                            </span>
+                                            <!-- Status Badge + Toggle -->
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    [class]="v.isActive !== false ? 'text-green-500 bg-green-50' : 'text-gray-400 bg-gray-100'"
+                                                    class="text-[8px] font-black px-1.5 py-0.5 rounded-full border border-current tracking-widest transition-colors">
+                                                    {{ v.isActive !== false ? 'ACTIF' : 'INACTIF' }}
+                                                </span>
+                                                <button (click)="$event.stopPropagation(); onToggleVariantStatus(v)"
+                                                    class="relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none"
+                                                    [class.bg-blue-600]="v.isActive !== false"
+                                                    [class.bg-gray-200]="v.isActive === false">
+                                                    <span
+                                                        class="inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform duration-200 shadow-sm"
+                                                        [class.translate-x-4]="v.isActive !== false"
+                                                        [class.translate-x-0.5]="v.isActive === false"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="flex flex-wrap gap-y-1 gap-x-4">
                                             <div *ngFor="let attr of v.attributes | keyvalue"
@@ -95,26 +109,28 @@
                                     </div>
 
                                     <!-- Inventory Info -->
-                                    <div class="col-span-4 grid grid-cols-2 gap-4 border-l border-gray-100 pl-6">
+                                    <div
+                                        class="col-span-12 lg:col-span-7 grid grid-cols-2 gap-8 lg:border-l border-gray-100 lg:pl-8">
                                         <div>
                                             <div
                                                 class="text-[8px] uppercase font-bold text-gray-300 tracking-wider mb-1">
                                                 Stock</div>
                                             <div [class]="v.stock > 0 ? 'text-gray-900' : 'text-red-500'"
                                                 class="text-sm font-black">
-                                                {{ v.stock }}
+                                                {{ v.stock }} <span
+                                                    class="text-[10px] text-gray-400 font-medium">unités</span>
                                             </div>
                                         </div>
                                         <div>
                                             <div
                                                 class="text-[8px] uppercase font-bold text-gray-300 tracking-wider mb-1">
-                                                Prix</div>
+                                                Prix de vente</div>
                                             <div class="text-sm font-black text-black">
-                                                {{ v.price }} Ar
+                                                {{ v.price }} <span
+                                                    class="text-[10px] text-gray-400 font-medium">Ar</span>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

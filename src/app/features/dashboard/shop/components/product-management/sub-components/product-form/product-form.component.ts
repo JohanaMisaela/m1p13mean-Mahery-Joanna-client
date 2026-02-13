@@ -14,6 +14,7 @@ export class ProductFormComponent implements OnInit {
     @Input() product: any = null; // If null, we are in Add mode
     @Input() categories: Category[] = [];
     @Input() isEdit = false;
+    @Input() loading = false;
 
     @Output() save = new EventEmitter<any>();
     @Output() cancel = new EventEmitter<void>();
@@ -50,7 +51,7 @@ export class ProductFormComponent implements OnInit {
             description: '',
             categories: [],
             tags: '',
-            variants: [{ sku: '', price: 0, stock: 0, images: [], attributes: [{ key: '', value: '' }] }]
+            variants: [{ sku: '', price: 0, stock: 0, images: [], attributes: [{ key: '', value: '' }], isActive: true }]
         };
     }
 
@@ -82,6 +83,7 @@ export class ProductFormComponent implements OnInit {
             tags: p.tags ? p.tags.join(', ') : '',
             variants: p.variants ? p.variants.map((v: any) => ({
                 ...v,
+                isActive: v.isActive !== false, // Explicitly handle true/false/undefined
                 images: v.images || [],
                 attributes: Array.isArray(v.attributes) ? [...v.attributes] :
                     (v.attributes && typeof v.attributes === 'object' ?
@@ -91,7 +93,7 @@ export class ProductFormComponent implements OnInit {
         };
 
         if (!this.form.variants || this.form.variants.length === 0) {
-            this.form.variants = [{ sku: '', price: 0, stock: 0, images: [], attributes: [{ key: '', value: '' }] }];
+            this.form.variants = [{ sku: '', price: 0, stock: 0, images: [], attributes: [{ key: '', value: '' }], isActive: true }];
         }
     }
 
@@ -140,22 +142,21 @@ export class ProductFormComponent implements OnInit {
             price: 0,
             stock: 0,
             images: [],
-            attributes: [{ key: '', value: '' }]
+            attributes: [{ key: '', value: '' }],
+            isActive: true
         });
         console.log('ProductForm: Variant added. New count:', this.form.variants.length);
         this.cdr.detectChanges();
     }
 
     removeVariant(index: number) {
-        if (this.form.variants.length > 1) {
-            const variant = this.form.variants[index];
-            console.log('ProductForm: Removing variant at index:', index, 'Variant:', variant);
-            if (variant._id) {
-                if (!this.form.deletedVariantIds) this.form.deletedVariantIds = [];
-                this.form.deletedVariantIds.push(variant._id);
-            }
+        // Only allow removing if it's a new variant (no _id)
+        if (!this.form.variants[index]._id) {
+            console.log('ProductForm: Removing new variant at index:', index);
             this.form.variants.splice(index, 1);
             this.cdr.detectChanges();
+        } else {
+            console.log('ProductForm: Cannot remove existing variant with _id. Consider toggling isActive instead.');
         }
     }
 
@@ -172,7 +173,25 @@ export class ProductFormComponent implements OnInit {
         this.form.variants[variantIndex].attributes.splice(attrIndex, 1);
     }
 
+    removeImage(variant: any, index: number) {
+        if (variant && variant.images && Array.isArray(variant.images)) {
+            variant.images.splice(index, 1);
+            this.cdr.detectChanges();
+        }
+    }
+
     onSave() {
+        // Validation: Check for duplicate SKUs within the form
+        const skus = this.form.variants
+            .map((v: any) => v.sku?.trim())
+            .filter((sku: string) => !!sku);
+
+        const hasDuplicateSkus = new Set(skus).size !== skus.length;
+        if (hasDuplicateSkus) {
+            alert('Erreur: Vous avez des SKUs en double dans vos variantes. Chaque SKU doit être unique.');
+            return;
+        }
+
         // Transform tags
         const tagsArray = typeof this.form.tags === 'string'
             ? this.form.tags.split(',').map((t: string) => t.trim()).filter((t: string) => !!t)
@@ -189,10 +208,29 @@ export class ProductFormComponent implements OnInit {
                     }
                 });
             }
-            return {
+
+            // Create a clean copy for the representative payload
+            const variantCopy = {
                 ...v,
                 attributes: attributesObj
             };
+
+            // Clean up SKU: trim it, and if empty, remove it to avoid unique constraint collisions in MongoDB
+            if (variantCopy.sku) {
+                variantCopy.sku = variantCopy.sku.trim();
+                if (variantCopy.sku === '') {
+                    delete variantCopy.sku;
+                }
+            } else {
+                delete variantCopy.sku;
+            }
+
+            // Also remove populated objects that might be present
+            if (variantCopy.product && typeof variantCopy.product === 'object') {
+                variantCopy.product = variantCopy.product._id;
+            }
+
+            return variantCopy;
         });
 
         if (this.isEdit) {

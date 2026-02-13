@@ -53,6 +53,7 @@ export class ShopManagementComponent implements OnInit {
     productLimit = signal(50);
 
     isAddingProduct = signal(false);
+    isSavingProduct = signal(false);
 
     showProductForm = signal(false);
     showVariantForm = signal(false);
@@ -142,33 +143,28 @@ export class ShopManagementComponent implements OnInit {
         const shopId = this.shop()?._id;
         if (!shopId) return;
 
+        this.isSavingProduct.set(true);
+
         // UPDATE EXISTING
         if (event._id) {
-            this.productService.updateProduct(event._id, event).subscribe({
+            // Destructure to separate product data from variant management arrays
+            // Backend updateProduct only expects core product fields
+            const { variants, deletedVariantIds, ...productData } = event;
+
+            this.productService.updateProduct(event._id, productData).subscribe({
                 next: () => {
-                    // Handle Variants Sync
-                    // 1. Create new variants (no _id)
-                    // 2. Update existing variants (has _id)
-                    // 3. Delete removed variants (passed in event.deletedVariantIds) - TODO: Add granular delete support if needed, 
-                    //    for now assuming we just update/create.
-
                     const variantRequests: any[] = [];
-
-                    if (event.variants && Array.isArray(event.variants)) {
-                        event.variants.forEach((v: any) => {
+                    if (variants && Array.isArray(variants)) {
+                        variants.forEach((v: any) => {
                             if (v._id) {
-                                // Update existing
                                 variantRequests.push(this.variantService.updateVariant(v._id, v));
                             } else {
-                                // Create new for this product
                                 variantRequests.push(this.variantService.createVariant(event._id, v));
                             }
                         });
                     }
-
-                    // Handle deletions if provided
-                    if (event.deletedVariantIds && Array.isArray(event.deletedVariantIds)) {
-                        event.deletedVariantIds.forEach((id: string) => {
+                    if (deletedVariantIds && Array.isArray(deletedVariantIds)) {
+                        deletedVariantIds.forEach((id: string) => {
                             variantRequests.push(this.variantService.deleteVariant(id));
                         });
                     }
@@ -177,42 +173,31 @@ export class ShopManagementComponent implements OnInit {
                         import('rxjs').then(rxjs => {
                             const { forkJoin, defaultIfEmpty } = rxjs;
                             forkJoin(variantRequests).pipe(defaultIfEmpty([])).subscribe(() => {
+                                this.isSavingProduct.set(false);
                                 this.loadProducts(shopId);
-                                // Close edit form handled by child logic? 
-                                // Actually child emits, parent reloads. 
-                                // We need to tell child to stop editing? 
-                                // The child manages its own `editingProductId` state, but we assume it resets on success?
-                                // Actually, we don't have a way to tell child "Success".
-                                // But since we reload products, the child will verify `products` input changes. 
-                                // However, `editingProductId` is local state.
-                                // We might need to toggle it off.
                             });
                         });
                     } else {
+                        this.isSavingProduct.set(false);
                         this.loadProducts(shopId);
                     }
-                }
+                },
+                error: () => this.isSavingProduct.set(false)
             });
             return;
         }
 
         // CREATE NEW
         if (this.isAddingProduct() && event.product && event.variants) {
-            // Ensure shop ID is included in product data for backend validation
-            const productData = {
-                ...event.product,
-                shop: shopId
-            };
-
-            // Basic frontend validation for category
+            const productData = { ...event.product, shop: shopId };
             if (!productData.categories || productData.categories.length === 0) {
                 alert('Veuillez sélectionner au moins une catégorie.');
+                this.isSavingProduct.set(false);
                 return;
             }
 
             this.productService.createProduct(shopId, productData).subscribe({
                 next: (newProduct) => {
-                    // Create all variants for the new product
                     const variantRequests = event.variants.map((v: any) =>
                         this.variantService.createVariant(newProduct._id, v)
                     );
@@ -221,20 +206,23 @@ export class ShopManagementComponent implements OnInit {
                         const { forkJoin } = rxjs;
                         forkJoin(variantRequests).subscribe({
                             next: () => {
+                                this.isSavingProduct.set(false);
                                 this.isAddingProduct.set(false);
                                 this.loadProducts(shopId);
                                 alert('Produit créé avec succès !');
                             },
                             error: (err) => {
                                 console.error('Error creating variants', err);
+                                this.isSavingProduct.set(false);
                                 alert('Produit créé, mais une erreur est survenue lors de la création des variantes.');
-                                this.loadProducts(shopId); // Still reload to show the product
+                                this.loadProducts(shopId);
                             }
                         });
                     });
                 },
                 error: (err) => {
                     console.error('Error creating product', err);
+                    this.isSavingProduct.set(false);
                     alert('Erreur lors de la création du produit. Vérifiez les champs obligatoires.');
                 }
             });

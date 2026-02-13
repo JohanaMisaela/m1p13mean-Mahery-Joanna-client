@@ -26,6 +26,7 @@ export class ProductManagementComponent implements OnChanges {
     @Input() total: number = 0;
     @Input() limit: number = 20;
     @Input() isAddingProduct = false;
+    @Input() isSavingProduct = false;
 
     @Output() editProduct = new EventEmitter<Product>();
     @Output() toggleStatus = new EventEmitter<Product>();

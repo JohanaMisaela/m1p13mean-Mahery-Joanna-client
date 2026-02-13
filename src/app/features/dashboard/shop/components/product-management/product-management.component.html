@@ -2,8 +2,8 @@
     <!-- ADD PRODUCT SECTION -->
     <div *ngIf="isAddingProduct"
         class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden animate-in slide-in-from-top-4 duration-300">
-        <app-product-form [categories]="categories" [isEdit]="false" (save)="onSaveProduct($event)"
-            (cancel)="cancelEdit()" (openImageModal)="openImageModal($event)">
+        <app-product-form [categories]="categories" [isEdit]="false" [loading]="isSavingProduct"
+            (save)="onSaveProduct($event)" (cancel)="cancelEdit()" (openImageModal)="openImageModal($event)">
         </app-product-form>
     </div>
 
@@ -35,7 +35,7 @@
                     <tr *ngIf="editingProductId === product._id" class="bg-gray-50/50">
                         <td colspan="4" class="p-6">
                             <app-product-form [product]="product" [categories]="categories" [isEdit]="true"
-                                (save)="onSaveProduct($event)" (cancel)="cancelEdit()"
+                                [loading]="isSavingProduct" (save)="onSaveProduct($event)" (cancel)="cancelEdit()"
                                 (openImageModal)="openImageModal($event)">
                             </app-product-form>
                         </td>

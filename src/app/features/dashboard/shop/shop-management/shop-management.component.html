@@ -95,10 +95,11 @@
                         <app-product-management [products]="products()" [categories]="categories()"
                             [shopId]="shop()?._id!" [currentPage]="productPage()" [total]="productTotal()"
                             [limit]="productLimit()" [isAddingProduct]="isAddingProduct()"
-                            (editProduct)="openProductForm($event)" (toggleStatus)="toggleStatus($event)"
-                            (manageVariants)="openVariantForm($event._id)" (refresh)="onRefresh()"
-                            (pageChange)="onProductPageChange($event)" (saveNewProduct)="saveProduct($event)"
-                            (cancelAddProduct)="isAddingProduct.set(false)" (openAddProduct)="openProductForm()">
+                            [isSavingProduct]="isSavingProduct()" (editProduct)="openProductForm($event)"
+                            (toggleStatus)="toggleStatus($event)" (manageVariants)="openVariantForm($event._id)"
+                            (refresh)="onRefresh()" (pageChange)="onProductPageChange($event)"
+                            (saveNewProduct)="saveProduct($event)" (cancelAddProduct)="isAddingProduct.set(false)"
+                            (openAddProduct)="openProductForm()">
                         </app-product-management>
                     </div>
                     }
