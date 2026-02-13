@@ -133,11 +133,19 @@
     </div>
 </td>
 <td class="px-6 py-4 align-top">
-    <button (click)="onToggleStatus()"
-        [class]="product.isActive ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-100'"
-        class="px-2.5 py-1 text-[10px] uppercase font-bold rounded-full border transition-all hover:brightness-95">
-        {{ product.isActive ? 'Actif' : 'Inactif' }}
-    </button>
+    <div class="flex flex-col items-start gap-2">
+        <button (click)="onToggleStatus()"
+            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none"
+            [class.bg-green-600]="product.isActive" [class.bg-gray-200]="!product.isActive">
+            <span
+                class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 shadow-sm"
+                [class.translate-x-5]="product.isActive" [class.translate-x-0.5]="!product.isActive"></span>
+        </button>
+        <span class="text-[10px] uppercase font-bold tracking-wider" [class.text-green-600]="product.isActive"
+            [class.text-gray-400]="!product.isActive">
+            {{ product.isActive ? 'En ligne' : 'Inactif' }}
+        </span>
+    </div>
 </td>
 <td class="px-6 py-4 align-top">
     <div class="flex items-center gap-1 text-yellow-500" *ngIf="product.averageRating">
