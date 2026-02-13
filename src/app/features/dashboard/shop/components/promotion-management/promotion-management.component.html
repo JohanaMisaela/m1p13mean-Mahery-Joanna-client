@@ -1,0 +1,247 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <span class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Total Promotions</span>
+            <span class="text-2xl font-semibold">{{ promotions().length }}</span>
+        </div>
+        <button (click)="openCreateForm()"
+            class="bg-black text-white px-6 py-3 uppercase tracking-widest text-xs hover:bg-gray-800 transition-all shadow-lg active:scale-95">
+            Nouvelle Promotion
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="py-20 text-center">
+        <p class="text-gray-400 italic">Chargement...</p>
+    </div>
+    }
+
+    <!-- Promotion List -->
+    @else if (promotions().length > 0) {
+    <div class="space-y-4">
+        @for (promo of promotions(); track promo._id) {
+        <div class="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md transition-all"
+            [class.opacity-60]="!promo.isActive">
+            <div class="flex items-start justify-between">
+                <!-- Promotion Info -->
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-lg font-bold text-gray-900">{{ promo.name }}</h3>
+
+                        <!-- Status Badge -->
+                        <span class="px-2 py-1 text-[10px] font-black uppercase rounded-full" [class]="getPromotionStatus(promo) === 'ongoing' ? 'bg-green-100 text-green-700' : 
+                                     getPromotionStatus(promo) === 'upcoming' ? 'bg-blue-100 text-blue-700' : 
+                                     'bg-gray-100 text-gray-500'">
+                            {{ getPromotionStatus(promo) === 'ongoing' ? 'En cours' :
+                            getPromotionStatus(promo) === 'upcoming' ? 'À venir' : 'Expirée' }}
+                        </span>
+
+                        <!-- Discount Badge -->
+                        <span class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded">
+                            -{{ promo.discountPercentage }}%
+                        </span>
+                    </div>
+
+                    @if (promo.description) {
+                    <p class="text-sm text-gray-600 mb-3">{{ promo.description }}</p>
+                    }
+
+                    <div class="flex items-center gap-6 text-xs text-gray-500">
+                        <div>
+                            <span class="font-bold uppercase tracking-wider">Début:</span>
+                            <span class="ml-2">{{ formatDateForDisplay(promo.startDate) }}</span>
+                        </div>
+                        <div>
+                            <span class="font-bold uppercase tracking-wider">Fin:</span>
+                            <span class="ml-2">{{ formatDateForDisplay(promo.endDate) }}</span>
+                        </div>
+                        <div>
+                            <span class="font-bold uppercase tracking-wider">Produits:</span>
+                            <span class="ml-2">{{ promo.products?.length || 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-4">
+                    <!-- Active Toggle -->
+                    <button (click)="togglePromotionStatus(promo)"
+                        class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none"
+                        [class.bg-green-600]="promo.isActive" [class.bg-gray-200]="!promo.isActive">
+                        <span
+                            class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 shadow-sm"
+                            [class.translate-x-5]="promo.isActive" [class.translate-x-0.5]="!promo.isActive"></span>
+                    </button>
+
+                    <!-- Edit Button -->
+                    <button (click)="openEditForm(promo)"
+                        class="text-xs font-bold text-gray-400 hover:text-black uppercase tracking-wider transition-colors">
+                        Éditer
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Empty State -->
+    @else {
+    <div class="py-20 text-center border-2 border-dashed border-gray-100 rounded-xl">
+        <p class="text-gray-400 italic">Aucune promotion pour le moment</p>
+    </div>
+    }
+
+    <!-- Promotion Form Modal/Inline -->
+    @if (showForm()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <!-- Form Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">
+                        {{ editingPromotion ? 'Modifier la Promotion' : 'Nouvelle Promotion' }}
+                    </h2>
+                    <button (click)="closeForm()" class="text-gray-400 hover:text-black transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form Fields -->
+                <div class="space-y-6">
+                    <!-- Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Nom de la promotion *
+                        </label>
+                        <input type="text" [(ngModel)]="formData().name"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors"
+                            placeholder="Ex: Black Friday, Soldes d'été...">
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Description
+                        </label>
+                        <textarea [(ngModel)]="formData().description" rows="3"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors resize-none"
+                            placeholder="Décrivez votre promotion..."></textarea>
+                    </div>
+
+                    <!-- Discount Percentage -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Pourcentage de réduction * (1-100)
+                        </label>
+                        <input type="number" [(ngModel)]="formData().discountPercentage" min="1" max="100"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors">
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                                Date de début *
+                            </label>
+                            <input type="date" [(ngModel)]="formData().startDate" [disabled]="!isStartDateEditable()"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            @if (!isStartDateEditable()) {
+                            <p class="text-xs text-orange-600 mt-1">
+                                ⚠️ La date de début ne peut plus être modifiée
+                            </p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                                Date de fin *
+                            </label>
+                            <input type="date" [(ngModel)]="formData().endDate"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Product Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                            Produits/Variants concernés ({{ selectedProducts().length }})
+                        </label>
+                        <div class="border border-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+                            @if (products.length > 0) {
+                            @for (product of products; track product._id) {
+                            <div class="mb-3 last:mb-0">
+                                <!-- Product Parent -->
+                                <label
+                                    class="flex items-center gap-3 py-2 hover:bg-gray-50 cursor-pointer rounded px-2 font-medium">
+                                    <input type="checkbox" [checked]="isProductSelected(product)"
+                                        (change)="toggleProductSelection(product)"
+                                        class="w-4 h-4 text-black border-gray-300 rounded focus:ring-black">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <img [src]="product.images?.[0] || 'assets/placeholder.png'"
+                                            class="w-10 h-10 object-cover rounded border border-gray-200">
+                                        <span class="text-sm font-bold">{{ product.name }}</span>
+                                    </div>
+                                </label>
+
+                                <!-- Variants (Children) -->
+                                @if (product.variants && product.variants.length > 0) {
+                                <div class="ml-10 mt-1 space-y-1">
+                                    @for (variant of product.variants; track variant._id) {
+                                    <label
+                                        class="flex items-center gap-3 py-1.5 hover:bg-gray-50 cursor-pointer rounded px-2">
+                                        <input type="checkbox" [checked]="isVariantSelected(variant._id)"
+                                            (change)="toggleVariantSelection(variant._id)"
+                                            class="w-3.5 h-3.5 text-black border-gray-300 rounded focus:ring-black">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            <img [src]="variant.images?.[0] || product.images?.[0] || 'assets/placeholder.png'"
+                                                class="w-8 h-8 object-cover rounded border border-gray-200">
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-gray-600">
+                                                    {{ getVariantLabel(variant) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            }
+                            } @else {
+                            <p class="text-sm text-gray-400 italic text-center py-4">Aucun produit/variant disponible
+                            </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" [(ngModel)]="formData().isActive" id="promoActive"
+                            class="w-4 h-4 text-black border-gray-300 rounded focus:ring-black">
+                        <label for="promoActive" class="text-sm font-medium text-gray-700 cursor-pointer">
+                            Promotion active
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
+                    <button (click)="closeForm()" [disabled]="isSaving()"
+                        class="px-6 py-3 text-sm font-bold text-gray-600 hover:text-black uppercase tracking-wider transition-colors disabled:opacity-50">
+                        Annuler
+                    </button>
+                    <button (click)="savePromotion()" [disabled]="isSaving()"
+                        class="bg-black text-white px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {{ isSaving() ? 'Enregistrement...' : (editingPromotion ? 'Mettre à jour' : 'Créer') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>

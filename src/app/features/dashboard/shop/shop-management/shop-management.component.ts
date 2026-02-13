@@ -13,12 +13,13 @@ import { ShopSettingsFormComponent } from '../components/shop-settings-form/shop
 import { FooterComponent } from '../../../../core/layout/footer/footer.component';
 
 import { ProductManagementComponent } from '../components/product-management/product-management.component';
+import { PromotionManagementComponent } from '../components/promotion-management/promotion-management.component';
 import { ReportManagementComponent } from '../components/report-management/report-management.component';
 
 @Component({
     selector: 'app-shop-management',
     standalone: true,
-    imports: [CommonModule, RouterModule, ShopHeaderComponent, ShopSettingsFormComponent, ProductManagementComponent, ReportManagementComponent, FooterComponent],
+    imports: [CommonModule, RouterModule, ShopHeaderComponent, ShopSettingsFormComponent, ProductManagementComponent, PromotionManagementComponent, ReportManagementComponent, FooterComponent],
     templateUrl: './shop-management.component.html',
     styles: [`
         :host {
@@ -48,6 +49,7 @@ export class ShopManagementComponent implements OnInit {
     shop = signal<Shop | null>(null);
     products = signal<Product[]>([]);
     categories = signal<Category[]>([]);
+    promotions = signal<any[]>([]);
     productTotal = signal(0);
     productPage = signal(1);
     productLimit = signal(50);
@@ -69,6 +71,7 @@ export class ShopManagementComponent implements OnInit {
                 this.loadShop(shopId);
                 this.loadProducts(shopId);
                 this.loadCategories();
+                this.loadPromotions(shopId);
                 if (this.currentUser()) {
                     this.loadUserRating(shopId);
                 }
@@ -113,6 +116,23 @@ export class ShopManagementComponent implements OnInit {
 
             this.products.set(data);
             this.productTotal.set(res.total || data.length);
+        });
+    }
+
+    loadPromotions(shopId: string) {
+        this.promotionService.getShopPromotions(shopId).subscribe({
+            next: (res: any) => {
+                const data = Array.isArray(res) ? res : (res.data || []);
+                // Filter only active promotions
+                const activePromotions = data.filter((p: any) => {
+                    const now = new Date();
+                    const start = new Date(p.startDate);
+                    const end = new Date(p.endDate);
+                    return p.isActive && now >= start && now <= end;
+                });
+                this.promotions.set(activePromotions);
+            },
+            error: () => this.promotions.set([])
         });
     }
 

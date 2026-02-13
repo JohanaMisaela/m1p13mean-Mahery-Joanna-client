@@ -23,10 +23,10 @@ export class PromotionService {
     }
 
     addProductsToPromotion(id: string, productIds: string[]): Observable<any> {
-        return this.http.post<any>(`${this.API_URL}/promotions/${id}/products`, { productIds });
+        return this.http.patch<any>(`${this.API_URL}/promotions/${id}/products/add`, { productIds });
     }
 
     removeProductsFromPromotion(id: string, productIds: string[]): Observable<any> {
-        return this.http.delete<any>(`${this.API_URL}/promotions/${id}/products`, { body: { productIds } });
+        return this.http.patch<any>(`${this.API_URL}/promotions/${id}/products/remove`, { productIds });
     }
 }
