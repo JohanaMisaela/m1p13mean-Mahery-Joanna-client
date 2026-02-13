@@ -97,25 +97,57 @@ export class ProductAttributesComponent {
     // Helper to get value from selectedAttributes signal case-insensitively
     getSelectedValue(key: string): string | undefined {
         const selected = this.selectedAttributes();
+        if (!selected) return undefined;
+
+        // Try exact match first
+        if (selected[key]) return selected[key];
+
         const actualKey = Object.keys(selected).find(k => k.trim().toLowerCase() === key.trim().toLowerCase());
         return actualKey ? selected[actualKey] : undefined;
     }
 
     selectAttribute(key: string, value: string): void {
+        const prod = this.product();
+        if (!prod || !prod.variants || prod.variants.length === 0) return;
+
+        const equals = (a: any, b: any) => a?.toString().trim().toLowerCase() === b?.toString().trim().toLowerCase();
+
+        // 1. Build the potential new selection
         const current = { ...this.selectedAttributes() };
-
-        // Find existing key case-insensitively to ensure we toggle/update correctly
         const existingKey = Object.keys(current).find(k => k.trim().toLowerCase() === key.trim().toLowerCase());
+        if (existingKey) delete current[existingKey];
+        current[key] = value;
 
-        if (existingKey && current[existingKey] === value) {
-            delete current[existingKey];
-        } else {
-            // Remove existing key if it has a different case, then set new one
-            if (existingKey) delete current[existingKey];
-            current[key] = value;
+        // 2. Check if this exact combination exists (and is active)
+        const exactMatch = prod.variants.find(v => {
+            if (v.isActive === false) return false;
+            return Object.entries(current).every(([selKey, selValue]) => {
+                const vKey = Object.keys(v.attributes).find(k => equals(k, selKey));
+                return vKey && equals(v.attributes[vKey], selValue);
+            });
+        });
+
+        if (exactMatch) {
+            this.selectionChange.emit(current);
+            return;
         }
 
-        this.selectionChange.emit(current);
+        // 3. Smart Switch: No exact match found for the combination.
+        // Find the first valid (active) variant that has the newly selected value
+        // and switch ALL attributes to match that variant.
+        const smartFallback = prod.variants.find(v => {
+            if (v.isActive === false) return false;
+            const vKey = Object.keys(v.attributes).find(k => equals(k, key));
+            return vKey && equals(v.attributes[vKey], value);
+        });
+
+        if (smartFallback) {
+            this.selectionChange.emit({ ...smartFallback.attributes });
+        } else {
+            // Last resort: if no variant at all has this value (unlikely with disabled logic), 
+            // just emit the partial selection.
+            this.selectionChange.emit(current);
+        }
     }
 
     isAttributeDisabled(key: string, value: string): boolean {
@@ -124,47 +156,17 @@ export class ProductAttributesComponent {
             return false;
         }
 
-        const currentSelection = this.selectedAttributes();
+        const equals = (a: any, b: any) => a?.toString().trim().toLowerCase() === b?.toString().trim().toLowerCase();
 
-        // Helper: case-insensitive equality
-        const equals = (a: string, b: string) => a?.toString().trim().toLowerCase() === b?.toString().trim().toLowerCase();
-
-        // Helper: find key in object case-insensitively
-        const findKey = (obj: any, searchKey: string) => Object.keys(obj).find(k => equals(k, searchKey));
-
-        // 1. Build "other" selections
-        const otherAndKey: { [k: string]: string } = {};
-        let hasOtherSelection = false;
-
-        Object.entries(currentSelection).forEach(([k, v]) => {
-            if (!equals(k, key)) {
-                otherAndKey[k] = v;
-                hasOtherSelection = true;
-            }
+        // To allow "Smart Switch", we only disable if there is NO variant at all (active) 
+        // that possesses this attribute value.
+        const hasAnyActiveVariantWithValue = prod.variants.some(v => {
+            if (v.isActive === false) return false;
+            const vKey = Object.keys(v.attributes).find(k => equals(k, key));
+            return vKey && equals(v.attributes[vKey], value);
         });
 
-        // Always allow if no other selection - ensures base state is fully clickable
-        if (!hasOtherSelection) {
-            return false;
-        }
-
-        // 2. Find variants that match 'otherAndKey'
-        const compatibleVariants = prod.variants.filter(variant => {
-            return Object.entries(otherAndKey).every(([selKey, selValue]) => {
-                const variantKey = findKey(variant.attributes, selKey);
-                if (!variantKey) return false;
-                return equals(variant.attributes[variantKey].toString(), selValue);
-            });
-        });
-
-        // 3. Check if any compatible variant has the value we are testing
-        const hasMatchingVariant = compatibleVariants.some(variant => {
-            const variantKey = findKey(variant.attributes, key);
-            if (!variantKey) return false;
-            return equals(variant.attributes[variantKey].toString(), value);
-        });
-
-        return !hasMatchingVariant;
+        return !hasAnyActiveVariantWithValue;
     }
 
     get Object() { return Object; }
