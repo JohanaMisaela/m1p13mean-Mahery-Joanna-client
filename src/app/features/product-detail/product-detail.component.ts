@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
+import { PromotionService } from '../../core/services/promotion.service';
 import { Product, ProductVariant } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -24,12 +25,14 @@ export class ProductDetailComponent implements OnInit {
   private productService = inject(ProductService);
   private authService = inject(AuthService);
   private cartService = inject(CartService);
+  private promotionService = inject(PromotionService);
 
   product = signal<Product | null>(null);
   isLoading = signal<boolean>(true);
   currentUser = this.authService.currentUser;
   currentImageIndex = signal<number>(0);
   showAddedToCart = signal<boolean>(false);
+  promotions = signal<any[]>([]);
 
   selectedAttributes = signal<{ [key: string]: string }>({});
 
@@ -62,9 +65,29 @@ export class ProductDetailComponent implements OnInit {
 
       return allAttributesPresent;
     }) || null;
-
     return variant;
   });
+
+  currentPromotion = computed(() => {
+    const variant = this.currentVariant();
+    const prod = this.product();
+    const allPromotions = this.promotions();
+
+    if (!prod || allPromotions.length === 0) return null;
+
+    // Check for variant specific promotion first
+    if (variant) {
+      const variantPromo = allPromotions.find(p => p.products?.includes(variant._id));
+      if (variantPromo) return variantPromo;
+    }
+
+    // Check for product level promotion (if product ID is in promotion)
+    const productPromo = allPromotions.find(p => p.products?.includes(prod._id));
+    if (productPromo) return productPromo;
+
+    return null; // No promotion found
+  });
+
 
   isSelectionComplete = computed(() => {
     const prod = this.product();
@@ -79,6 +102,22 @@ export class ProductDetailComponent implements OnInit {
   });
 
   effectivePrice = computed(() => {
+    const variant = this.currentVariant();
+    const promo = this.currentPromotion();
+    let price = this.product()?.price || 0;
+
+    if (variant) {
+      price = variant.price;
+    }
+
+    if (promo) {
+      return price * (1 - promo.discountPercentage / 100);
+    }
+
+    return price;
+  });
+
+  originalPrice = computed(() => {
     const variant = this.currentVariant();
     if (variant) return variant.price;
     return this.product()?.price || 0;
@@ -248,11 +287,31 @@ export class ProductDetailComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
+        if (product.shop) {
+          this.loadPromotions(product.shop._id || product.shop);
+        }
         if (!silent) this.isLoading.set(false);
       },
       error: () => {
         if (!silent) this.isLoading.set(false);
       }
+    });
+  }
+
+  loadPromotions(shopId: string) {
+    if (!shopId) return;
+    this.promotionService.getShopPromotions(shopId).subscribe({
+      next: (res: any) => {
+        const data = Array.isArray(res) ? res : (res.data || []);
+        const activePromotions = data.filter((p: any) => {
+          const now = new Date();
+          const start = new Date(p.startDate);
+          const end = new Date(p.endDate);
+          return p.isActive && now >= start && now <= end;
+        });
+        this.promotions.set(activePromotions);
+      },
+      error: () => this.promotions.set([])
     });
   }
 

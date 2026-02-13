@@ -51,10 +51,10 @@
                         </button>
                         }
 
-                        @if (prod.isOnSale && prod.activePromotion) {
+                        @if (currentPromotion(); as promo) {
                         <div
                             class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold uppercase rounded shadow-md">
-                            -{{ prod.activePromotion.discountPercentage }}%
+                            -{{ promo.discountPercentage }}%
                         </div>
                         }
                         @if (effectiveStock() === 0) {
@@ -121,13 +121,12 @@
                 <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
                     <div>
                         <div class="flex items-baseline gap-3">
-                            @if (prod.isOnSale && prod.activePromotion) {
+                            @if (currentPromotion(); as promo) {
                             <span class="text-3xl font-black text-red-600">
-                                {{ (effectivePrice() * (1 - prod.activePromotion.discountPercentage / 100)) |
-                                number:'1.0-0' }} Ar
+                                {{ effectivePrice() | number:'1.0-0' }} Ar
                             </span>
                             <span class="text-lg text-gray-400 line-through">
-                                {{ effectivePrice() | number:'1.0-0' }} Ar
+                                {{ originalPrice() | number:'1.0-0' }} Ar
                             </span>
                             } @else {
                             <span class="text-3xl font-black text-gray-900">
