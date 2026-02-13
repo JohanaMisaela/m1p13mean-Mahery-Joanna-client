@@ -7,6 +7,7 @@ import { faStore, faEdit, faPowerOff, faCog } from '@fortawesome/free-solid-svg-
 import { ShopService } from '../../../../core/services/shop.service';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ReportService } from '../../../../core/services/report.service';
 import { Shop, ShopResponse } from '../../../../shared/models/product.model';
 import { User } from '../../../../shared/models/user.model';
 
@@ -21,6 +22,7 @@ export class ShopListComponent implements OnInit {
   private readonly shopService = inject(ShopService);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
+  private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
   protected readonly currentUser = this.authService.currentUser;
 
@@ -35,6 +37,7 @@ export class ShopListComponent implements OnInit {
   @Input() onlyMyShops = false;
 
   shops = signal<Shop[]>([]);
+  shopReportCounts = signal<{ [key: string]: number }>({});
   showAddForm = false;
   potentialOwners = signal<User[]>([]);
   errorMessage = signal<string | null>(null);
@@ -78,7 +81,27 @@ export class ShopListComponent implements OnInit {
       this.shops.set(res.data);
       this.totalItems.set(res.total);
       this.totalPages.set(res.totalPages);
+
+      // Fetch report counts for each shop
+      res.data.forEach((shop: any) => {
+        const id = (shop._id || shop.id)?.toString();
+        if (id) {
+          this.reportService.getShopReports(id, { status: 'pending' }).subscribe(reportsRes => {
+            this.shopReportCounts.update(counts => ({
+              ...counts,
+              [id]: reportsRes.total || 0
+            }));
+            console.log('Updated counts for', id, ':', reportsRes.total);
+          });
+        }
+      });
     });
+  }
+
+  getReportCount(shop: any): number {
+    const id = (shop._id || shop.id)?.toString();
+    if (!id) return 0;
+    return this.shopReportCounts()[id] || 0;
   }
 
   loadPotentialOwners() {

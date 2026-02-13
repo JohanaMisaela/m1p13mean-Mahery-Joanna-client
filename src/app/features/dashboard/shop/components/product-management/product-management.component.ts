@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Product, ProductVariant, Category } from '../../../../../shared/models/product.model';
 import { ProductVariantService } from '../../../../../core/services/product-variant.service';
+import { ReportService } from '../../../../../core/services/report.service';
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { ProductFormComponent } from './sub-components/product-form/product-form.component';
 import { ImageManagementModalComponent } from './sub-components/image-management-modal/image-management-modal.component';
@@ -13,9 +14,11 @@ import { ImageManagementModalComponent } from './sub-components/image-management
     imports: [CommonModule, PaginationComponent, FormsModule, ProductFormComponent, ImageManagementModalComponent],
     templateUrl: './product-management.component.html',
 })
-export class ProductManagementComponent {
+export class ProductManagementComponent implements OnChanges {
     private variantService = inject(ProductVariantService);
+    private reportService = inject(ReportService);
 
+    @Input() shopId!: string;
     @Input() products: Product[] = [];
     @Input() categories: Category[] = [];
     @Input() currentPage: number = 1;
@@ -31,6 +34,9 @@ export class ProductManagementComponent {
     @Output() saveNewProduct = new EventEmitter<any>();
     @Output() cancelAddProduct = new EventEmitter<void>();
 
+    productReports = signal<any[]>([]);
+    productReportCounts = signal<{ [key: string]: number }>({});
+
     expandedProductId: string | null = null;
     editingProductId: string | null = null;
 
@@ -40,6 +46,25 @@ export class ProductManagementComponent {
 
     get totalPages(): number {
         return Math.ceil(this.total / this.limit);
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if ((changes['products'] || changes['shopId']) && this.products && this.shopId) {
+            this.loadReportCounts();
+        }
+    }
+
+    loadReportCounts() {
+        this.reportService.getShopReports(this.shopId, { status: 'pending', targetType: 'product' }).subscribe(res => {
+            this.productReports.set(res.data || []);
+
+            // Map counts
+            const counts: { [key: string]: number } = {};
+            this.products.forEach(p => {
+                counts[p._id] = (res.data || []).filter((r: any) => r.targetId === p._id).length;
+            });
+            this.productReportCounts.set(counts);
+        });
     }
 
     toggleExpand(productId: string) {

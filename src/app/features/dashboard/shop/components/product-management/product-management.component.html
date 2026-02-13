@@ -52,72 +52,126 @@
                                     <div *ngIf="expandedProductId === product._id"
                                         class="mt-4 animate-in slide-in-from-top-2 duration-200">
                                         <!-- Expanded Details View -->
-                                        <div class="mt-4 p-4 bg-gray-50/50 rounded-lg border border-gray-100 space-y-4">
-                                            <!-- Categories -->
+                                        <div class="mt-6 p-6 bg-gray-50/50 rounded-xl border border-gray-100 space-y-8">
+                                            <!-- Categories Section -->
                                             <div>
-                                                <h5
-                                                    class="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-widest">
-                                                    Catégories</h5>
+                                                <div class="flex items-center gap-2 mb-3">
+                                                    <span class="w-1 h-3 bg-black rounded-full"></span>
+                                                    <h5
+                                                        class="text-[10px] uppercase font-bold text-gray-400 tracking-[0.15em]">
+                                                        Catégories
+                                                    </h5>
+                                                </div>
                                                 <div class="flex flex-wrap gap-2">
                                                     @if (product.category) {
                                                     <span
-                                                        class="bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded text-[10px] uppercase font-bold shadow-sm">
+                                                        class="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-[10px] uppercase font-bold text-gray-600 hover:border-black hover:text-black transition-all cursor-default shadow-sm">
                                                         {{ product.category.name }}
                                                     </span>
                                                     }
                                                     @for (cat of product.categories; track cat._id) {
                                                     <span
-                                                        class="bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded text-[10px] uppercase font-bold shadow-sm">
+                                                        class="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-[10px] uppercase font-bold text-gray-600 hover:border-black hover:text-black transition-all cursor-default shadow-sm">
                                                         {{ cat.name }}
                                                     </span>
                                                     }
                                                 </div>
                                             </div>
 
-                                            <!-- Variants -->
+                                            <!-- Variants Section -->
                                             <div>
-                                                <h5
-                                                    class="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-widest">
-                                                    Variantes ({{ product.variants?.length || 0 }})</h5>
-                                                <div class="space-y-2">
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="w-1 h-3 bg-black rounded-full"></span>
+                                                        <h5
+                                                            class="text-[10px] uppercase font-bold text-gray-400 tracking-[0.15em]">
+                                                            Variantes ({{ product.variants?.length || 0 }})
+                                                        </h5>
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 gap-3">
                                                     <div *ngFor="let v of product.variants"
-                                                        class="text-xs flex items-center justify-between text-gray-600 bg-white p-3 rounded border border-gray-100 shadow-sm hover:border-gray-200 transition-colors">
-                                                        <div class="flex items-center gap-4">
-                                                            <div class="flex -space-x-1.5 overflow-hidden">
-                                                                <img *ngFor="let img of v.images | slice:0:2"
+                                                        class="group/variant relative flex items-center gap-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-gray-300 hover:shadow-md transition-all duration-300">
+
+                                                        <!-- Variant Status Dot -->
+                                                        <div [class]="v.isActive ? 'bg-green-500' : 'bg-gray-300'"
+                                                            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full transition-colors">
+                                                        </div>
+
+                                                        <!-- Image Preview -->
+                                                        <div
+                                                            class="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
+                                                            <div class="flex -space-x-8 h-full">
+                                                                <img *ngFor="let img of v.images | slice:0:2; let i = index"
                                                                     [src]="img"
-                                                                    class="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover bg-gray-50">
+                                                                    class="w-full h-full object-cover transition-transform group-hover/variant:scale-110"
+                                                                    [style.zIndex]="2-i"
+                                                                    [style.transform]="i > 0 ? 'translateX(10px)' : ''">
                                                             </div>
-                                                            <span
-                                                                class="font-mono text-[10px] bg-gray-50 px-2 py-0.5 rounded border border-gray-100 text-gray-500">
-                                                                {{ v.sku || 'SANS-SKU' }}
-                                                            </span>
-                                                            <div class="flex gap-2 divide-x divide-gray-100">
-                                                                <span *ngFor="let attr of v.attributes | keyvalue"
-                                                                    class="pl-2 first:pl-0 text-gray-500">
-                                                                    {{attr.key}}: <span
-                                                                        class="text-gray-900 font-semibold">{{attr.value}}</span>
-                                                                </span>
+                                                            <div *ngIf="(v.images?.length || 0) > 2"
+                                                                class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white font-bold z-10">
+                                                                +{{v.images.length - 2}}
                                                             </div>
                                                         </div>
-                                                        <div class="flex items-center gap-6">
-                                                            <div class="text-right">
+
+                                                        <!-- Details Grid -->
+                                                        <div class="flex-grow grid grid-cols-4 gap-6 items-center">
+                                                            <!-- SKU & Attributes -->
+                                                            <div class="col-span-2">
                                                                 <div
-                                                                    class="text-[10px] text-gray-400 uppercase font-bold leading-none mb-1">
+                                                                    class="text-[9px] uppercase font-black text-gray-300 tracking-widest mb-1">
+                                                                    Détails</div>
+                                                                <div
+                                                                    class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                                    <span
+                                                                        class="text-[11px] font-mono text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">{{
+                                                                        v.sku || 'SANS-SKU' }}</span>
+                                                                    <div *ngFor="let attr of v.attributes | keyvalue"
+                                                                        class="text-xs text-gray-600">
+                                                                        <span
+                                                                            class="text-gray-400 font-medium">{{attr.key}}:</span>
+                                                                        <span
+                                                                            class="font-bold text-gray-900 ml-1">{{attr.value}}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Stock -->
+                                                            <div class="text-center border-l border-gray-50">
+                                                                <div
+                                                                    class="text-[9px] uppercase font-black text-gray-300 tracking-widest mb-1">
                                                                     Stock</div>
-                                                                <span
-                                                                    [class]="v.stock > 0 ? 'text-gray-900' : 'text-red-500'"
-                                                                    class="font-bold">
+                                                                <div [class]="v.stock > 10 ? 'text-gray-900' : v.stock > 0 ? 'text-orange-500' : 'text-red-500'"
+                                                                    class="text-sm font-black tracking-tight">
                                                                     {{ v.stock }}
-                                                                </span>
+                                                                </div>
                                                             </div>
-                                                            <div class="text-right min-w-[80px]">
+
+                                                            <!-- Price -->
+                                                            <div class="text-right border-l border-gray-50">
                                                                 <div
-                                                                    class="text-[10px] text-gray-400 uppercase font-bold leading-none mb-1">
+                                                                    class="text-[9px] uppercase font-black text-gray-300 tracking-widest mb-1">
                                                                     Prix</div>
-                                                                <span class="font-black text-black">{{ v.price |
-                                                                    currency:'Ar ':'1.0-0' }}</span>
+                                                                <div
+                                                                    class="text-base font-black text-black tracking-tighter">
+                                                                    {{ v.price | currency:'Ar ':'symbol':'1.0-0' }}
+                                                                </div>
                                                             </div>
+                                                        </div>
+
+                                                        <!-- Action Toggle -->
+                                                        <div class="pl-4 border-l border-gray-50">
+                                                            <button (click)="toggleVariantStatus(v)"
+                                                                class="p-2 rounded-lg transition-all hover:bg-gray-50 active:scale-90"
+                                                                [title]="v.isActive ? 'Désactiver la variante' : 'Activer la variante'">
+                                                                <div [class]="v.isActive ? 'bg-black' : 'bg-gray-200'"
+                                                                    class="w-8 h-4 rounded-full relative transition-colors">
+                                                                    <div [class]="v.isActive ? 'translate-x-4' : 'translate-x-1'"
+                                                                        class="absolute top-1 w-2 h-2 rounded-full bg-white transition-transform duration-300 shadow-sm">
+                                                                    </div>
+                                                                </div>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -146,8 +200,9 @@
                             </div>
                             <div *ngIf="!product.averageRating" class="text-[10px] text-gray-300 italic">Aucun avis
                             </div>
-                            <div class="mt-2 text-[10px] font-bold text-red-500" *ngIf="(product.reportCount || 0) > 0">
-                                {{ product.reportCount }} signalements
+                            <div class="mt-2 text-[10px] font-bold text-red-500"
+                                *ngIf="(productReportCounts()[product._id] || 0) > 0">
+                                {{ productReportCounts()[product._id] }} signalement(s)
                             </div>
                         </td>
                         <td class="px-6 py-4 align-top text-right">
