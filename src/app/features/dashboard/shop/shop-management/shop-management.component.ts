@@ -109,6 +109,8 @@ export class ShopManagementComponent implements OnInit {
             limit: this.productLimit()
         }).subscribe((res: any) => {
             const data = Array.isArray(res) ? res : (res.data || []);
+            console.log(data);
+
             this.products.set(data);
             this.productTotal.set(res.total || data.length);
         });
