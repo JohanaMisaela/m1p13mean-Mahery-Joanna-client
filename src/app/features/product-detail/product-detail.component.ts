@@ -274,6 +274,14 @@ export class ProductDetailComponent implements OnInit {
           this.selectedAttributes.set({});
         }
 
+        if (product.shop) {
+          const shopId = typeof product.shop === 'string' ? product.shop : product.shop._id;
+          console.log('Product loaded, loading promotions for shop:', shopId);
+          this.loadPromotions(shopId);
+        } else {
+          console.warn('Product loaded but no shop information found:', product);
+        }
+
         this.currentImageIndex.set(0);
 
         if (!silent) this.isLoading.set(false);
@@ -299,9 +307,11 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadPromotions(shopId: string) {
+    console.log('loadPromotions called with shopId:', shopId);
     if (!shopId) return;
     this.promotionService.getShopPromotions(shopId).subscribe({
       next: (res: any) => {
+        console.log('Promotions loaded for shop', shopId, res);
         const data = Array.isArray(res) ? res : (res.data || []);
         const activePromotions = data.filter((p: any) => {
           const now = new Date();
@@ -309,9 +319,13 @@ export class ProductDetailComponent implements OnInit {
           const end = new Date(p.endDate);
           return p.isActive && now >= start && now <= end;
         });
+        console.log('Active promotions filtered:', activePromotions);
         this.promotions.set(activePromotions);
       },
-      error: () => this.promotions.set([])
+      error: (err) => {
+        console.error('Error loading promotions:', err);
+        this.promotions.set([]);
+      }
     });
   }
 

@@ -54,7 +54,7 @@
                         @if (currentPromotion(); as promo) {
                         <div
                             class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold uppercase rounded shadow-md">
-                            -{{ promo.discountPercentage }}%
+                            -{{ promo.discountPercentage }}% {{promo.name}}
                         </div>
                         }
                         @if (effectiveStock() === 0) {
