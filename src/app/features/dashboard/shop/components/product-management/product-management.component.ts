@@ -88,7 +88,7 @@ export class ProductManagementComponent implements OnChanges {
         }
     }
 
-    onSaveProduct(event: { product: any, variants: any[] }) {
+    onSaveProduct(event: any) {
         this.saveNewProduct.emit(event);
         this.editingProductId = null;
     }

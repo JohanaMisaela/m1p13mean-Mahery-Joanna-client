@@ -122,7 +122,7 @@
                             </div>
                             <!-- Pending Reports Indicator -->
                             <div class="mt-1 text-[10px] font-bold text-red-500" *ngIf="getReportCount(shop) > 0">
-                                {{ getReportCount(shop) }} signalements en attente
+                                {{ getReportCount(shop) }} signalement(s)
                             </div>
                             <div *ngIf="!shop.averageRating && getReportCount(shop) === 0"
                                 class="text-[10px] text-gray-300 italic">

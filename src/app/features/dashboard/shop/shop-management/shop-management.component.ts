@@ -82,7 +82,15 @@ export class ShopManagementComponent implements OnInit {
     }
 
     loadCategories() {
-        this.categoryService.getCategories().subscribe(c => this.categories.set(c));
+        console.log('ShopManagement: Loading categories...');
+        this.categoryService.getCategories().subscribe({
+            next: (res: any) => {
+                const data = Array.isArray(res) ? res : (res.data || []);
+                console.log('ShopManagement: Categories parsed:', data);
+                this.categories.set(data);
+            },
+            error: (err) => console.error('ShopManagement: Error loading categories:', err)
+        });
     }
 
     loadUserRating(shopId: string) {
