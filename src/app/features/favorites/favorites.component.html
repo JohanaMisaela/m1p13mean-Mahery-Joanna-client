@@ -37,7 +37,7 @@
             @if (!isLoading() && activeTab() === 'products') {
             <div class="flex-1 flex flex-col">
                 @if (products().length > 0) {
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-4">
                     @for (product of products(); track product._id) {
                     <app-product-card [product]="product"></app-product-card>
                     }

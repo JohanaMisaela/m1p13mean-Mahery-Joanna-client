@@ -1,8 +1,12 @@
 import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
+import { switchMap, map, catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
 import { ShopService } from '../../core/services/shop.service';
+import { ProductVariantService } from '../../core/services/product-variant.service';
+import { PromotionService } from '../../core/services/promotion.service';
 import { Product, Shop } from '../../shared/models/product.model';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ShopCardComponent } from '../../shared/components/shop-card/shop-card.component';
@@ -21,6 +25,8 @@ import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-ico
 export class FavoritesComponent implements OnInit {
   private productService = inject(ProductService);
   private shopService = inject(ShopService);
+  private productVariantService = inject(ProductVariantService);
+  private promotionService = inject(PromotionService);
   private router = inject(Router);
 
   activeTab = signal<'products' | 'shops'>('products');
@@ -52,7 +58,6 @@ export class FavoritesComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Initialization logic that doesn't require HTTP calls
   }
 
   switchTab(tab: 'products' | 'shops') {
@@ -79,7 +84,92 @@ export class FavoritesComponent implements OnInit {
     this.productService.getFavorites(params).subscribe({
       next: (res: any) => {
         const data = Array.isArray(res) ? res : (res.data || []);
-        this.products.set(data);
+        console.log('Favorites raw response:', res);
+        console.log('Favorites data list:', data);
+
+        // Hydrate products with full details to get variants and promotions (since backend favorites endpoint is lightweight)
+        const hydratedProducts: Product[] = [];
+        let completed = 0;
+
+        if (data.length === 0) {
+          console.log('No favorites found.');
+          this.products.set([]);
+          this.totalProducts.set(0);
+          this.checkLoading();
+          return;
+        }
+
+        console.log('Starting hydration for', data.length, 'products');
+
+        data.forEach((p: Product) => {
+          console.log('Fetching full details for product:', p._id);
+
+          this.productService.getProduct(p._id).pipe(
+            switchMap(fullProduct => {
+              const shopId = typeof fullProduct.shop === 'string' ? fullProduct.shop : fullProduct.shop._id;
+              return forkJoin({
+                product: of(fullProduct),
+                variants: this.productVariantService.getVariantsByProduct(fullProduct._id).pipe(catchError(() => of([]))),
+                promotions: this.promotionService.getShopPromotions(shopId).pipe(catchError(() => of([])))
+              });
+            })
+          ).subscribe({
+            next: ({ product, variants, promotions }) => {
+              // Enrich product with variants and promotions logic (mirrors backend getAllProducts)
+              const relevantIds = [product._id, ...variants.map((v: any) => v._id)];
+              const now = new Date();
+
+              const activePromos = (Array.isArray(promotions) ? promotions : promotions.data || [])
+                .filter((promo: any) => {
+                  const start = new Date(promo.startDate);
+                  const end = new Date(promo.endDate);
+                  return promo.isActive && now >= start && now <= end &&
+                    promo.products?.some((id: string) => relevantIds.includes(id));
+                })
+                .sort((a: any, b: any) => {
+                  if (b.discountPercentage !== a.discountPercentage) {
+                    return b.discountPercentage - a.discountPercentage;
+                  }
+                  return a.name.localeCompare(b.name);
+                });
+
+              const bestPromo = activePromos.length > 0 ? activePromos[0] : null;
+              const firstVariant = variants[0];
+
+              const enrichedProduct: Product = {
+                ...product,
+                variants: variants, // properties might differ lightly but okay for card
+                price: product.price || firstVariant?.price || 0,
+                stock: product.stock || variants.reduce((acc: number, v: any) => acc + v.stock, 0) || 0,
+                images: (product.images && product.images.length > 0) ? product.images : (firstVariant?.images || []),
+                activePromotion: bestPromo ? {
+                  name: bestPromo.name,
+                  discountPercentage: bestPromo.discountPercentage,
+                  endDate: bestPromo.endDate
+                } : undefined,
+                isOnSale: !!bestPromo
+              };
+
+              hydratedProducts.push(enrichedProduct);
+              completed++;
+              if (completed === data.length) {
+                const ordered = data.map((orig: Product) => hydratedProducts.find(hp => hp._id === orig._id));
+                const finalProducts = ordered.filter((x: Product | undefined): x is Product => !!x);
+                console.log('Hydration complete. Final products:', finalProducts);
+                this.products.set(finalProducts);
+                this.checkLoading();
+              }
+            },
+            error: (err) => {
+              console.error('Error hydrating product', p._id, err);
+              completed++;
+              if (completed === data.length) {
+                this.products.set(hydratedProducts);
+                this.checkLoading();
+              }
+            }
+          });
+        });
 
         if (!Array.isArray(res)) {
           this.totalProductPages.set(res.totalPages || 1);
@@ -87,8 +177,6 @@ export class FavoritesComponent implements OnInit {
         } else {
           this.totalProducts.set(data.length);
         }
-
-        this.checkLoading();
       },
       error: () => this.checkLoading()
     });
