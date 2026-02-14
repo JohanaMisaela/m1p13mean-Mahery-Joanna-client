@@ -340,7 +340,10 @@ export class ProductDetailComponent implements OnInit {
     const prod = this.product();
     if (!prod) return;
 
-    this.cartService.addToCart(prod, this.currentVariant(), 1);
+    const promotion = this.currentPromotion();
+    const promotionId = promotion?._id;
+
+    this.cartService.addToCart(prod, this.currentVariant(), 1, promotionId);
     this.showAddedToCart.set(true);
     setTimeout(() => this.showAddedToCart.set(false), 3000);
   }
