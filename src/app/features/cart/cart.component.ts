@@ -5,11 +5,12 @@ import { CartService, CartItem } from '../../core/services/cart.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrash, faMinus, faPlus, faArrowRight, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { CheckoutModalComponent } from './checkout-modal/checkout-modal.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterLink, FontAwesomeModule, EmptyStateComponent],
+  imports: [CommonModule, RouterLink, FontAwesomeModule, EmptyStateComponent, CheckoutModalComponent],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss'
 })
@@ -17,6 +18,7 @@ export class CartComponent {
   cartService = inject(CartService);
 
   cartItems = this.cartService.items;
+  showCheckoutModal = signal<boolean>(false);
 
   // Calculate subtotal, discount, and total
   cartSummary = computed(() => {
@@ -67,5 +69,18 @@ export class CartComponent {
 
   removeItem(item: CartItem) {
     this.cartService.removeFromCart(item.product._id, item.variant?._id);
+  }
+
+  openCheckoutModal() {
+    this.showCheckoutModal.set(true);
+  }
+
+  closeCheckoutModal() {
+    this.showCheckoutModal.set(false);
+  }
+
+  onOrderSuccess() {
+    this.showCheckoutModal.set(false);
+    // Optionally redirect to orders page
   }
 }

@@ -28,6 +28,13 @@
                 <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'myShops'"></span>
                 <span>Mes Boutique</span>
             </button>
+
+            <button (click)="activeView.set('myOrders')" [class.bg-gray-50]="activeView() === 'myOrders'"
+                [class.text-black]="activeView() === 'myOrders'"
+                class="w-full text-left px-6 py-4 text-xs uppercase tracking-widest text-gray-400 hover:text-black hover:bg-gray-50 transition-all flex items-center space-x-4">
+                <span class="w-1.5 h-1.5 rounded-full" [class.bg-black]="activeView() === 'myOrders'"></span>
+                <span>Mes Commandes</span>
+            </button>
             }
 
         </nav>
@@ -49,6 +56,7 @@
                         @case ('shops') { Boutiques }
                         @case ('users') { Utilisateurs }
                         @case ('myShops') { Mes Boutiques }
+                        @case ('myOrders') { Mes Commandes }
                         }
                     </h1>
                     <div class="h-0.5 w-12 bg-black"></div>
@@ -61,6 +69,8 @@
                     <app-user-list></app-user-list>
                     } @else if (activeView() === 'myShops') {
                     <app-shop-list [onlyMyShops]="true"></app-shop-list>
+                    } @else if (activeView() === 'myOrders') {
+                    <app-order-list></app-order-list>
                     }
                 </div>
 

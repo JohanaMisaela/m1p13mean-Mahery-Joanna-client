@@ -1,0 +1,43 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Order, OrderResponse } from '../../shared/models/order.model';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class OrderService {
+    private http = inject(HttpClient);
+    private apiUrl = `${environment.apiUrl}/orders`;
+
+    getShopOrders(shopId: string, query: any = {}): Observable<OrderResponse> {
+        let params = new HttpParams();
+        params = params.set('shopId', shopId);
+        Object.keys(query).forEach(key => {
+            if (query[key]) {
+                params = params.set(key, query[key]);
+            }
+        });
+        return this.http.get<OrderResponse>(`${this.apiUrl}/shop`, { params });
+    }
+
+    getMyOrders(query: any = {}): Observable<OrderResponse> {
+        let params = new HttpParams();
+        Object.keys(query).forEach(key => {
+            if (query[key]) {
+                params = params.set(key, query[key]);
+            }
+        });
+
+        return this.http.get<OrderResponse>(`${this.apiUrl}/my-orders`, { params });
+    }
+
+    updateOrderStatus(orderId: string, status: string): Observable<Order> {
+        return this.http.put<Order>(`${this.apiUrl}/${orderId}/status`, { status });
+    }
+
+    createOrder(orderData: any): Observable<Order> {
+        return this.http.post<Order>(this.apiUrl, orderData);
+    }
+}

@@ -124,9 +124,7 @@
 
                     @case ('orders') {
                     <div class="bg-white p-8 border border-gray-100 shadow-sm">
-                        <div class="py-20 text-center border-2 border-dashed border-gray-100">
-                            <p class="text-gray-400 italic">Gestion des commandes à venir...</p>
-                        </div>
+                        <app-order-list [shopId]="shop()?._id!"></app-order-list>
                     </div>
                     }
 

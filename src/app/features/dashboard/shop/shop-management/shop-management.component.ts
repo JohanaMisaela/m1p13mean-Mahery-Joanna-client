@@ -15,11 +15,12 @@ import { FooterComponent } from '../../../../core/layout/footer/footer.component
 import { ProductManagementComponent } from '../components/product-management/product-management.component';
 import { PromotionManagementComponent } from '../components/promotion-management/promotion-management.component';
 import { ReportManagementComponent } from '../components/report-management/report-management.component';
+import { OrderListComponent } from '../components/order-list/order-list.component';
 
 @Component({
     selector: 'app-shop-management',
     standalone: true,
-    imports: [CommonModule, RouterModule, ShopHeaderComponent, ShopSettingsFormComponent, ProductManagementComponent, PromotionManagementComponent, ReportManagementComponent, FooterComponent],
+    imports: [CommonModule, RouterModule, ShopHeaderComponent, ShopSettingsFormComponent, ProductManagementComponent, PromotionManagementComponent, ReportManagementComponent, OrderListComponent, FooterComponent],
     templateUrl: './shop-management.component.html',
     styles: [`
         :host {

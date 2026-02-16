@@ -122,13 +122,19 @@
                 </dl>
 
                 <div class="mt-6">
-                    <button type="button"
+                    <button type="button" (click)="openCheckoutModal()"
                         class="w-full bg-black border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-black">
                         Commander
                     </button>
                 </div>
             </section>
         </div>
+
+        <!-- Checkout Modal -->
+        @if (showCheckoutModal()) {
+        <app-checkout-modal (close)="closeCheckoutModal()" (orderSuccess)="onOrderSuccess()"></app-checkout-modal>
+        }
+
         } @else {
         <app-empty-state title="Votre panier est vide" message="Découvrez nos produits et commencez vos achats !"
             buttonText="Commencer le shopping" [icon]="icons.bag" [link]="['/']">

@@ -7,11 +7,12 @@ import { ShopService } from '../../core/services/shop.service';
 import { ShopListComponent } from './components/shop-list/shop-list.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { FooterComponent } from '../../core/layout/footer/footer.component';
+import { OrderListComponent } from './shop/components/order-list/order-list.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ShopListComponent, UserListComponent, FooterComponent],
+  imports: [CommonModule, ShopListComponent, UserListComponent, OrderListComponent, FooterComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -21,7 +22,7 @@ export class DashboardComponent {
   private readonly router = inject(Router);
 
   protected readonly currentUser = this.authService.currentUser;
-  activeView = signal<'shops' | 'users' | 'myShops'>('shops');
+  activeView = signal<'shops' | 'users' | 'myShops' | 'myOrders'>('shops');
 
   constructor() {
     const user = this.authService.currentUser();
