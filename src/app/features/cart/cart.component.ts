@@ -60,6 +60,8 @@ export class CartComponent {
     const newQuantity = item.quantity + change;
     if (newQuantity > 0) {
       this.cartService.updateQuantity(item.product._id, item.variant?._id, newQuantity);
+    } else {
+      this.cartService.removeFromCart(item.product._id, item.variant?._id);
     }
   }
 

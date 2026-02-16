@@ -75,6 +75,15 @@ export class CartService {
     }
 
     removeFromCart(productId: string, variantId?: string): void {
+        // Optimistic update
+        const previousItems = this.cartItems();
+        const updatedItems = previousItems.filter(item => {
+            const pMatch = item.product._id === productId;
+            const vMatch = variantId ? item.variant?._id === variantId : !item.variant;
+            return !(pMatch && vMatch);
+        });
+        this.cartItems.set(updatedItems);
+
         let url = `${this.API_URL}/cart/${productId}`;
         if (variantId) {
             url += `?variantId=${variantId}`;
@@ -85,13 +94,29 @@ export class CartService {
                 if (cart && cart.items) {
                     this.cartItems.set(cart.items);
                 }
-                this.loadCart();
             },
-            error: (err) => console.error('Failed to remove from cart', err)
+            error: (err) => {
+                console.error('Failed to remove from cart', err);
+                // Revert on error
+                this.cartItems.set(previousItems);
+            }
         });
     }
 
     updateQuantity(productId: string, variantId: string | undefined, quantity: number): void {
+        const previousItems = this.cartItems();
+
+        // Optimistic update
+        const updatedItems = previousItems.map(item => {
+            const pMatch = item.product._id === productId;
+            const vMatch = variantId ? item.variant?._id === variantId : !item.variant;
+            if (pMatch && vMatch) {
+                return { ...item, quantity };
+            }
+            return item;
+        });
+        this.cartItems.set(updatedItems);
+
         let url = `${this.API_URL}/cart/${productId}`;
         if (variantId) {
             url += `?variantId=${variantId}`;
@@ -102,9 +127,12 @@ export class CartService {
                 if (cart && cart.items) {
                     this.cartItems.set(cart.items);
                 }
-                this.loadCart();
             },
-            error: (err) => console.error('Failed to update quantity', err)
+            error: (err) => {
+                console.error('Failed to update quantity', err);
+                // Revert
+                this.cartItems.set(previousItems);
+            }
         });
     }
 
