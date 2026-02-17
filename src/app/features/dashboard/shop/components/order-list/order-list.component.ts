@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { OrderService } from '../../../../../core/services/order.service';
 import { Order, OrderResponse } from '../../../../../shared/models/order.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faEye, faShoppingBag, faClock, faCheck, faTruck, faTimes, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faShoppingBag, faClock, faCheck, faTruck, faTimes, faChevronLeft, faChevronRight, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-order-list',
@@ -24,14 +24,17 @@ export class OrderListComponent implements OnInit {
     loading = signal<boolean>(false);
 
     // Icons
-    faEye = faEye;
-    faShoppingBag = faShoppingBag;
-    faClock = faClock;
-    faCheck = faCheck;
-    faTruck = faTruck;
-    faTimes = faTimes;
-    faChevronLeft = faChevronLeft;
-    faChevronRight = faChevronRight;
+    icons = {
+        eye: faEye,
+        bag: faShoppingBag,
+        clock: faClock,
+        check: faCheck,
+        truck: faTruck,
+        times: faTimes,
+        left: faChevronLeft,
+        right: faChevronRight,
+        marker: faMapMarkerAlt
+    };
 
     ngOnInit(): void {
         this.loadOrders();
@@ -74,6 +77,14 @@ export class OrderListComponent implements OnInit {
             case 'CANCELLED': return 'bg-red-100 text-red-800';
             default: return 'bg-gray-100 text-gray-800';
         }
+    }
+
+    getAttributesString(attributes: any): string {
+        if (!attributes) return '';
+        if (Array.isArray(attributes)) {
+            return attributes.map(attr => `${attr.name}: ${attr.value}`).join(', ');
+        }
+        return Object.entries(attributes).map(([key, value]) => `${key}: ${value}`).join(', ');
     }
 
     getStatusLabel(status: string): string {

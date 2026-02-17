@@ -1,4 +1,5 @@
 export interface OrderItem {
+    _id: string;
     product: any; // Ideally should be Product interface
     variant?: any; // Ideally should be ProductVariant interface
     quantity: number;

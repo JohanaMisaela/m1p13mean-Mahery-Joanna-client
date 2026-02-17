@@ -30,7 +30,7 @@ export class OrderService {
             }
         });
 
-        return this.http.get<OrderResponse>(`${this.apiUrl}/my-orders`, { params });
+        return this.http.get<OrderResponse>(`${this.apiUrl}/my`, { params });
     }
 
     updateOrderStatus(orderId: string, status: string): Observable<Order> {

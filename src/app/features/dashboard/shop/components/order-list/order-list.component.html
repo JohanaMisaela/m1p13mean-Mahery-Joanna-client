@@ -56,6 +56,41 @@
                             <span class="text-xs text-gray-400">{{ order.user?.email }}</span>
                         </div>
                     </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        @for (item of order.items; track item._id) {
+                        <div class="flex items-center space-x-4 mb-2 last:mb-0">
+                            <div class="w-10 h-14 bg-gray-50 flex-shrink-0 border border-gray-100 rounded-sm">
+                                <img *ngIf="item.variant?.images?.[0] || item.product?.images?.[0]"
+                                    [src]="item.variant?.images?.[0] || item.product?.images?.[0]"
+                                    class="w-full h-full object-cover">
+                                <div *ngIf="!item.variant?.images?.[0] && !item.product?.images?.[0]"
+                                    class="w-full h-full flex items-center justify-center text-gray-200">
+                                    <fa-icon [icon]="icons.bag"></fa-icon>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">{{ item.product?.name }}</p>
+                                <p *ngIf="item.variant?.attributes?.length"
+                                    class="text-[10px] text-gray-400 uppercase tracking-tighter">
+                                    {{ getAttributesString(item.variant.attributes) }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ item.quantity }} x {{ item.price | currency:'Ar ':'code':'1.0-0' }}
+                                </p>
+                            </div>
+                        </div>
+                        }
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        <div class="flex items-start space-x-3">
+                            <fa-icon [icon]="icons.marker" class="text-gray-300 text-xs mt-1"></fa-icon>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <p class="font-medium text-gray-900">{{ order.shippingAddress?.street }}</p>
+                                <p>{{ order.shippingAddress?.zip }} {{ order.shippingAddress?.city }}</p>
+                                <p>{{ order.shippingAddress?.country }}</p>
+                            </div>
+                        </div>
+                    </td>
                     <td class="px-6 py-4 font-medium text-gray-900">
                         Ar {{ order.totalAmount | number }}
                     </td>
