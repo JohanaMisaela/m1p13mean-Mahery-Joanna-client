@@ -53,13 +53,14 @@ import { OrderItemComponent } from '../../../../../shared/components/order-item/
                   <span class="text-sm font-medium text-gray-900 leading-tight">
                     {{ (order.user?.name || '') + ' ' + (order.user?.surname || '') | titlecase }}
                   </span>
+                  <span *ngIf="order.user?.username" class="text-[10px] text-gray-400">@{{ order.user.username }}</span>
                 </div>
               </div>
               <div class="flex items-center space-x-3 group">
                 <div class="w-8 h-8 rounded-full bg-purple-50 text-purple-400 flex items-center justify-center text-xs group-hover:bg-purple-100 transition-colors">
                   <fa-icon [icon]="faEnvelope"></fa-icon>
                 </div>
-                <span class="text-xs text-gray-500 truncate">{{ order.user?.email || "Pas d'email" }}</span>
+                <span class="text-xs text-gray-500 truncate">{{ order.user?.email || 'Aucun email' }}</span>
               </div>
               <div *ngIf="order.user?.contact" class="flex items-center space-x-3 group">
                 <div class="w-8 h-8 rounded-full bg-green-50 text-green-400 flex items-center justify-center text-xs group-hover:bg-green-100 transition-colors">
