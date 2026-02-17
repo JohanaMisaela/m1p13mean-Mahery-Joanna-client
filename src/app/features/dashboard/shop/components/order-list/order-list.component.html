@@ -1,4 +1,64 @@
 <div class="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden">
+    <div class="bg-white border-b border-gray-100 p-6">
+        <div class="flex flex-wrap items-center gap-6">
+            <!-- Text Filters -->
+            <div class="flex-grow grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                <div class="relative">
+                    <label
+                        class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Client</label>
+                    <input type="text" [ngModel]="filterClient()"
+                        (ngModelChange)="filterClient.set($event); applyFilters()" placeholder="Nom ou Email..."
+                        class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                </div>
+
+                <div class="relative">
+                    <label
+                        class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Article</label>
+                    <input type="text" [ngModel]="filterItem()" (ngModelChange)="filterItem.set($event); applyFilters()"
+                        placeholder="Nom du produit..."
+                        class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                </div>
+
+                <div class="relative">
+                    <label
+                        class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Statut</label>
+                    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); applyFilters()"
+                        class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none appearance-none">
+                        <option value="">Tous les statuts</option>
+                        <option value="PENDING">En attente</option>
+                        <option value="CONFIRMED">Confirmée</option>
+                        <option value="SHIPPED">Expédiée</option>
+                        <option value="CANCELLED">Annulée</option>
+                    </select>
+                </div>
+
+                <div class="relative">
+                    <label class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Total
+                        Min</label>
+                    <input type="number" [ngModel]="filterMinTotal()"
+                        (ngModelChange)="filterMinTotal.set($event); applyFilters()" placeholder="Ar 0"
+                        class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                </div>
+
+                <div class="relative">
+                    <label class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Total
+                        Max</label>
+                    <input type="number" [ngModel]="filterMaxTotal()"
+                        (ngModelChange)="filterMaxTotal.set($event); applyFilters()" placeholder="Ar Max"
+                        class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-end self-end pb-0.5">
+                <button (click)="resetFilters()"
+                    class="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black font-bold transition-colors">
+                    Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
         <div>
@@ -21,7 +81,7 @@
     } @else if (orders().length === 0) {
     <!-- Empty State -->
     <app-empty-state title="Aucune commande" message="Vous n'avez pas encore reçu de commandes clients."
-        [icon]="icons.left">
+        [icon]="icons.bag">
         <!-- icon will be overwritten anyway if not specified correctly, but icons object is small now -->
     </app-empty-state>
     } @else {
@@ -34,18 +94,9 @@
     </div>
 
     <!-- Pagination -->
-    <div class="p-4 border-t border-gray-100 flex items-center justify-between">
-        <button [disabled]="page() === 1" (click)="changePage(page() - 1)"
-            class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            <fa-icon [icon]="icons.left" class="mr-2"></fa-icon> Précédent
-        </button>
-        <span class="text-sm text-gray-500">
-            Page <span class="font-medium text-gray-900">{{ page() }}</span> sur {{ totalPages() }}
-        </span>
-        <button [disabled]="page() === totalPages()" (click)="changePage(page() + 1)"
-            class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            Suivant <fa-icon [icon]="icons.right" class="ml-2"></fa-icon>
-        </button>
+    <div class="px-8 py-6 border-t border-gray-100 bg-white">
+        <app-pagination [currentPage]="page()" [totalPages]="totalPages()" (pageChange)="changePage($event)">
+        </app-pagination>
     </div>
     }
 </div>

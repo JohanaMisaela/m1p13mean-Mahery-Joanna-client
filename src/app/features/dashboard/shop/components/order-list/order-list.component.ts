@@ -1,16 +1,18 @@
 import { Component, inject, signal, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../../../../core/services/order.service';
 import { Order, OrderResponse } from '../../../../../shared/models/order.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { ShopOrderCardComponent } from '../order-card/shop-order-card.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 
 @Component({
     selector: 'app-order-list',
     standalone: true,
-    imports: [CommonModule, FontAwesomeModule, ShopOrderCardComponent, EmptyStateComponent],
+    imports: [CommonModule, FormsModule, FontAwesomeModule, ShopOrderCardComponent, EmptyStateComponent, PaginationComponent],
     templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
@@ -25,10 +27,16 @@ export class OrderListComponent implements OnInit {
     totalPages = signal<number>(1);
     loading = signal<boolean>(false);
 
+    // Filters
+    filterClient = signal<string>('');
+    filterItem = signal<string>('');
+    filterStatus = signal<string>('');
+    filterMinTotal = signal<number | null>(null);
+    filterMaxTotal = signal<number | null>(null);
+
     // Icons
     icons = {
-        left: faChevronLeft,
-        right: faChevronRight
+        bag: faShoppingBag
     };
 
     ngOnInit(): void {
@@ -41,8 +49,19 @@ export class OrderListComponent implements OnInit {
             return;
         }
 
+        const query: any = {
+            page: this.page(),
+            limit: this.limit()
+        };
+
+        if (this.filterClient()) query.client = this.filterClient();
+        if (this.filterItem()) query.item = this.filterItem();
+        if (this.filterStatus()) query.status = this.filterStatus();
+        if (this.filterMinTotal() !== null) query.minTotal = this.filterMinTotal();
+        if (this.filterMaxTotal() !== null) query.maxTotal = this.filterMaxTotal();
+
         this.loading.set(true);
-        this.orderService.getShopOrders(this.shopId, { page: this.page(), limit: this.limit() })
+        this.orderService.getShopOrders(this.shopId, query)
             .subscribe({
                 next: (res: OrderResponse) => {
                     this.orders.set(res.data);
@@ -55,6 +74,21 @@ export class OrderListComponent implements OnInit {
                     this.loading.set(false);
                 }
             });
+    }
+
+    applyFilters() {
+        this.page.set(1);
+        this.loadOrders();
+    }
+
+    resetFilters() {
+        this.filterClient.set('');
+        this.filterItem.set('');
+        this.filterStatus.set('');
+        this.filterMinTotal.set(null);
+        this.filterMaxTotal.set(null);
+        this.page.set(1);
+        this.loadOrders();
     }
 
     changePage(newPage: number) {
