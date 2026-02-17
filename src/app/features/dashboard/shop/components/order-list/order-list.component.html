@@ -16,117 +16,21 @@
     <!-- Loading State -->
     @if (loading()) {
     <div class="p-12 flex justify-center items-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
     </div>
     } @else if (orders().length === 0) {
     <!-- Empty State -->
-    <div class="p-16 text-center">
-        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <fa-icon [icon]="icons.bag" class="text-gray-300 text-2xl"></fa-icon>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-1">Aucune commande</h3>
-        <p class="text-gray-500 text-sm">Vous n'avez pas encore reçu de commandes.</p>
-    </div>
+    <app-empty-state title="Aucune commande" message="Vous n'avez pas encore reçu de commandes clients."
+        [icon]="icons.left">
+        <!-- icon will be overwritten anyway if not specified correctly, but icons object is small now -->
+    </app-empty-state>
     } @else {
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="border-b border-gray-100 bg-gray-50/30 text-xs uppercase tracking-wider text-gray-500">
-                    <th class="px-6 py-4 font-medium">Référence</th>
-                    <th class="px-6 py-4 font-medium">Date</th>
-                    <th class="px-6 py-4 font-medium">Client</th>
-                    <th class="px-6 py-4 font-medium">Total</th>
-                    <th class="px-6 py-4 font-medium">Statut</th>
-                    <th class="px-6 py-4 font-medium text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50 text-sm">
-                @for (order of orders(); track order._id) {
-                <tr class="hover:bg-gray-50/50 transition-colors group">
-                    <td class="px-6 py-4 font-medium text-gray-900">
-                        #{{ order._id | slice:-6 | uppercase }}
-                    </td>
-                    <td class="px-6 py-4 text-gray-500">
-                        {{ order.createdAt | date:'dd MMM yyyy, HH:mm' }}
-                    </td>
-                    <td class="px-6 py-4 text-gray-600">
-                        <div class="flex flex-col">
-                            <span class="font-medium text-gray-900">{{ order.user?.username || 'Utilisateur' }}</span>
-                            <span class="text-xs text-gray-400">{{ order.user?.email }}</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-gray-600">
-                        @for (item of order.items; track item._id) {
-                        <div class="flex items-center space-x-4 mb-2 last:mb-0">
-                            <div class="w-10 h-14 bg-gray-50 flex-shrink-0 border border-gray-100 rounded-sm">
-                                <img *ngIf="item.variant?.images?.[0] || item.product?.images?.[0]"
-                                    [src]="item.variant?.images?.[0] || item.product?.images?.[0]"
-                                    class="w-full h-full object-cover">
-                                <div *ngIf="!item.variant?.images?.[0] && !item.product?.images?.[0]"
-                                    class="w-full h-full flex items-center justify-center text-gray-200">
-                                    <fa-icon [icon]="icons.bag"></fa-icon>
-                                </div>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium">{{ item.product?.name }}</p>
-                                <p *ngIf="item.variant?.attributes?.length"
-                                    class="text-[10px] text-gray-400 uppercase tracking-tighter">
-                                    {{ getAttributesString(item.variant.attributes) }}
-                                </p>
-                                <p class="text-xs text-gray-500">
-                                    {{ item.quantity }} x {{ item.price | currency:'Ar ':'code':'1.0-0' }}
-                                </p>
-                            </div>
-                        </div>
-                        }
-                    </td>
-                    <td class="px-6 py-4 text-gray-600">
-                        <div class="flex items-start space-x-3">
-                            <fa-icon [icon]="icons.marker" class="text-gray-300 text-xs mt-1"></fa-icon>
-                            <div class="text-xs text-gray-600 space-y-1">
-                                <p class="font-medium text-gray-900">{{ order.shippingAddress?.street }}</p>
-                                <p>{{ order.shippingAddress?.zip }} {{ order.shippingAddress?.city }}</p>
-                                <p>{{ order.shippingAddress?.country }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-medium text-gray-900">
-                        Ar {{ order.totalAmount | number }}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                            [ngClass]="getStatusClass(order.status) + ' bg-opacity-10 border-opacity-20'">
-                            {{ getStatusLabel(order.status) }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div
-                            class="flex justify-end items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <!-- Status Actions -->
-                            @if (order.status === 'PENDING') {
-                            <button (click)="updateStatus(order, 'CONFIRMED')"
-                                class="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Confirmer">
-                                <fa-icon [icon]="icons.check"></fa-icon>
-                            </button>
-                            <button (click)="updateStatus(order, 'CANCELLED')"
-                                class="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Annuler">
-                                <fa-icon [icon]="icons.times"></fa-icon>
-                            </button>
-                            }
-                            @if (order.status === 'CONFIRMED') {
-                            <button (click)="updateStatus(order, 'SHIPPED')"
-                                class="p-1.5 text-purple-600 hover:bg-purple-50 rounded" title="Expédier">
-                                <fa-icon [icon]="icons.truck"></fa-icon>
-                            </button>
-                            }
-                        </div>
-                    </td>
-                </tr>
-                <!-- Expandable details could go here -->
-                }
-            </tbody>
-        </table>
+    <!-- Orders List -->
+    <div class="p-6 space-y-6 bg-gray-50/30">
+        @for (order of orders(); track order._id) {
+        <app-shop-order-card [order]="order" (statusUpdate)="updateStatus($event)">
+        </app-shop-order-card>
+        }
     </div>
 
     <!-- Pagination -->

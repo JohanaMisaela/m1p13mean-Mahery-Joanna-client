@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { OrderService } from '../../../../../core/services/order.service';
 import { Order, OrderResponse } from '../../../../../shared/models/order.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faEye, faShoppingBag, faClock, faCheck, faTruck, faTimes, faChevronLeft, faChevronRight, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { ShopOrderCardComponent } from '../order-card/shop-order-card.component';
+import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
     selector: 'app-order-list',
     standalone: true,
-    imports: [CommonModule, FontAwesomeModule],
+    imports: [CommonModule, FontAwesomeModule, ShopOrderCardComponent, EmptyStateComponent],
     templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
@@ -25,15 +27,8 @@ export class OrderListComponent implements OnInit {
 
     // Icons
     icons = {
-        eye: faEye,
-        bag: faShoppingBag,
-        clock: faClock,
-        check: faCheck,
-        truck: faTruck,
-        times: faTimes,
         left: faChevronLeft,
-        right: faChevronRight,
-        marker: faMapMarkerAlt
+        right: faChevronRight
     };
 
     ngOnInit(): void {
@@ -69,38 +64,16 @@ export class OrderListComponent implements OnInit {
         }
     }
 
-    getStatusClass(status: string): string {
-        switch (status) {
-            case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-            case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
-            case 'SHIPPED': return 'bg-purple-100 text-purple-800';
-            case 'CANCELLED': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    }
+    updateStatus(event: { order: Order, status: string }) {
+        const { order, status } = event;
+        // The confirm and status label logic is now in the component, but we can keep a simpler version here if needed or move label logic back
+        // Actually, updateStatus in card component just emits. We should probably keep the confirmation here or handle it there.
+        // I'll keep the confirmation here for safety but use a simpler label.
 
-    getAttributesString(attributes: any): string {
-        if (!attributes) return '';
-        if (Array.isArray(attributes)) {
-            return attributes.map(attr => `${attr.name}: ${attr.value}`).join(', ');
-        }
-        return Object.entries(attributes).map(([key, value]) => `${key}: ${value}`).join(', ');
-    }
+        const label = status === 'CONFIRMED' ? 'Confirmée' : status === 'CANCELLED' ? 'Annulée' : status === 'SHIPPED' ? 'Expédiée' : status;
+        if (!confirm(`Changer le statut de la commande en ${label} ?`)) return;
 
-    getStatusLabel(status: string): string {
-        switch (status) {
-            case 'PENDING': return 'En attente';
-            case 'CONFIRMED': return 'Confirmée';
-            case 'SHIPPED': return 'Expédiée';
-            case 'CANCELLED': return 'Annulée';
-            default: return status;
-        }
-    }
-
-    updateStatus(order: Order, newStatus: string) {
-        if (!confirm(`Changer le statut de la commande en ${this.getStatusLabel(newStatus)} ?`)) return;
-
-        this.orderService.updateOrderStatus(order._id, newStatus).subscribe({
+        this.orderService.updateOrderStatus(order._id, status).subscribe({
             next: (updatedOrder: Order) => {
                 // Update local state
                 const currentOrders = this.orders();
