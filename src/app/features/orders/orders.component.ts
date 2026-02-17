@@ -16,13 +16,15 @@ import {
   faBoxOpen
 } from '@fortawesome/free-solid-svg-icons';
 
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { FormsModule } from '@angular/forms';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { OrderCardComponent } from './components/order-card/order-card.component';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, FontAwesomeModule, EmptyStateComponent, OrderCardComponent],
+  imports: [CommonModule, RouterLink, FontAwesomeModule, FormsModule, EmptyStateComponent, OrderCardComponent, PaginationComponent],
   templateUrl: './orders.component.html',
   styles: [`
     .order-card {
@@ -40,6 +42,17 @@ export class OrdersComponent implements OnInit {
   currentUser = this.authService.currentUser;
   orders = signal<Order[]>([]);
   loading = signal<boolean>(false);
+  total = signal<number>(0);
+  page = signal<number>(1);
+  limit = signal<number>(10);
+  totalPages = signal<number>(1);
+
+  // Filters
+  filterShop = signal<string>('');
+  filterItem = signal<string>('');
+  filterStatus = signal<string>('');
+  filterMinTotal = signal<number | null>(null);
+  filterMaxTotal = signal<number | null>(null);
 
   icons = {
     bag: faShoppingBag,
@@ -58,9 +71,22 @@ export class OrdersComponent implements OnInit {
 
   loadOrders() {
     this.loading.set(true);
-    this.orderService.getMyOrders({ limit: 50 }).subscribe({
+    const query: any = {
+      page: this.page(),
+      limit: this.limit()
+    };
+
+    if (this.filterShop()) query.shop = this.filterShop();
+    if (this.filterItem()) query.item = this.filterItem();
+    if (this.filterStatus()) query.status = this.filterStatus();
+    if (this.filterMinTotal() !== null) query.minTotal = this.filterMinTotal();
+    if (this.filterMaxTotal() !== null) query.maxTotal = this.filterMaxTotal();
+
+    this.orderService.getMyOrders(query).subscribe({
       next: (res: OrderResponse) => {
         this.orders.set(res.data);
+        this.total.set(res.total);
+        this.totalPages.set(res.totalPages || Math.ceil(res.total / this.limit()));
         this.loading.set(false);
       },
       error: (err) => {
@@ -68,6 +94,28 @@ export class OrdersComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  applyFilters() {
+    this.page.set(1);
+    this.loadOrders();
+  }
+
+  resetFilters() {
+    this.filterShop.set('');
+    this.filterItem.set('');
+    this.filterStatus.set('');
+    this.filterMinTotal.set(null);
+    this.filterMaxTotal.set(null);
+    this.page.set(1);
+    this.loadOrders();
+  }
+
+  changePage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalPages()) {
+      this.page.set(newPage);
+      this.loadOrders();
+    }
   }
 
   cancelOrder(orderId: string) {

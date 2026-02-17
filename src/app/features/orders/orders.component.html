@@ -8,6 +8,65 @@
     </div>
 
     <div class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Filter Bar -->
+        <div class="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden mb-12">
+            <div class="p-6">
+                <div class="flex flex-wrap items-center gap-6">
+                    <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="relative">
+                            <label
+                                class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Boutique</label>
+                            <input type="text" [ngModel]="filterShop()"
+                                (ngModelChange)="filterShop.set($event); applyFilters()" placeholder="Nom du shop..."
+                                class="w-full bg-gray-50 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                        </div>
+                        <div class="relative">
+                            <label
+                                class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Article</label>
+                            <input type="text" [ngModel]="filterItem()"
+                                (ngModelChange)="filterItem.set($event); applyFilters()" placeholder="Produit..."
+                                class="w-full bg-gray-50 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                        </div>
+                        <div class="relative">
+                            <label
+                                class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Statut</label>
+                            <select [ngModel]="filterStatus()"
+                                (ngModelChange)="filterStatus.set($event); applyFilters()"
+                                class="w-full bg-gray-50 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none appearance-none">
+                                <option value="">Tous les statuts</option>
+                                <option value="PENDING">En attente</option>
+                                <option value="CONFIRMED">Confirmée</option>
+                                <option value="SHIPPED">Expédiée</option>
+                                <option value="CANCELLED">Annulée</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label
+                                    class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Min</label>
+                                <input type="number" [ngModel]="filterMinTotal()"
+                                    (ngModelChange)="filterMinTotal.set($event); applyFilters()" placeholder="Ar"
+                                    class="w-full bg-gray-50 border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block">Max</label>
+                                <input type="number" [ngModel]="filterMaxTotal()"
+                                    (ngModelChange)="filterMaxTotal.set($event); applyFilters()" placeholder="Ar"
+                                    class="w-full bg-gray-50 border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-end self-end pb-0.5">
+                        <button (click)="resetFilters()"
+                            class="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black font-bold transition-colors">
+                            Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Loading State -->
         <div *ngIf="loading()" class="flex justify-center items-center py-20">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
@@ -15,7 +74,7 @@
 
         <!-- Empty State -->
         <app-empty-state *ngIf="!loading() && orders().length === 0" title="Aucune commande trouvée"
-            message="Vous n'avez pas encore passé de commande sur notre boutique." buttonText="Commencer mes achats"
+            message="Nous n'avons trouvé aucune commande correspondant à vos filtres." buttonText="Commencer mes achats"
             [link]="['/']" [icon]="icons.empty">
         </app-empty-state>
 
@@ -23,6 +82,12 @@
         <div *ngIf="!loading() && orders().length > 0" class="space-y-8">
             <app-order-card *ngFor="let order of orders()" [order]="order" (cancel)="cancelOrder($event)">
             </app-order-card>
+
+            <!-- Pagination -->
+            <div class="pt-8 flex justify-center border-t border-gray-100">
+                <app-pagination [currentPage]="page()" [totalPages]="totalPages()" (pageChange)="changePage($event)">
+                </app-pagination>
+            </div>
         </div>
     </div>
 </div>

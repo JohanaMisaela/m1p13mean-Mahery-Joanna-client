@@ -14,19 +14,24 @@ export class OrderService {
     getShopOrders(shopId: string, query: any = {}): Observable<OrderResponse> {
         let params = new HttpParams();
         params = params.set('shopId', shopId);
+
         Object.keys(query).forEach(key => {
-            if (query[key]) {
-                params = params.set(key, query[key]);
+            const value = query[key];
+            if (value !== undefined && value !== null && value !== '') {
+                params = params.set(key, value.toString());
             }
         });
+
         return this.http.get<OrderResponse>(`${this.apiUrl}/shop`, { params });
     }
 
     getMyOrders(query: any = {}): Observable<OrderResponse> {
         let params = new HttpParams();
+
         Object.keys(query).forEach(key => {
-            if (query[key]) {
-                params = params.set(key, query[key]);
+            const value = query[key];
+            if (value !== undefined && value !== null && value !== '') {
+                params = params.set(key, value.toString());
             }
         });
 
