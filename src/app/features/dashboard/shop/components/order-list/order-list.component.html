@@ -22,7 +22,7 @@
     <!-- Empty State -->
     <div class="p-16 text-center">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <fa-icon [icon]="faShoppingBag" class="text-gray-300 text-2xl"></fa-icon>
+            <fa-icon [icon]="icons.bag" class="text-gray-300 text-2xl"></fa-icon>
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-1">Aucune commande</h3>
         <p class="text-gray-500 text-sm">Vous n'avez pas encore reçu de commandes.</p>
@@ -107,17 +107,17 @@
                             @if (order.status === 'PENDING') {
                             <button (click)="updateStatus(order, 'CONFIRMED')"
                                 class="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Confirmer">
-                                <fa-icon [icon]="faCheck"></fa-icon>
+                                <fa-icon [icon]="icons.check"></fa-icon>
                             </button>
                             <button (click)="updateStatus(order, 'CANCELLED')"
                                 class="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Annuler">
-                                <fa-icon [icon]="faTimes"></fa-icon>
+                                <fa-icon [icon]="icons.times"></fa-icon>
                             </button>
                             }
                             @if (order.status === 'CONFIRMED') {
                             <button (click)="updateStatus(order, 'SHIPPED')"
                                 class="p-1.5 text-purple-600 hover:bg-purple-50 rounded" title="Expédier">
-                                <fa-icon [icon]="faTruck"></fa-icon>
+                                <fa-icon [icon]="icons.truck"></fa-icon>
                             </button>
                             }
                         </div>
@@ -133,14 +133,14 @@
     <div class="p-4 border-t border-gray-100 flex items-center justify-between">
         <button [disabled]="page() === 1" (click)="changePage(page() - 1)"
             class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            <fa-icon [icon]="faChevronLeft" class="mr-2"></fa-icon> Précédent
+            <fa-icon [icon]="icons.left" class="mr-2"></fa-icon> Précédent
         </button>
         <span class="text-sm text-gray-500">
             Page <span class="font-medium text-gray-900">{{ page() }}</span> sur {{ totalPages() }}
         </span>
         <button [disabled]="page() === totalPages()" (click)="changePage(page() + 1)"
             class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            Suivant <fa-icon [icon]="faChevronRight" class="ml-2"></fa-icon>
+            Suivant <fa-icon [icon]="icons.right" class="ml-2"></fa-icon>
         </button>
     </div>
     }
