@@ -16,10 +16,13 @@ import {
   faBoxOpen
 } from '@fortawesome/free-solid-svg-icons';
 
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { OrderCardComponent } from './components/order-card/order-card.component';
+
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, FontAwesomeModule],
+  imports: [CommonModule, RouterLink, FontAwesomeModule, EmptyStateComponent, OrderCardComponent],
   templateUrl: './orders.component.html',
   styles: [`
     .order-card {
