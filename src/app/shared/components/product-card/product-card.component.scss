@@ -1,0 +1,55 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.group {
+    // Smoother shadows than default Tailwind
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+// Custom easing for image transitions
+img {
+    will-change: transform;
+    transition: transform 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+// Line clamp utility fallback if not available
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// Refined typography
+h3 a {
+    letter-spacing: -0.01em;
+}
+
+// Quick action button styling refinements
+button {
+    cursor: pointer;
+    
+    &:active {
+        transform: scale(0.98);
+    }
+}
+
+// Special badge styling
+.badge-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}

@@ -1,87 +1,104 @@
 <div
-    class="group bg-white border border-gray-100 hover:border-black transition-all duration-300 relative flex flex-col h-full rounded-lg overflow-hidden shadow-sm hover:shadow-md">
+    class="group h-full bg-white flex flex-col relative transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-transparent hover:border-gray-100">
 
-    <!-- Image -->
-    <div class="relative aspect-[4/5] bg-gray-100 overflow-hidden cursor-pointer"
+    <!-- Image Container -->
+    <div class="relative aspect-[1/1] overflow-hidden bg-[#f9f9f9] cursor-pointer"
         [routerLink]="['/product', product._id]">
+        <!-- Product Image -->
         <img [src]="product.images?.[0] || 'assets/placeholder.png'" [alt]="product.name"
-            class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500">
+            class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110">
 
-        @if (product.stock === 0) {
-        <div class="absolute inset-0 bg-white/60 flex items-center justify-center">
-            <span class="bg-black text-white px-3 py-1 text-xs font-bold uppercase">Épuisé</span>
+        <!-- Hover Overlay -->
+        <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
         </div>
-        }
 
-        @if (product.isOnSale && product.activePromotion) {
+        <!-- Badges -->
+        <div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
+            @if (product.isOnSale && product.activePromotion) {
+            <span class="bg-black text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1">
+                -{{ product.activePromotion.discountPercentage }}%
+            </span>
+            }
+            @if (product.stock === 0) {
+            <span
+                class="bg-white/90 backdrop-blur-sm text-black text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 border border-black/10">
+                Sold Out
+            </span>
+            }
+        </div>
+
+        <!-- Quick Interaction Buttons -->
         <div
-            class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs font-bold uppercase rounded shadow-sm">
-            -{{ product.activePromotion?.discountPercentage }}%
+            class="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out flex gap-2 z-20">
+            <button
+                class="flex-1 bg-black text-white py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-900 transition-colors flex items-center justify-center gap-2">
+                <fa-icon [icon]="icons.bag" class="text-xs"></fa-icon>
+                Quick Add
+            </button>
+            <button
+                class="w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 border border-black/5 shadow-sm">
+                <fa-icon [icon]="icons.heartRegular"></fa-icon>
+            </button>
         </div>
-        }
     </div>
 
-    <!-- Details -->
-    <div class="p-4 flex flex-col flex-1">
-        <!-- Shop Info -->
-        @if (product.shop) {
-        <div class="mb-2 flex items-center gap-2 text-xs text-gray-500">
-            <fa-icon [icon]="icons.shop"></fa-icon>
-            <span class="font-bold truncate max-w-[150px]" [title]="product.shop?.name || ''">
-                {{ product.shop?.name || 'Boutique' }}
-            </span>
-        </div>
-        }
-
-        <!-- Category -->
-        <div class="flex flex-wrap gap-1 mb-1 min-h-[1.5rem]">
+    <!-- Content -->
+    <div class="p-6 flex flex-col flex-1">
+        <!-- Shop & Category -->
+        <div class="flex justify-between items-start mb-3">
+            @if (product.shop) {
+            <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                <fa-icon [icon]="icons.shop" class="text-[8px]"></fa-icon>
+                <span class="truncate max-w-[100px]">{{ product.shop?.name }}</span>
+            </div>
+            }
             @if (product.category) {
-            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
-                {{ product.category.name || 'Catégorie' }}
+            <span class="text-[9px] font-medium text-gray-400 uppercase tracking-tighter">
+                {{ product.category.name }}
             </span>
-            } @else if (product.categories && product.categories.length > 0) {
-            @for (cat of product.categories; track cat._id) {
-            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
-                {{ cat.name }}
-            </span>
-            }
-            } @else {
-            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Aucune catégorie</span>
             }
         </div>
 
-        <h3 class="text-sm font-bold uppercase text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]" [title]="product.name">
-            <a [routerLink]="['/product', product._id]" class="hover:underline decoration-1 underline-offset-2">
+        <!-- Title -->
+        <h3 class="text-sm font-semibold text-black mb-1.5 line-clamp-1 group-hover:underline transition-all">
+            <a [routerLink]="['/product', product._id]">
                 {{ product.name }}
             </a>
         </h3>
 
-        <!-- Description Preview -->
-        <p class="text-xs text-gray-500 line-clamp-2 mb-2">
+        <!-- Description -->
+        <p class="text-[11px] text-gray-400 line-clamp-2 mb-4 leading-relaxed font-light">
             {{ product.description }}
         </p>
 
-        <!-- Rating -->
-        <div class="flex items-center gap-1 mb-3">
-            @for (star of getStarArray(product.averageRating || 0); track $index) {
-            <fa-icon [icon]="icons.star" [class.text-yellow-400]="star" [class.text-gray-200]="!star"
-                class="text-xs"></fa-icon>
-            }
-            <span class="text-xs text-gray-400 ml-1">({{ product.totalRatings || 0 }})</span>
-        </div>
-
-        <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
+        <!-- Bottom Row (Price & Rating) -->
+        <div class="mt-auto flex items-end justify-between">
+            <!-- Price Display -->
             <div class="flex flex-col">
                 @if (product.isOnSale && product.activePromotion) {
-                <span class="text-xs text-gray-400 line-through">{{ product.price | currency:'MGA':'Ar ':'1.0-0'
-                    }}</span>
-                <span class="text-lg font-bold text-red-600">
-                    {{ getDiscountedPrice(product.price || 0, product.activePromotion?.discountPercentage || 0) |
+                <span class="text-[10px] text-gray-400 line-through mb-0.5">
+                    {{ product.price | currency:'MGA':'Ar ':'1.0-0' }}
+                </span>
+                <span class="text-base font-bold text-black">
+                    {{ getDiscountedPrice(product.price || 0, product.activePromotion.discountPercentage || 0) |
                     currency:'MGA':'Ar ':'1.0-0' }}
                 </span>
                 } @else {
-                <span class="text-lg font-bold">{{ product.price | currency:'MGA':'Ar ':'1.0-0' }}</span>
+                <span class="text-base font-bold text-black">
+                    {{ product.price | currency:'MGA':'Ar ':'1.0-0' }}
+                </span>
                 }
+            </div>
+
+            <!-- Rating -->
+            <div class="flex flex-col items-end">
+                <div class="flex items-center gap-0.5 mb-0.5">
+                    @for (star of getStarArray(product.averageRating || 0); track $index) {
+                    <fa-icon [icon]="icons.star" [class.text-yellow-400]="star" [class.text-gray-100]="!star"
+                        class="text-[10px]"></fa-icon>
+                    }
+                </div>
+                <span class="text-[9px] text-gray-300 font-medium">({{ product.totalRatings || 0 }} reviews)</span>
             </div>
         </div>
     </div>

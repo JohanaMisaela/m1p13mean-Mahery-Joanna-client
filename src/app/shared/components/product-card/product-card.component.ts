@@ -2,7 +2,9 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCartPlus, faStar, faStore } from '@fortawesome/free-solid-svg-icons';
+import { faCartPlus, faStar, faStore, faHeart, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+// Triggering rebuild after package installation
 import { Product } from '../../models/product.model';
 
 @Component({
@@ -18,7 +20,10 @@ export class ProductCardComponent {
   protected icons = {
     cart: faCartPlus,
     star: faStar,
-    shop: faStore
+    shop: faStore,
+    heart: faHeart,
+    heartRegular: faHeartRegular,
+    bag: faShoppingBag
   };
 
   getStarArray(rating: number): number[] {
