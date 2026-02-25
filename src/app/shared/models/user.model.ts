@@ -27,6 +27,12 @@ export interface RegisterRequest {
     password: string;
     contact?: string;
     role?: 'admin' | 'shop' | 'user';
+    address?: {
+        street: string;
+        city: string;
+        zip: string;
+        country: string;
+    };
 }
 
 export interface UserAddress {
