@@ -1,86 +1,102 @@
-<header class="bg-white shadow-sm w-full">
-    <div class="max-w-4/5 mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-12">
-            <a routerLink="/" class="text-2xl font-bold text-gray-900 no-underline hover:text-gray-700 cursor-pointer">
-                E-Commerce
-            </a>
-
-
-        </div>
-
-
-
-        <div class="flex items-center gap-4">
-            @if (currentUser()) {
-            <div class="relative">
-                <button (click)="toggleMenu()" class="flex items-center gap-6 p-2 rounded-full transition-colors ">
-                    <span class="hidden md:block font-medium text-gray-700">{{ currentUser()?.name }} {{
-                        currentUser()?.surname }}</span>
-                    <fa-icon [icon]="isMenuOpen ? icons.close : icons.menu" class="text-xl text-gray-700"></fa-icon>
-
-                </button>
-
-                @if (isMenuOpen) {
-                <div class="fixed inset-0 z-10" (click)="closeMenu()"></div>
-
-                <div
-                    class="absolute right-0 mt-3 w-60 bg-white rounded-xl shadow-2xl ring-1 ring-black ring-opacity-5 z-20 overflow-hidden origin-top-right transform transition-all duration-200">
-
-                    <div class="py-2">
-
-                        @if (currentUser()?.role === 'admin' || currentUser()?.role === 'shop') {
-                        <a routerLink="/dashboard" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.dashboard" class="w-4"></fa-icon>
-                            <span class="font-medium">Administration</span>
-                        </a>
-                        }
-
-                        <a routerLink="/profil" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.user" class="w-4"></fa-icon>
-                            <span class="font-medium">Profil</span>
-                        </a>
-
-                        <a routerLink="/cart" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.cart" class="w-4"></fa-icon>
-                            <span class="font-medium">Panier</span>
-                        </a>
-                        <a routerLink="/orders" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.orders" class="w-4"></fa-icon>
-                            <span class="font-medium">Commandes</span>
-                        </a>
-                        <a routerLink="/favorites" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.heart" class="w-4"></fa-icon>
-                            <span class="font-medium">Favoris</span>
-                        </a>
-                        <a routerLink="/profil" (click)="closeMenu()"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
-                            <fa-icon [icon]="icons.settings" class="w-4"></fa-icon>
-                            <span class="font-medium">Paramètres</span>
-                        </a>
-
-
-                        <div class="border-t border-gray-100 my-1 mx-2"></div>
-
-                        <button (click)="logout()"
-                            class="w-full text-left flex items-center gap-3 px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                            <fa-icon [icon]="icons.logout" class="w-4"></fa-icon>
-                            <span class="font-medium">Déconnexion</span>
-                        </button>
-                    </div>
-                </div>
-                }
-            </div>
-            } @else {
-            <a routerLink="/auth/login"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium no-underline inline-block">
-                Connexion
-            </a>
-            }
-        </div>
+<header class="w-full">
+  <div class="max-w-4/5 mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
+    <!-- Logo -->
+    <div class="flex items-center">
+      <a routerLink="/" class="logo-text group no-underline">
+        <span class="logo-accent">E</span>-Commerce
+      </a>
     </div>
+
+    <!-- Right Side Actions -->
+    <div class="flex items-center gap-6">
+      @if (currentUser()) {
+        <div class="relative">
+          <button
+            (click)="toggleMenu()"
+            class="user-profile-trigger"
+            [class.is-active]="isMenuOpen"
+            aria-label="User menu"
+          >
+            <div class="avatar-placeholder">
+              <fa-icon [icon]="isMenuOpen ? icons.close : icons.user"></fa-icon>
+            </div>
+          </button>
+
+          @if (isMenuOpen) {
+            <div class="modal-backdrop" (click)="closeMenu()"></div>
+
+            <div class="premium-dropdown z-20">
+              <!-- User Profile Header -->
+              <div class="user-profile-header">
+                <div class="user-avatar-large">
+                  {{ currentUser()?.name?.[0] }}{{ currentUser()?.surname?.[0] }}
+                </div>
+                <div class="user-details">
+                  <span class="user-name"
+                    >{{ currentUser()?.name }} {{ currentUser()?.surname }}</span
+                  >
+                  <div class="user-email">
+                    <fa-icon [icon]="icons.envelope"></fa-icon>
+                    <span>{{ currentUser()?.email }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dropdown-links">
+                @if (currentUser()?.role === 'admin' || currentUser()?.role === 'shop') {
+                  <a routerLink="/dashboard" (click)="closeMenu()" class="dropdown-link accent">
+                    <fa-icon [icon]="icons.dashboard"></fa-icon>
+                    <span>Administration</span>
+                  </a>
+                }
+
+                <div class="link-group">
+                  <a routerLink="/profil" (click)="closeMenu()" class="dropdown-link">
+                    <fa-icon [icon]="icons.user"></fa-icon>
+                    <span>Mon Profil</span>
+                  </a>
+
+                  <a routerLink="/cart" (click)="closeMenu()" class="dropdown-link">
+                    <fa-icon [icon]="icons.cart"></fa-icon>
+                    <span>Mon Panier</span>
+                  </a>
+
+                  <a routerLink="/orders" (click)="closeMenu()" class="dropdown-link">
+                    <fa-icon [icon]="icons.orders"></fa-icon>
+                    <span>Mes Commandes</span>
+                  </a>
+
+                  <a routerLink="/favorites" (click)="closeMenu()" class="dropdown-link">
+                    <fa-icon [icon]="icons.heart"></fa-icon>
+                    <span>Mes Favoris</span>
+                  </a>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="link-group">
+                  <a routerLink="/profil" (click)="closeMenu()" class="dropdown-link secondary">
+                    <fa-icon [icon]="icons.settings"></fa-icon>
+                    <span>Paramètres</span>
+                  </a>
+
+                  <button (click)="logout()" class="dropdown-link logout">
+                    <fa-icon [icon]="icons.logout"></fa-icon>
+                    <span>Déconnexion</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <a
+          routerLink="/auth/login"
+          class="px-6 py-2.5 bg-[#0f172a] hover:bg-black text-white rounded-full transition-all duration-300 font-semibold no-underline text-sm shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5"
+        >
+          Connexion
+        </a>
+      }
+    </div>
+  </div>
 </header>

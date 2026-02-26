@@ -56,7 +56,7 @@ importers:
     devDependencies:
       '@angular/build':
         specifier: ^21.1.2
-        version: 21.1.2(7077d5337c052802d57a3034f5fa5afe)
+        version: 21.1.2(ww3oxqlquhxkmhl7vdeslbty5y)
       '@angular/cli':
         specifier: ^21.1.2
         version: 21.1.2(@types/node@20.19.30)(chokidar@5.0.0)(hono@4.11.7)
@@ -3238,7 +3238,7 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@angular/build@21.1.2(7077d5337c052802d57a3034f5fa5afe)':
+  '@angular/build@21.1.2(ww3oxqlquhxkmhl7vdeslbty5y)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2101.2(chokidar@5.0.0)

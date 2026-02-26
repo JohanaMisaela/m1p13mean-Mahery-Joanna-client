@@ -1,5 +1,4 @@
 export const environment = {
-    production: true,
-    apiUrl: 'https://ecommerce-back-node-express-mongo.vercel.app/api'
-
+  production: true,
+  apiUrl: 'https://m1p13mean-mahery-joanna.vercel.app/api',
 };
