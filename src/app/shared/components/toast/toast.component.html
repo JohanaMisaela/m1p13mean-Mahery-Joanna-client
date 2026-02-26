@@ -1,0 +1,16 @@
+<div class="toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast-card" [ngClass]="toast.type" role="alert">
+      <div class="toast-icon">
+        <fa-icon [icon]="icons[toast.type]"></fa-icon>
+      </div>
+      <div class="toast-content">
+        <p class="toast-message">{{ toast.message }}</p>
+      </div>
+      <button class="toast-close" (click)="remove(toast.id)" aria-label="Close">
+        <fa-icon [icon]="icons.close"></fa-icon>
+      </button>
+      <div class="toast-progress" [style.animation-duration.ms]="toast.duration"></div>
+    </div>
+  }
+</div>

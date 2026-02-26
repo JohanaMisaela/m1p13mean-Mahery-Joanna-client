@@ -1,85 +1,113 @@
-<div class="h-full bg-gray-50 flex flex-col overflow-hidden">
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <h1 class="text-3xl font-light text-gray-900 mb-2">Mes Favoris</h1>
-            <p class="text-gray-500">Retrouvez tous vos produits et boutiques préférés.</p>
-        </div>
-
-        <!-- Tabs -->
-        <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-            <div class="flex space-x-8">
-                <button (click)="switchTab('products')"
-                    [class]="'pb-4 border-b-2 font-medium text-sm transition-colors ' +
-                    (activeTab() === 'products' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700')">
-                    Produits ({{ totalProducts() }})
-                </button>
-                <button (click)="switchTab('shops')"
-                    [class]="'pb-4 border-b-2 font-medium text-sm transition-colors ' +
-                    (activeTab() === 'shops' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700')">
-                    Boutiques ({{ totalShops() }})
-                </button>
-            </div>
-        </div>
+<div class="min-h-full bg-gray-50 flex flex-col">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 shrink-0">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <h1 class="text-3xl font-light text-gray-900 mb-2">Mes Favoris</h1>
+      <p class="text-gray-500">Retrouvez tous vos produits et boutiques préférés.</p>
     </div>
 
-    <div class="flex-1 overflow-y-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 h-full flex flex-col">
+    <!-- Tabs -->
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div class="flex space-x-8">
+        <button
+          (click)="switchTab('products')"
+          [class]="
+            'pb-4 border-b-2 font-medium text-sm transition-colors ' +
+            (activeTab() === 'products'
+              ? 'border-black text-black'
+              : 'border-transparent text-gray-500 hover:text-gray-700')
+          "
+        >
+          Produits ({{ totalProducts() }})
+        </button>
+        <button
+          (click)="switchTab('shops')"
+          [class]="
+            'pb-4 border-b-2 font-medium text-sm transition-colors ' +
+            (activeTab() === 'shops'
+              ? 'border-black text-black'
+              : 'border-transparent text-gray-500 hover:text-gray-700')
+          "
+        >
+          Boutiques ({{ totalShops() }})
+        </button>
+      </div>
+    </div>
+  </div>
 
-            <!-- Loading State -->
-            @if (isLoading()) {
+  <div class="">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex flex-col">
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="flex-1 flex items-center justify-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+        </div>
+      }
+
+      <!-- Products Tab -->
+      @if (!isLoading() && activeTab() === 'products') {
+        <div class="flex-1 flex flex-col">
+          @if (products().length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-4">
+              @for (product of products(); track product._id) {
+                <app-product-card [product]="product"></app-product-card>
+              }
+            </div>
+          } @else {
             <div class="flex-1 flex items-center justify-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+              <app-empty-state
+                title="Aucun produit favori"
+                message="Vous n'avez pas encore ajouté de produits à vos favoris."
+                buttonText="Découvrir des produits"
+                [icon]="icons.heart"
+                (action)="navigateToHome()"
+              >
+              </app-empty-state>
             </div>
-            }
-
-            <!-- Products Tab -->
-            @if (!isLoading() && activeTab() === 'products') {
-            <div class="flex-1 flex flex-col">
-                @if (products().length > 0) {
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-4">
-                    @for (product of products(); track product._id) {
-                    <app-product-card [product]="product"></app-product-card>
-                    }
-                </div>
-                } @else {
-                <div class="flex-1 flex items-center justify-center">
-                    <app-empty-state title="Aucun produit favori"
-                        message="Vous n'avez pas encore ajouté de produits à vos favoris."
-                        buttonText="Découvrir des produits" [icon]="icons.heart" (action)="navigateToHome()">
-                    </app-empty-state>
-                </div>
-                }
-            </div>
-
-            <app-pagination [currentPage]="currentProductPage()" [totalPages]="totalProductPages()"
-                (pageChange)="onProductPageChange($event)"></app-pagination>
-            }
-
-            <!-- Shops Tab -->
-            @if (!isLoading() && activeTab() === 'shops') {
-            <div class="flex-1 flex flex-col">
-                @if (shops().length > 0) {
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-4">
-                    @for (shop of shops(); track shop._id) {
-                    <app-shop-card [shop]="shop" [showFavoriteButton]="true" [isFavorite]="true"
-                        (favoriteToggle)="toggleShopFavorite($event)"></app-shop-card>
-                    }
-                </div>
-                } @else {
-                <div class="flex-1 flex items-center justify-center">
-                    <app-empty-state title="Aucune boutique favorite"
-                        message="Vous n'avez pas encore ajouté de boutiques à vos favoris."
-                        buttonText="Parcourir les boutiques" [icon]="icons.store" (action)="navigateToShops()">
-                    </app-empty-state>
-                </div>
-                }
-            </div>
-
-            <app-pagination [currentPage]="currentShopPage()" [totalPages]="totalShopPages()"
-                (pageChange)="onShopPageChange($event)"></app-pagination>
-            }
-
+          }
         </div>
+
+        <app-pagination
+          [currentPage]="currentProductPage()"
+          [totalPages]="totalProductPages()"
+          (pageChange)="onProductPageChange($event)"
+        ></app-pagination>
+      }
+
+      <!-- Shops Tab -->
+      @if (!isLoading() && activeTab() === 'shops') {
+        <div class="flex-1 flex flex-col">
+          @if (shops().length > 0) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-4">
+              @for (shop of shops(); track shop._id) {
+                <app-shop-card
+                  [shop]="shop"
+                  [showFavoriteButton]="true"
+                  [isFavorite]="true"
+                  (favoriteToggle)="toggleShopFavorite($event)"
+                ></app-shop-card>
+              }
+            </div>
+          } @else {
+            <div class="flex-1 flex items-center justify-center">
+              <app-empty-state
+                title="Aucune boutique favorite"
+                message="Vous n'avez pas encore ajouté de boutiques à vos favoris."
+                buttonText="Parcourir les boutiques"
+                [icon]="icons.store"
+                (action)="navigateToShops()"
+              >
+              </app-empty-state>
+            </div>
+          }
+        </div>
+
+        <app-pagination
+          [currentPage]="currentShopPage()"
+          [totalPages]="totalShopPages()"
+          (pageChange)="onShopPageChange($event)"
+        ></app-pagination>
+      }
     </div>
+  </div>
 </div>

@@ -1,8 +1,19 @@
+<app-toast />
 <app-header class="w-full shrink-0" />
-<main class="flex-grow flex flex-col relative min-h-0 min-w-0" [class.overflow-y-auto]="!hasSidebar()"
-    [class.overflow-hidden]="hasSidebar()">
+<main
+  class="flex-grow flex flex-col relative min-h-0 min-w-0"
+  [class.overflow-y-auto]="!hasSidebar()"
+  [class.overflow-hidden]="hasSidebar()"
+>
+  <div
+    class="flex-grow flex flex-col min-h-0"
+    [class.h-full]="hasSidebar()"
+    [class.min-h-full]="!hasSidebar()"
+  >
     <router-outlet />
+  </div>
+
+  @if (!hasSidebar()) {
+    <app-footer class="shrink-0" />
+  }
 </main>
-@if (!hasSidebar()) {
-<app-footer class="shrink-0" />
-}

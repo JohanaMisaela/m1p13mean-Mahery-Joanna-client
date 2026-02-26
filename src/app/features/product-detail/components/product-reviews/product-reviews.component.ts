@@ -1,242 +1,263 @@
-
-import { Component, Input, Output, EventEmitter, inject, signal, OnInit, computed, effect, afterNextRender } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  inject,
+  signal,
+  OnInit,
+  computed,
+  effect,
+  afterNextRender,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../../../core/services/product.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStar, faComment, faUser, faTimes, faTrash, faCamera, faEdit } from '@fortawesome/free-solid-svg-icons';
+import {
+  faStar,
+  faComment,
+  faUser,
+  faTimes,
+  faTrash,
+  faCamera,
+  faEdit,
+} from '@fortawesome/free-solid-svg-icons';
 import { User } from '../../../../shared/models/user.model';
 
 @Component({
-    selector: 'app-product-reviews',
-    standalone: true,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, FontAwesomeModule],
-    templateUrl: './product-reviews.component.html',
-    styleUrls: ['./product-reviews.component.scss']
+  selector: 'app-product-reviews',
+  standalone: true,
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FontAwesomeModule],
+  templateUrl: './product-reviews.component.html',
+  styleUrls: ['./product-reviews.component.scss'],
 })
 export class ProductReviewsComponent implements OnInit {
-    @Input({ required: true }) productId!: string;
-    @Input() currentUser: User | null = null;
-    @Output() reviewsUpdated = new EventEmitter<void>();
+  @Input({ required: true }) productId!: string;
+  @Input() currentUser: User | null = null;
+  @Output() reviewsUpdated = new EventEmitter<void>();
 
-    private productService = inject(ProductService);
-    private fb = inject(FormBuilder);
+  private productService = inject(ProductService);
+  private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
 
-    comments = signal<any[]>([]);
-    userRating = signal<number>(0);
+  comments = signal<any[]>([]);
+  userRating = signal<number>(0);
 
-    selectedImages = signal<string[]>([]);
-    editSelectedImages = signal<string[]>([]);
-    editingCommentId = signal<string | null>(null);
+  selectedImages = signal<string[]>([]);
+  editSelectedImages = signal<string[]>([]);
+  editingCommentId = signal<string | null>(null);
 
-    commentForm: FormGroup;
-    editCommentForm: FormGroup;
+  commentForm: FormGroup;
+  editCommentForm: FormGroup;
 
-    icons = {
-        star: faStar,
-        comment: faComment,
-        user: faUser,
-        close: faTimes,
-        trash: faTrash,
-        camera: faCamera,
-        edit: faEdit
+  icons = {
+    star: faStar,
+    comment: faComment,
+    user: faUser,
+    close: faTimes,
+    trash: faTrash,
+    camera: faCamera,
+    edit: faEdit,
+  };
+
+  constructor() {
+    this.commentForm = this.fb.group({
+      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]],
+    });
+
+    this.editCommentForm = this.fb.group({
+      comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]],
+    });
+
+    afterNextRender(() => {
+      if (this.productId) {
+        this.loadComments(this.productId);
+        if (this.currentUser) {
+          this.loadUserRating(this.productId);
+        }
+      }
+    });
+  }
+
+  ngOnInit(): void {}
+
+  loadComments(id: string): void {
+    this.productService.getComments(id).subscribe({
+      next: (res: any) => this.comments.set(res.data || []),
+      error: () => {},
+    });
+  }
+
+  loadUserRating(id: string): void {
+    this.productService.getMyRating(id).subscribe({
+      next: (res) => {
+        this.userRating.set(res?.rating || 0);
+      },
+      error: () => this.userRating.set(0),
+    });
+  }
+
+  getStarArray(rating: any): number[] {
+    const r = Number(rating) || 0;
+    return Array(5)
+      .fill(0)
+      .map((_, i) => (i < Math.round(r) ? 1 : 0));
+  }
+
+  submitRating(rating: number): void {
+    if (!this.currentUser || !this.productId) return;
+
+    this.userRating.set(rating);
+
+    this.productService.rateProduct(this.productId, rating).subscribe({
+      next: () => {
+        this.loadUserRating(this.productId);
+        this.reviewsUpdated.emit();
+      },
+      error: () => {},
+    });
+  }
+
+  submitComment(): void {
+    if (this.commentForm.invalid || !this.currentUser || !this.productId) return;
+
+    const commentData = this.commentForm.value.comment;
+    const commentImages = [...this.selectedImages()];
+
+    const tempComment = {
+      _id: 'temp-' + Date.now(),
+      comment: commentData,
+      images: commentImages,
+      user: {
+        _id: this.currentUser._id || this.currentUser.id,
+        id: this.currentUser.id || this.currentUser._id,
+        name: this.currentUser.name || 'Moi',
+      },
+      createdAt: new Date().toISOString(),
     };
 
-    constructor() {
-        this.commentForm = this.fb.group({
-            comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
-        });
+    const previousComments = this.comments();
+    this.comments.set([tempComment, ...previousComments]);
 
-        this.editCommentForm = this.fb.group({
-            comment: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]]
-        });
+    this.commentForm.reset();
+    this.selectedImages.set([]);
 
-        afterNextRender(() => {
-            if (this.productId) {
-                this.loadComments(this.productId);
-                if (this.currentUser) {
-                    this.loadUserRating(this.productId);
-                }
-            }
-        });
-    }
+    const payload = { comment: commentData, images: commentImages };
+    this.productService.addComment(this.productId, payload).subscribe({
+      next: () => {
+        this.loadComments(this.productId);
+        this.reviewsUpdated.emit();
+      },
+      error: () => {
+        this.comments.set(previousComments);
+        this.toastService.error("Erreur lors de l'envoi du commentaire. Veuillez réessayer.");
+      },
+    });
+  }
 
-    ngOnInit(): void { }
+  isCommentOwner(comment: any): boolean {
+    if (!this.currentUser || !comment.user) return false;
+    const commentUserId = comment.user._id || comment.user.id || comment.user;
+    const currentUserId = this.currentUser._id || this.currentUser.id;
+    return commentUserId === currentUserId;
+  }
 
+  editComment(comment: any): void {
+    this.editingCommentId.set(comment._id);
+    this.editCommentForm.patchValue({
+      comment: comment.comment,
+    });
+    this.editSelectedImages.set(comment.images || []);
+  }
 
-    loadComments(id: string): void {
-        this.productService.getComments(id).subscribe({
-            next: (res: any) => this.comments.set(res.data || []),
-            error: () => { }
-        });
-    }
+  cancelEdit(): void {
+    this.editingCommentId.set(null);
+    this.editCommentForm.reset();
+    this.editSelectedImages.set([]);
+  }
 
-    loadUserRating(id: string): void {
-        this.productService.getMyRating(id).subscribe({
-            next: (res) => {
-                this.userRating.set(res?.rating || 0);
-            },
-            error: () => this.userRating.set(0)
-        });
-    }
+  submitUpdate(commentId: string): void {
+    if (this.editCommentForm.invalid) return;
 
-    getStarArray(rating: any): number[] {
-        const r = Number(rating) || 0;
-        return Array(5).fill(0).map((_, i) => i < Math.round(r) ? 1 : 0);
-    }
+    const previousComments = this.comments();
+    const updatedText = this.editCommentForm.value.comment;
+    const updatedImages = this.editSelectedImages();
 
-    submitRating(rating: number): void {
-        if (!this.currentUser || !this.productId) return;
+    this.comments.set(
+      previousComments.map((c) =>
+        c._id === commentId ? { ...c, comment: updatedText, images: updatedImages } : c,
+      ),
+    );
 
-        this.userRating.set(rating);
+    const updatedData = {
+      comment: updatedText,
+      images: updatedImages,
+    };
 
-        this.productService.rateProduct(this.productId, rating).subscribe({
-            next: () => {
-                this.loadUserRating(this.productId);
-                this.reviewsUpdated.emit();
-            },
-            error: () => { }
-        });
-    }
+    this.editingCommentId.set(null);
+    this.editSelectedImages.set([]);
 
-    submitComment(): void {
-        if (this.commentForm.invalid || !this.currentUser || !this.productId) return;
+    this.productService.updateComment(commentId, updatedData).subscribe({
+      next: () => {
+        this.loadComments(this.productId);
+        this.reviewsUpdated.emit();
+      },
+      error: () => {
+        this.comments.set(previousComments);
+        this.toastService.error('Erreur lors de la modification');
+      },
+    });
+  }
 
-        const commentData = this.commentForm.value.comment;
-        const commentImages = [...this.selectedImages()];
+  deleteComment(commentId: string): void {
+    if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
 
-        const tempComment = {
-            _id: 'temp-' + Date.now(),
-            comment: commentData,
-            images: commentImages,
-            user: {
-                _id: this.currentUser._id || this.currentUser.id,
-                id: this.currentUser.id || this.currentUser._id,
-                name: this.currentUser.name || 'Moi'
-            },
-            createdAt: new Date().toISOString()
+    const previousComments = this.comments();
+    this.comments.set(previousComments.filter((c) => c._id !== commentId));
+
+    this.productService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.loadComments(this.productId);
+        this.reviewsUpdated.emit();
+      },
+      error: () => {
+        this.comments.set(previousComments);
+        this.toastService.error('Erreur lors de la suppression');
+      },
+    });
+  }
+
+  onFileSelected(event: any, target: 'main' | 'edit' = 'main'): void {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          const result = e.target.result as string;
+          if (target === 'main') {
+            this.selectedImages.update((imgs) => [...imgs, result]);
+          } else {
+            this.editSelectedImages.update((imgs) => [...imgs, result]);
+          }
         };
-
-        const previousComments = this.comments();
-        this.comments.set([tempComment, ...previousComments]);
-
-        this.commentForm.reset();
-        this.selectedImages.set([]);
-
-        const payload = { comment: commentData, images: commentImages };
-        this.productService.addComment(this.productId, payload).subscribe({
-            next: () => {
-                this.loadComments(this.productId);
-                this.reviewsUpdated.emit();
-            },
-            error: () => {
-                this.comments.set(previousComments);
-                alert('Erreur lors de l\'envoi du commentaire. Veuillez réessayer.');
-            }
-        });
+        reader.readAsDataURL(files[i]);
+      }
     }
+    event.target.value = '';
+  }
 
-    isCommentOwner(comment: any): boolean {
-        if (!this.currentUser || !comment.user) return false;
-        const commentUserId = comment.user._id || comment.user.id || comment.user;
-        const currentUserId = this.currentUser._id || this.currentUser.id;
-        return commentUserId === currentUserId;
+  removeSelectedImage(index: number, target: 'main' | 'edit' = 'main'): void {
+    if (target === 'main') {
+      this.selectedImages.update((imgs) => imgs.filter((_, i) => i !== index));
+    } else {
+      this.editSelectedImages.update((imgs) => imgs.filter((_, i) => i !== index));
     }
+  }
 
-    editComment(comment: any): void {
-        this.editingCommentId.set(comment._id);
-        this.editCommentForm.patchValue({
-            comment: comment.comment
-        });
-        this.editSelectedImages.set(comment.images || []);
-    }
-
-    cancelEdit(): void {
-        this.editingCommentId.set(null);
-        this.editCommentForm.reset();
-        this.editSelectedImages.set([]);
-    }
-
-    submitUpdate(commentId: string): void {
-        if (this.editCommentForm.invalid) return;
-
-        const previousComments = this.comments();
-        const updatedText = this.editCommentForm.value.comment;
-        const updatedImages = this.editSelectedImages();
-
-        this.comments.set(previousComments.map(c =>
-            c._id === commentId
-                ? { ...c, comment: updatedText, images: updatedImages }
-                : c
-        ));
-
-        const updatedData = {
-            comment: updatedText,
-            images: updatedImages
-        };
-
-        this.editingCommentId.set(null);
-        this.editSelectedImages.set([]);
-
-        this.productService.updateComment(commentId, updatedData).subscribe({
-            next: () => {
-                this.loadComments(this.productId);
-                this.reviewsUpdated.emit();
-            },
-            error: () => {
-                this.comments.set(previousComments);
-                alert('Erreur lors de la modification');
-            }
-        });
-    }
-
-    deleteComment(commentId: string): void {
-        if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
-
-        const previousComments = this.comments();
-        this.comments.set(previousComments.filter(c => c._id !== commentId));
-
-        this.productService.deleteComment(commentId).subscribe({
-            next: () => {
-                this.loadComments(this.productId);
-                this.reviewsUpdated.emit();
-            },
-            error: () => {
-                this.comments.set(previousComments);
-                alert('Erreur lors de la suppression');
-            }
-        });
-    }
-
-    onFileSelected(event: any, target: 'main' | 'edit' = 'main'): void {
-        const files = event.target.files;
-        if (files) {
-            for (let i = 0; i < files.length; i++) {
-                const reader = new FileReader();
-                reader.onload = (e: any) => {
-                    const result = e.target.result as string;
-                    if (target === 'main') {
-                        this.selectedImages.update(imgs => [...imgs, result]);
-                    } else {
-                        this.editSelectedImages.update(imgs => [...imgs, result]);
-                    }
-                };
-                reader.readAsDataURL(files[i]);
-            }
-        }
-        event.target.value = '';
-    }
-
-    removeSelectedImage(index: number, target: 'main' | 'edit' = 'main'): void {
-        if (target === 'main') {
-            this.selectedImages.update(imgs => imgs.filter((_, i) => i !== index));
-        } else {
-            this.editSelectedImages.update(imgs => imgs.filter((_, i) => i !== index));
-        }
-    }
-
-    openImage(url: string): void {
-        window.open(url, '_blank');
-    }
+  openImage(url: string): void {
+    window.open(url, '_blank');
+  }
 }

@@ -7,6 +7,7 @@ import { ProductService } from '../../core/services/product.service';
 import { ShopService } from '../../core/services/shop.service';
 import { ProductVariantService } from '../../core/services/product-variant.service';
 import { PromotionService } from '../../core/services/promotion.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Product, Shop } from '../../shared/models/product.model';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { ShopCardComponent } from '../../shared/components/shop-card/shop-card.component';
@@ -18,15 +19,24 @@ import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-ico
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductCardComponent, ShopCardComponent, PaginationComponent, EmptyStateComponent, FontAwesomeModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    ProductCardComponent,
+    ShopCardComponent,
+    PaginationComponent,
+    EmptyStateComponent,
+    FontAwesomeModule,
+  ],
   templateUrl: './favorites.component.html',
-  styleUrl: './favorites.component.css'
+  styleUrl: './favorites.component.css',
 })
 export class FavoritesComponent implements OnInit {
   private productService = inject(ProductService);
   private shopService = inject(ShopService);
   private productVariantService = inject(ProductVariantService);
   private promotionService = inject(PromotionService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
 
   activeTab = signal<'products' | 'shops'>('products');
@@ -48,7 +58,7 @@ export class FavoritesComponent implements OnInit {
   icons = {
     heart: faHeart,
     store: faStore,
-    bag: faShoppingBag
+    bag: faShoppingBag,
   };
 
   constructor() {
@@ -57,8 +67,7 @@ export class FavoritesComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   switchTab(tab: 'products' | 'shops') {
     this.activeTab.set(tab);
@@ -78,12 +87,12 @@ export class FavoritesComponent implements OnInit {
   loadProducts() {
     const params = {
       page: this.currentProductPage(),
-      limit: this.itemsPerPage
+      limit: this.itemsPerPage,
     };
 
     this.productService.getFavorites(params).subscribe({
       next: (res: any) => {
-        const data = Array.isArray(res) ? res : (res.data || []);
+        const data = Array.isArray(res) ? res : res.data || [];
         console.log('Favorites raw response:', res);
         console.log('Favorites data list:', data);
 
@@ -104,71 +113,97 @@ export class FavoritesComponent implements OnInit {
         data.forEach((p: Product) => {
           console.log('Fetching full details for product:', p._id);
 
-          this.productService.getProduct(p._id).pipe(
-            switchMap(fullProduct => {
-              const shopId = typeof fullProduct.shop === 'string' ? fullProduct.shop : fullProduct.shop._id;
-              return forkJoin({
-                product: of(fullProduct),
-                variants: this.productVariantService.getVariantsByProduct(fullProduct._id).pipe(catchError(() => of([]))),
-                promotions: this.promotionService.getShopPromotions(shopId).pipe(catchError(() => of([])))
-              });
-            })
-          ).subscribe({
-            next: ({ product, variants, promotions }) => {
-              // Enrich product with variants and promotions logic (mirrors backend getAllProducts)
-              const relevantIds = [product._id, ...variants.map((v: any) => v._id)];
-              const now = new Date();
-
-              const activePromos = (Array.isArray(promotions) ? promotions : promotions.data || [])
-                .filter((promo: any) => {
-                  const start = new Date(promo.startDate);
-                  const end = new Date(promo.endDate);
-                  return promo.isActive && now >= start && now <= end &&
-                    promo.products?.some((id: string) => relevantIds.includes(id));
-                })
-                .sort((a: any, b: any) => {
-                  if (b.discountPercentage !== a.discountPercentage) {
-                    return b.discountPercentage - a.discountPercentage;
-                  }
-                  return a.name.localeCompare(b.name);
+          this.productService
+            .getProduct(p._id)
+            .pipe(
+              switchMap((fullProduct) => {
+                const shopId =
+                  typeof fullProduct.shop === 'string' ? fullProduct.shop : fullProduct.shop._id;
+                return forkJoin({
+                  product: of(fullProduct),
+                  variants: this.productVariantService
+                    .getVariantsByProduct(fullProduct._id)
+                    .pipe(catchError(() => of([]))),
+                  promotions: this.promotionService
+                    .getShopPromotions(shopId)
+                    .pipe(catchError(() => of([]))),
                 });
+              }),
+            )
+            .subscribe({
+              next: ({ product, variants, promotions }) => {
+                // Enrich product with variants and promotions logic (mirrors backend getAllProducts)
+                const relevantIds = [product._id, ...variants.map((v: any) => v._id)];
+                const now = new Date();
 
-              const bestPromo = activePromos.length > 0 ? activePromos[0] : null;
-              const firstVariant = variants[0];
+                const activePromos = (
+                  Array.isArray(promotions) ? promotions : promotions.data || []
+                )
+                  .filter((promo: any) => {
+                    const start = new Date(promo.startDate);
+                    const end = new Date(promo.endDate);
+                    return (
+                      promo.isActive &&
+                      now >= start &&
+                      now <= end &&
+                      promo.products?.some((id: string) => relevantIds.includes(id))
+                    );
+                  })
+                  .sort((a: any, b: any) => {
+                    if (b.discountPercentage !== a.discountPercentage) {
+                      return b.discountPercentage - a.discountPercentage;
+                    }
+                    return a.name.localeCompare(b.name);
+                  });
 
-              const enrichedProduct: Product = {
-                ...product,
-                variants: variants, // properties might differ lightly but okay for card
-                price: product.price || firstVariant?.price || 0,
-                stock: product.stock || variants.reduce((acc: number, v: any) => acc + v.stock, 0) || 0,
-                images: (product.images && product.images.length > 0) ? product.images : (firstVariant?.images || []),
-                activePromotion: bestPromo ? {
-                  name: bestPromo.name,
-                  discountPercentage: bestPromo.discountPercentage,
-                  endDate: bestPromo.endDate
-                } : undefined,
-                isOnSale: !!bestPromo
-              };
+                const bestPromo = activePromos.length > 0 ? activePromos[0] : null;
+                const firstVariant = variants[0];
 
-              hydratedProducts.push(enrichedProduct);
-              completed++;
-              if (completed === data.length) {
-                const ordered = data.map((orig: Product) => hydratedProducts.find(hp => hp._id === orig._id));
-                const finalProducts = ordered.filter((x: Product | undefined): x is Product => !!x);
-                console.log('Hydration complete. Final products:', finalProducts);
-                this.products.set(finalProducts);
-                this.checkLoading();
-              }
-            },
-            error: (err) => {
-              console.error('Error hydrating product', p._id, err);
-              completed++;
-              if (completed === data.length) {
-                this.products.set(hydratedProducts);
-                this.checkLoading();
-              }
-            }
-          });
+                const enrichedProduct: Product = {
+                  ...product,
+                  variants: variants, // properties might differ lightly but okay for card
+                  price: product.price || firstVariant?.price || 0,
+                  stock:
+                    product.stock ||
+                    variants.reduce((acc: number, v: any) => acc + v.stock, 0) ||
+                    0,
+                  images:
+                    product.images && product.images.length > 0
+                      ? product.images
+                      : firstVariant?.images || [],
+                  activePromotion: bestPromo
+                    ? {
+                        name: bestPromo.name,
+                        discountPercentage: bestPromo.discountPercentage,
+                        endDate: bestPromo.endDate,
+                      }
+                    : undefined,
+                  isOnSale: !!bestPromo,
+                };
+
+                hydratedProducts.push(enrichedProduct);
+                completed++;
+                if (completed === data.length) {
+                  const ordered = data.map((orig: Product) =>
+                    hydratedProducts.find((hp) => hp._id === orig._id),
+                  );
+                  const finalProducts = ordered.filter(
+                    (x: Product | undefined): x is Product => !!x,
+                  );
+                  console.log('Hydration complete. Final products:', finalProducts);
+                  this.products.set(finalProducts);
+                  this.checkLoading();
+                }
+              },
+              error: (err) => {
+                console.error('Error hydrating product', p._id, err);
+                completed++;
+                if (completed === data.length) {
+                  this.products.set(hydratedProducts);
+                  this.checkLoading();
+                }
+              },
+            });
         });
 
         if (!Array.isArray(res)) {
@@ -178,19 +213,19 @@ export class FavoritesComponent implements OnInit {
           this.totalProducts.set(data.length);
         }
       },
-      error: () => this.checkLoading()
+      error: () => this.checkLoading(),
     });
   }
 
   loadShops() {
     const params = {
       page: this.currentShopPage(),
-      limit: this.itemsPerPage
+      limit: this.itemsPerPage,
     };
 
     this.shopService.getFavorites(params).subscribe({
       next: (res: any) => {
-        const data = Array.isArray(res) ? res : (res.data || []);
+        const data = Array.isArray(res) ? res : res.data || [];
         this.shops.set(data);
 
         if (!Array.isArray(res)) {
@@ -202,7 +237,7 @@ export class FavoritesComponent implements OnInit {
 
         this.checkLoading();
       },
-      error: () => this.checkLoading()
+      error: () => this.checkLoading(),
     });
   }
 
@@ -231,13 +266,13 @@ export class FavoritesComponent implements OnInit {
     this.shopService.toggleFavorite(shop._id, false).subscribe({
       next: () => {
         // Remove from local list
-        this.shops.set(this.shops().filter(s => s._id !== shop._id));
-        this.totalShops.update(total => Math.max(0, total - 1));
+        this.shops.set(this.shops().filter((s) => s._id !== shop._id));
+        this.totalShops.update((total) => Math.max(0, total - 1));
       },
       error: (err) => {
         console.error('Failed to remove favorite', err);
-        alert('Erreur lors de la suppression du favori');
-      }
+        this.toastService.error('Erreur lors de la suppression du favori');
+      },
     });
   }
 
