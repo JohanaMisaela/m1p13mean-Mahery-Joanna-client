@@ -6,9 +6,10 @@
   [class.overflow-hidden]="hasSidebar()"
 >
   <div
-    class="flex-grow flex flex-col min-h-0"
+    class="flex-grow flex flex-col"
+    [class.min-h-0]="hasSidebar()"
     [class.h-full]="hasSidebar()"
-    [class.min-h-full]="!hasSidebar()"
+    [class.shrink-0]="!hasSidebar()"
   >
     <router-outlet />
   </div>
