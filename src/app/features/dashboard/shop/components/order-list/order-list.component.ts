@@ -10,114 +10,129 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 
 @Component({
-    selector: 'app-order-list',
-    standalone: true,
-    imports: [CommonModule, FormsModule, FontAwesomeModule, ShopOrderCardComponent, EmptyStateComponent, PaginationComponent],
-    templateUrl: './order-list.component.html',
+  selector: 'app-order-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    FontAwesomeModule,
+    ShopOrderCardComponent,
+    EmptyStateComponent,
+    PaginationComponent,
+  ],
+  templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
-    private orderService = inject(OrderService);
+  private orderService = inject(OrderService);
 
-    @Input() shopId?: string;
+  @Input() shopId?: string;
 
-    orders = signal<Order[]>([]);
-    total = signal<number>(0);
-    page = signal<number>(1);
-    limit = signal<number>(10);
-    totalPages = signal<number>(1);
-    loading = signal<boolean>(false);
+  orders = signal<Order[]>([]);
+  total = signal<number>(0);
+  page = signal<number>(1);
+  limit = signal<number>(10);
+  totalPages = signal<number>(1);
+  loading = signal<boolean>(false);
 
-    // Filters
-    filterClient = signal<string>('');
-    filterItem = signal<string>('');
-    filterStatus = signal<string>('');
-    filterMinTotal = signal<number | null>(null);
-    filterMaxTotal = signal<number | null>(null);
+  // Filters
+  filterClient = signal<string>('');
+  filterItem = signal<string>('');
+  filterStatus = signal<string>('');
+  filterMinTotal = signal<number | null>(null);
+  filterMaxTotal = signal<number | null>(null);
 
-    // Icons
-    icons = {
-        bag: faShoppingBag
+  // Icons
+  icons = {
+    bag: faShoppingBag,
+  };
+
+  ngOnInit(): void {
+    this.loadOrders();
+  }
+
+  loadOrders() {
+    if (!this.shopId) {
+      console.error('No shopId provided to OrderListComponent');
+      return;
+    }
+
+    const query: any = {
+      page: this.page(),
+      limit: this.limit(),
     };
 
-    ngOnInit(): void {
-        this.loadOrders();
-    }
+    if (this.filterClient()) query.client = this.filterClient();
+    if (this.filterItem()) query.item = this.filterItem();
+    if (this.filterStatus()) query.status = this.filterStatus();
+    if (this.filterMinTotal() !== null) query.minTotal = this.filterMinTotal();
+    if (this.filterMaxTotal() !== null) query.maxTotal = this.filterMaxTotal();
 
-    loadOrders() {
-        if (!this.shopId) {
-            console.error('No shopId provided to OrderListComponent');
-            return;
+    this.loading.set(true);
+    this.orderService.getShopOrders(this.shopId, query).subscribe({
+      next: (res: OrderResponse) => {
+        this.orders.set(res.data);
+        this.total.set(res.total);
+        this.totalPages.set(res.totalPages);
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        console.error('Failed to load orders', err);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  applyFilters() {
+    this.page.set(1);
+    this.loadOrders();
+  }
+
+  resetFilters() {
+    this.filterClient.set('');
+    this.filterItem.set('');
+    this.filterStatus.set('');
+    this.filterMinTotal.set(null);
+    this.filterMaxTotal.set(null);
+    this.page.set(1);
+    this.loadOrders();
+  }
+
+  changePage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalPages()) {
+      this.page.set(newPage);
+      this.loadOrders();
+    }
+  }
+
+  updateStatus(event: { order: Order; status: string }) {
+    const { order, status } = event;
+    // The confirm and status label logic is now in the component, but we can keep a simpler version here if needed or move label logic back
+    // Actually, updateStatus in card component just emits. We should probably keep the confirmation here or handle it there.
+    // I'll keep the confirmation here for safety but use a simpler label.
+
+    const label =
+      status === 'CONFIRMED'
+        ? 'Confirmée'
+        : status === 'CANCELLED'
+          ? 'Annulée'
+          : status === 'SHIPPED'
+            ? 'Expédiée'
+            : status === 'REJECTED'
+              ? 'Rejetée'
+              : status;
+    if (!confirm(`Changer le statut de la commande en ${label} ?`)) return;
+
+    this.orderService.updateOrderStatus(order._id, status).subscribe({
+      next: (updatedOrder: Order) => {
+        // Update local state
+        const currentOrders = this.orders();
+        const index = currentOrders.findIndex((o) => o._id === order._id);
+        if (index !== -1) {
+          currentOrders[index] = { ...currentOrders[index], status: updatedOrder.status } as Order;
+          this.orders.set([...currentOrders]);
         }
-
-        const query: any = {
-            page: this.page(),
-            limit: this.limit()
-        };
-
-        if (this.filterClient()) query.client = this.filterClient();
-        if (this.filterItem()) query.item = this.filterItem();
-        if (this.filterStatus()) query.status = this.filterStatus();
-        if (this.filterMinTotal() !== null) query.minTotal = this.filterMinTotal();
-        if (this.filterMaxTotal() !== null) query.maxTotal = this.filterMaxTotal();
-
-        this.loading.set(true);
-        this.orderService.getShopOrders(this.shopId, query)
-            .subscribe({
-                next: (res: OrderResponse) => {
-                    this.orders.set(res.data);
-                    this.total.set(res.total);
-                    this.totalPages.set(res.totalPages);
-                    this.loading.set(false);
-                },
-                error: (err: any) => {
-                    console.error('Failed to load orders', err);
-                    this.loading.set(false);
-                }
-            });
-    }
-
-    applyFilters() {
-        this.page.set(1);
-        this.loadOrders();
-    }
-
-    resetFilters() {
-        this.filterClient.set('');
-        this.filterItem.set('');
-        this.filterStatus.set('');
-        this.filterMinTotal.set(null);
-        this.filterMaxTotal.set(null);
-        this.page.set(1);
-        this.loadOrders();
-    }
-
-    changePage(newPage: number) {
-        if (newPage >= 1 && newPage <= this.totalPages()) {
-            this.page.set(newPage);
-            this.loadOrders();
-        }
-    }
-
-    updateStatus(event: { order: Order, status: string }) {
-        const { order, status } = event;
-        // The confirm and status label logic is now in the component, but we can keep a simpler version here if needed or move label logic back
-        // Actually, updateStatus in card component just emits. We should probably keep the confirmation here or handle it there.
-        // I'll keep the confirmation here for safety but use a simpler label.
-
-        const label = status === 'CONFIRMED' ? 'Confirmée' : status === 'CANCELLED' ? 'Annulée' : status === 'SHIPPED' ? 'Expédiée' : status;
-        if (!confirm(`Changer le statut de la commande en ${label} ?`)) return;
-
-        this.orderService.updateOrderStatus(order._id, status).subscribe({
-            next: (updatedOrder: Order) => {
-                // Update local state
-                const currentOrders = this.orders();
-                const index = currentOrders.findIndex(o => o._id === order._id);
-                if (index !== -1) {
-                    currentOrders[index] = { ...currentOrders[index], status: updatedOrder.status } as Order;
-                    this.orders.set([...currentOrders]);
-                }
-            },
-            error: (err: any) => console.error('Failed to update status', err)
-        });
-    }
+      },
+      error: (err: any) => console.error('Failed to update status', err),
+    });
+  }
 }
