@@ -130,3 +130,15 @@
     </div>
   </div>
 </div>
+
+@if (showConfirmModal()) {
+  <app-confirm-modal
+    [title]="'Annulation de commande'"
+    [message]="'Êtes-vous sûr de vouloir annuler cette commande ?'"
+    [confirmText]="'Confirmer l\'annulation'"
+    [cancelText]="'Garder la commande'"
+    [type]="'danger'"
+    (confirm)="confirmCancel()"
+    (cancel)="onCancelModal()"
+  ></app-confirm-modal>
+}

@@ -26,11 +26,18 @@ import {
   faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 import { User } from '../../../../shared/models/user.model';
+import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-product-reviews',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FontAwesomeModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    FontAwesomeModule,
+    ConfirmModalComponent,
+  ],
   templateUrl: './product-reviews.component.html',
   styleUrls: ['./product-reviews.component.scss'],
 })
@@ -49,6 +56,10 @@ export class ProductReviewsComponent implements OnInit {
   selectedImages = signal<string[]>([]);
   editSelectedImages = signal<string[]>([]);
   editingCommentId = signal<string | null>(null);
+
+  // Confirm Modal state
+  showConfirmModal = signal<boolean>(false);
+  pendingDeleteId = signal<string | null>(null);
 
   commentForm: FormGroup;
   editCommentForm: FormGroup;
@@ -213,8 +224,15 @@ export class ProductReviewsComponent implements OnInit {
   }
 
   deleteComment(commentId: string): void {
-    if (!confirm('Voulez-vous vraiment supprimer ce commentaire ?')) return;
+    this.pendingDeleteId.set(commentId);
+    this.showConfirmModal.set(true);
+  }
 
+  confirmDelete(): void {
+    const commentId = this.pendingDeleteId();
+    if (!commentId) return;
+
+    this.showConfirmModal.set(false);
     const previousComments = this.comments();
     this.comments.set(previousComments.filter((c) => c._id !== commentId));
 
@@ -222,12 +240,20 @@ export class ProductReviewsComponent implements OnInit {
       next: () => {
         this.loadComments(this.productId);
         this.reviewsUpdated.emit();
+        this.pendingDeleteId.set(null);
+        this.toastService.success('Commentaire supprimé avec succès');
       },
       error: () => {
         this.comments.set(previousComments);
         this.toastService.error('Erreur lors de la suppression');
+        this.pendingDeleteId.set(null);
       },
     });
+  }
+
+  cancelDelete(): void {
+    this.showConfirmModal.set(false);
+    this.pendingDeleteId.set(null);
   }
 
   onFileSelected(event: any, target: 'main' | 'edit' = 'main'): void {

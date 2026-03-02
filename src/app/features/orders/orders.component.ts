@@ -21,6 +21,7 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
 import { FormsModule } from '@angular/forms';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { OrderCardComponent } from './components/order-card/order-card.component';
+import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-orders',
@@ -33,6 +34,7 @@ import { OrderCardComponent } from './components/order-card/order-card.component
     EmptyStateComponent,
     OrderCardComponent,
     PaginationComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './orders.component.html',
   styles: [
@@ -67,6 +69,10 @@ export class OrdersComponent implements OnInit {
   filterStatus = signal<string>('');
   filterMinTotal = signal<number | null>(null);
   filterMaxTotal = signal<number | null>(null);
+
+  // Confirm Modal state
+  showConfirmModal = signal<boolean>(false);
+  pendingCancelId = signal<string | null>(null);
 
   icons = {
     bag: faShoppingBag,
@@ -133,10 +139,15 @@ export class OrdersComponent implements OnInit {
   }
 
   cancelOrder(orderId: string) {
-    if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
-      return;
-    }
+    this.pendingCancelId.set(orderId);
+    this.showConfirmModal.set(true);
+  }
 
+  confirmCancel() {
+    const orderId = this.pendingCancelId();
+    if (!orderId) return;
+
+    this.showConfirmModal.set(false);
     this.orderService.updateOrderStatus(orderId, 'CANCELLED').subscribe({
       next: () => {
         // Update local state
@@ -145,12 +156,19 @@ export class OrdersComponent implements OnInit {
             current.map((o) => (o._id === orderId ? { ...o, status: 'CANCELLED' } : o)) as Order[],
         );
         this.toastService.success('Commande annulée avec succès.');
+        this.pendingCancelId.set(null);
       },
       error: (err) => {
         console.error('Failed to cancel order', err);
         this.toastService.error("Erreur lors de l'annulation de la commande.");
+        this.pendingCancelId.set(null);
       },
     });
+  }
+
+  onCancelModal() {
+    this.showConfirmModal.set(false);
+    this.pendingCancelId.set(null);
   }
 
   statusLabel(status: string): string {

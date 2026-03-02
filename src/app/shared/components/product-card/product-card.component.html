@@ -22,7 +22,7 @@
     <div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
       @if (product.isOnSale && product.activePromotion) {
         <span
-          class="bg-black text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1"
+          class="bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1"
         >
           -{{ product.activePromotion.discountPercentage }}%
         </span>

@@ -1,0 +1,72 @@
+<div
+  class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-x-hidden overflow-y-auto outline-none"
+>
+  <!-- Backdrop with blur -->
+  <div
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+    (click)="onCancel()"
+  ></div>
+
+  <!-- Modal Content -->
+  <div
+    class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl transform transition-all animate-in fade-in zoom-in duration-200"
+  >
+    <!-- Close Button -->
+    <button
+      (click)="onCancel()"
+      class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+    >
+      <fa-icon [icon]="icons.close"></fa-icon>
+    </button>
+
+    <div class="p-8">
+      <!-- Icon and Header -->
+      <div class="flex items-center gap-4 mb-6">
+        <div
+          [ngClass]="{
+            'bg-red-50 text-red-500': type === 'danger',
+            'bg-orange-50 text-orange-500': type === 'warning',
+            'bg-blue-50 text-blue-500': type === 'info',
+            'bg-green-50 text-green-500': type === 'success',
+          }"
+          class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-sm"
+        >
+          <fa-icon
+            [icon]="type === 'danger' || type === 'warning' ? icons.warning : icons.info"
+          ></fa-icon>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900 leading-tight">{{ title }}</h3>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <p class="text-gray-600 leading-relaxed mb-8">
+        {{ message }}
+      </p>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button
+          (click)="onCancel()"
+          class="flex-1 px-6 py-3.5 text-sm font-bold text-gray-700 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 active:scale-[0.98] transition-all uppercase tracking-wider"
+        >
+          {{ cancelText }}
+        </button>
+        <button
+          (click)="onConfirm()"
+          [ngClass]="{
+            'bg-red-600 hover:bg-red-700': type === 'danger',
+            'bg-orange-500 hover:bg-orange-600': type === 'warning',
+            'bg-blue-600 hover:bg-blue-700': type === 'info',
+            'bg-black hover:bg-gray-800':
+              type === 'success' || (type !== 'danger' && type !== 'warning' && type !== 'info'),
+          }"
+          class="flex-1 px-6 py-3.5 text-sm font-bold text-white rounded-xl shadow-lg shadow-black/5 active:scale-[0.98] transition-all uppercase tracking-wider"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

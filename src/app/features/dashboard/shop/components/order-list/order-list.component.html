@@ -134,3 +134,17 @@
     </div>
   }
 </div>
+
+@if (showConfirmModal()) {
+  <app-confirm-modal
+    [title]="'Changement de statut'"
+    [message]="
+      'Voulez-vous vraiment changer le statut de cette commande en ' + pendingUpdate()?.label + ' ?'
+    "
+    [confirmText]="'Confirmer'"
+    [cancelText]="'Annuler'"
+    [type]="'info'"
+    (confirm)="confirmStatusUpdate()"
+    (cancel)="cancelStatusUpdate()"
+  ></app-confirm-modal>
+}

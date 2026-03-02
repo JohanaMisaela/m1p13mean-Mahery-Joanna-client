@@ -8,6 +8,7 @@ import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 import { ShopOrderCardComponent } from '../order-card/shop-order-card.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
+import { ConfirmModalComponent } from '../../../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-order-list',
@@ -19,6 +20,7 @@ import { PaginationComponent } from '../../../../../shared/components/pagination
     ShopOrderCardComponent,
     EmptyStateComponent,
     PaginationComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './order-list.component.html',
 })
@@ -40,6 +42,10 @@ export class OrderListComponent implements OnInit {
   filterStatus = signal<string>('');
   filterMinTotal = signal<number | null>(null);
   filterMaxTotal = signal<number | null>(null);
+
+  // Confirm Modal state
+  showConfirmModal = signal<boolean>(false);
+  pendingUpdate = signal<{ order: Order; status: string; label: string } | null>(null);
 
   // Icons
   icons = {
@@ -106,10 +112,6 @@ export class OrderListComponent implements OnInit {
 
   updateStatus(event: { order: Order; status: string }) {
     const { order, status } = event;
-    // The confirm and status label logic is now in the component, but we can keep a simpler version here if needed or move label logic back
-    // Actually, updateStatus in card component just emits. We should probably keep the confirmation here or handle it there.
-    // I'll keep the confirmation here for safety but use a simpler label.
-
     const label =
       status === 'CONFIRMED'
         ? 'Confirmée'
@@ -120,19 +122,37 @@ export class OrderListComponent implements OnInit {
             : status === 'REJECTED'
               ? 'Rejetée'
               : status;
-    if (!confirm(`Changer le statut de la commande en ${label} ?`)) return;
+
+    this.pendingUpdate.set({ order, status, label });
+    this.showConfirmModal.set(true);
+  }
+
+  confirmStatusUpdate() {
+    const pending = this.pendingUpdate();
+    if (!pending) return;
+
+    const { order, status } = pending;
+    this.showConfirmModal.set(false);
 
     this.orderService.updateOrderStatus(order._id, status).subscribe({
       next: (updatedOrder: Order) => {
-        // Update local state
         const currentOrders = this.orders();
         const index = currentOrders.findIndex((o) => o._id === order._id);
         if (index !== -1) {
           currentOrders[index] = { ...currentOrders[index], status: updatedOrder.status } as Order;
           this.orders.set([...currentOrders]);
         }
+        this.pendingUpdate.set(null);
       },
-      error: (err: any) => console.error('Failed to update status', err),
+      error: (err: any) => {
+        console.error('Failed to update status', err);
+        this.pendingUpdate.set(null);
+      },
     });
+  }
+
+  cancelStatusUpdate() {
+    this.showConfirmModal.set(false);
+    this.pendingUpdate.set(null);
   }
 }
