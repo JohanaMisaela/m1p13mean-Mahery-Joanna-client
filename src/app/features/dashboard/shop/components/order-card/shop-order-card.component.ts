@@ -12,8 +12,11 @@ import {
   faUser,
   faEnvelope,
   faPhone,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 import { OrderItemComponent } from '../../../../../shared/components/order-item/order-item.component';
+import { InvoiceService } from '../../../../../core/services/invoice.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-shop-order-card',
@@ -23,6 +26,8 @@ import { OrderItemComponent } from '../../../../../shared/components/order-item/
   styleUrl: './shop-order-card.component.scss',
 })
 export class ShopOrderCardComponent {
+  private invoiceService = inject(InvoiceService);
+
   @Input({ required: true }) order!: Order;
   @Output() statusUpdate = new EventEmitter<{ order: Order; status: string }>();
 
@@ -35,6 +40,7 @@ export class ShopOrderCardComponent {
   faUser = faUser;
   faEnvelope = faEnvelope;
   faPhone = faPhone;
+  faDownload = faDownload;
 
   statusLabel(): string {
     switch (this.order.status) {
@@ -71,5 +77,9 @@ export class ShopOrderCardComponent {
 
   onStatusUpdate(status: string) {
     this.statusUpdate.emit({ order: this.order, status });
+  }
+
+  downloadInvoice() {
+    this.invoiceService.generateInvoice(this.order);
   }
 }

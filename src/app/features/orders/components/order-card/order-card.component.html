@@ -86,6 +86,15 @@
           >
             Annuler la commande
           </button>
+
+          <button
+            *ngIf="order.status === 'CONFIRMED' || order.status === 'SHIPPED'"
+            (click)="downloadInvoice()"
+            class="inline-flex items-center space-x-2 text-[10px] uppercase tracking-widest text-blue-600 hover:text-blue-800 font-bold transition-colors"
+          >
+            <fa-icon [icon]="faDownload"></fa-icon>
+            <span>Télécharger la facture</span>
+          </button>
           <div class="flex-grow"></div>
         </div>
       </div>

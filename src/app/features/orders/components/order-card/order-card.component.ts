@@ -2,8 +2,15 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Order } from '../../../../shared/models/order.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faShoppingBag, faMapMarkerAlt, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faShoppingBag,
+  faMapMarkerAlt,
+  faChevronRight,
+  faDownload,
+} from '@fortawesome/free-solid-svg-icons';
 import { OrderItemComponent } from '../../../../shared/components/order-item/order-item.component';
+import { InvoiceService } from '../../../../core/services/invoice.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-order-card',
@@ -13,12 +20,15 @@ import { OrderItemComponent } from '../../../../shared/components/order-item/ord
   styleUrl: './order-card.component.scss',
 })
 export class OrderCardComponent {
+  private invoiceService = inject(InvoiceService);
+
   @Input({ required: true }) order!: Order;
   @Output() cancel = new EventEmitter<string>();
 
   faShoppingBag = faShoppingBag;
   faMapMarkerAlt = faMapMarkerAlt;
   faChevronRight = faChevronRight;
+  faDownload = faDownload;
 
   statusLabel(): string {
     switch (this.order.status) {
@@ -55,5 +65,9 @@ export class OrderCardComponent {
 
   onCancel() {
     this.cancel.emit(this.order._id);
+  }
+
+  downloadInvoice() {
+    this.invoiceService.generateInvoice(this.order);
   }
 }

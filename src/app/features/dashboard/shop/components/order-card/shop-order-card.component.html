@@ -173,10 +173,18 @@
                   </button>
                 </ng-container>
 
-                <ng-container *ngIf="order.status === 'CONFIRMED'">
+                <ng-container *ngIf="order.status === 'CONFIRMED' || order.status === 'SHIPPED'">
                   <button
+                    (click)="downloadInvoice()"
+                    class="px-5 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all flex items-center space-x-2 text-xs font-bold uppercase tracking-wider"
+                  >
+                    <fa-icon [icon]="faDownload"></fa-icon>
+                    <span>Facture</span>
+                  </button>
+                  <button
+                    *ngIf="order.status === 'CONFIRMED'"
                     (click)="onStatusUpdate('SHIPPED')"
-                    class="px-5 py-2.5 bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white rounded-lg transition-all flex items-center space-x-2 text-xs font-bold uppercase tracking-wider w-full justify-center"
+                    class="px-5 py-2.5 bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white rounded-lg transition-all flex items-center space-x-2 text-xs font-bold uppercase tracking-wider"
                   >
                     <fa-icon [icon]="faTruck"></fa-icon>
                     <span>Expédier</span>
