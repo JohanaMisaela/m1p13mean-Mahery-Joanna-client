@@ -26,6 +26,7 @@ interface Promotion {
   shop: string;
   createdAt?: string;
   updatedAt?: string;
+  isLocked?: boolean;
 }
 
 @Component({
@@ -76,6 +77,22 @@ export class PromotionManagementComponent implements OnChanges {
     const allSelected = variantIds.every((id) => current.includes(id));
 
     if (allSelected) {
+      // Trying to deselect all. Check if any are locked.
+      if (this.editingPromotion?.isLocked) {
+        const lockedInThisProduct = variantIds.filter((id) =>
+          this.editingPromotion!.products.includes(id),
+        );
+        if (lockedInThisProduct.length > 0) {
+          this.toastService.warning(
+            'Certains variants de ce produit ne peuvent pas être retirés car la promotion est déjà utilisée.',
+          );
+          // Only keep the locked ones
+          this.selectedProducts.set([
+            ...current.filter((id) => !variantIds.includes(id) || lockedInThisProduct.includes(id)),
+          ]);
+          return;
+        }
+      }
       this.selectedProducts.set(current.filter((id) => !variantIds.includes(id)));
     } else {
       const newSelection = [...current];
@@ -89,6 +106,13 @@ export class PromotionManagementComponent implements OnChanges {
   }
 
   toggleVariantSelection(variantId: string) {
+    if (this.editingPromotion?.isLocked && this.editingPromotion.products.includes(variantId)) {
+      this.toastService.warning(
+        "Vous ne pouvez pas retirer un produit d'une promotion déjà utilisée dans des commandes.",
+      );
+      return;
+    }
+
     const current = this.selectedProducts();
     if (current.includes(variantId)) {
       this.selectedProducts.set(current.filter((id) => id !== variantId));

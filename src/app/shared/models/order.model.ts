@@ -5,8 +5,13 @@ export interface OrderItem {
   quantity: number;
   price: number;
   originalPrice: number;
-  promotion?: string;
-  // ... possibly other fields, or populated fields
+  promotion?: {
+    _id: string;
+    name: string;
+    discountPercentage: number;
+  };
+  promotionName?: string;
+  promotionDiscount?: number;
 }
 
 export interface Order {
