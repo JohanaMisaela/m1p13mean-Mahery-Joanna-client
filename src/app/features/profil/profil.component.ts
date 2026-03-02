@@ -61,6 +61,7 @@ export class ProfilComponent implements OnInit {
     name: ['', Validators.required],
     surname: [''],
     email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+    contact: [''],
   });
 
   protected addressForm: FormGroup = this.fb.group({
@@ -88,6 +89,7 @@ export class ProfilComponent implements OnInit {
         name: user.name,
         surname: user.surname,
         email: user.email,
+        contact: user.contact || '',
       });
     }
   }
@@ -110,6 +112,7 @@ export class ProfilComponent implements OnInit {
       name: this.profileForm.get('name')?.value,
       surname: this.profileForm.get('surname')?.value,
       email: this.currentUser()?.email, // Keep email same for now or allow edit if req
+      contact: this.profileForm.get('contact')?.value,
     };
 
     this.userService.updateProfile(updateData).subscribe({
