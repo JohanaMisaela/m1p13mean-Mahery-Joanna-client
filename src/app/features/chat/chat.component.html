@@ -1,0 +1,176 @@
+<div class="chat-container bg-gray-50 flex h-[90vh] overflow-hidden">
+  <!-- Sidebar -->
+  <aside class="w-80 bg-white border-r border-gray-100 flex flex-col">
+    <div class="p-6 border-b border-gray-50">
+      <h2 class="text-xl font-black text-black tracking-tight flex items-center gap-2">
+        <fa-icon [icon]="icons.shop" class="text-gray-400"></fa-icon>
+        Mes Messages
+      </h2>
+    </div>
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      @if (displayConversations().length === 0) {
+        <div class="p-8 text-center">
+          <p class="text-sm text-gray-400 italic">Aucune conversation</p>
+        </div>
+      } @else {
+        @for (conv of displayConversations(); track conv._id || conv.shop?._id) {
+          <button
+            (click)="selectConversation(conv)"
+            class="w-full p-4 flex gap-4 hover:bg-gray-50 transition-all border-b border-gray-50 text-left relative"
+            [class.bg-black/5]="activeConversation()?._id === conv._id"
+          >
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 relative">
+              <img
+                [src]="conv.shop?.logo || 'assets/placeholder.png'"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline mb-1">
+                <h3 class="font-bold text-sm text-gray-900 truncate">{{ conv.shop?.name }}</h3>
+                <span class="text-[10px] text-gray-400 font-medium">
+                  {{ conv.updatedAt | date: 'HH:mm' }}
+                </span>
+              </div>
+              <div class="flex justify-between items-center gap-2">
+                <p class="text-xs text-gray-500 truncate" [class.font-black]="conv.unreadCount > 0">
+                  {{ conv.lastMessage?.content || 'Démarrer la discussion' }}
+                </p>
+                @if (conv.unreadCount > 0) {
+                  <span
+                    class="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                  >
+                    {{ conv.unreadCount }}
+                  </span>
+                }
+              </div>
+            </div>
+          </button>
+        }
+      }
+    </div>
+  </aside>
+
+  <!-- Chat Area -->
+  <main class="flex-1 flex flex-col bg-white">
+    @if (activeConversation()) {
+      <!-- Header -->
+      <header class="h-16 border-b border-gray-100 px-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+            <img
+              [src]="activeConversation().shop?.logo || 'assets/placeholder.png'"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-gray-900">{{ activeConversation().shop?.name }}</h3>
+            <div class="flex items-center gap-1.5">
+              <fa-icon [icon]="icons.clock" class="text-[10px] text-gray-400"></fa-icon>
+              <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                {{ activeConversation().shop?.openingHours || 'Horaires non définis' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Messages -->
+      <div
+        class="flex-1 overflow-y-auto p-6 space-y-4 messages-container custom-scrollbar bg-gray-50/30"
+      >
+        @for (msg of messages(); track msg._id) {
+          <div class="flex w-full" [class.justify-end]="isMyMessage(msg.sender)">
+            <div
+              class="max-w-[70%] rounded-2xl p-4 shadow-sm"
+              [class.bg-black]="isMyMessage(msg.sender)"
+              [class.text-white]="isMyMessage(msg.sender)"
+              [class.bg-white]="!isMyMessage(msg.sender)"
+              [class.text-gray-900]="!isMyMessage(msg.sender)"
+              [class.rounded-br-none]="isMyMessage(msg.sender)"
+              [class.rounded-bl-none]="!isMyMessage(msg.sender)"
+            >
+              @if (msg.images?.length) {
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  @for (img of msg.images; track img) {
+                    <img
+                      [src]="img"
+                      class="rounded-lg w-full h-32 object-cover cursor-pointer hover:opacity-90"
+                    />
+                  }
+                </div>
+              }
+              <p class="text-sm leading-relaxed">{{ msg.content }}</p>
+              <div class="flex items-center justify-end gap-1.5 mt-2">
+                @if (msg.isEdited) {
+                  <span class="text-[9px] opacity-60 italic">(modifié)</span>
+                }
+                <span class="text-[9px] opacity-60 font-mono">
+                  {{ msg.createdAt | date: 'HH:mm' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Input Area -->
+      <footer class="p-4 bg-white border-t border-gray-100">
+        @if (selectedImages.length > 0) {
+          <div class="flex gap-2 mb-4 overflow-x-auto pb-2 max-w-5xl mx-auto">
+            @for (img of selectedImages; track img; let i = $index) {
+              <div class="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 group">
+                <img [src]="img" class="w-full h-full object-cover" />
+                <button
+                  (click)="removeImage(i)"
+                  class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  &times;
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="flex items-end gap-3 max-w-5xl mx-auto">
+          <div class="flex-1 relative group">
+            <textarea
+              [(ngModel)]="newMessage"
+              (keydown.enter)="$event.preventDefault(); sendMessage()"
+              placeholder="Écrivez votre message..."
+              class="w-full bg-gray-50 border border-transparent rounded-2xl px-4 py-3 text-sm focus:bg-white focus:border-black/10 focus:ring-4 focus:ring-black/5 transition-all outline-none resize-none max-h-32"
+              rows="1"
+            ></textarea>
+
+            <label
+              class="absolute right-3 bottom-3 p-1.5 text-gray-400 hover:text-black cursor-pointer transition-colors"
+            >
+              <fa-icon [icon]="icons.image"></fa-icon>
+              <input type="file" (change)="onFileSelected($event)" multiple class="hidden" />
+            </label>
+          </div>
+
+          <button
+            (click)="sendMessage()"
+            [disabled]="!newMessage().trim() && !selectedImages.length"
+            class="p-4 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all disabled:opacity-30 flex items-center justify-center shadow-lg shadow-black/10"
+          >
+            <fa-icon [icon]="icons.send"></fa-icon>
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <div class="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+        <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+          <fa-icon [icon]="icons.shop" class="text-4xl text-gray-300"></fa-icon>
+        </div>
+        <h2 class="text-xl font-black text-black mb-2">Sélectionnez une discussion</h2>
+        <p class="text-sm max-w-xs mx-auto">
+          Choisissez une boutique dans la liste pour commencer à échanger.
+        </p>
+      </div>
+    }
+  </main>
+</div>

@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ChatService } from '../../services/chat.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faUser,
@@ -26,9 +27,38 @@ import {
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
+  private readonly chatService = inject(ChatService);
   private readonly router = inject(Router);
 
   protected readonly currentUser = this.authService.currentUser;
+  protected unreadCount = signal<number>(0);
+  private pollInterval: any;
+
+  ngOnInit() {
+    this.loadUnreadCount();
+    this.startPolling();
+  }
+
+  private startPolling() {
+    this.pollInterval = setInterval(() => {
+      if (this.currentUser()) {
+        this.loadUnreadCount();
+      }
+    }, 10000); // Poll every 10 seconds
+  }
+
+  private loadUnreadCount() {
+    if (!this.currentUser()) return;
+    this.chatService.getUnreadCount().subscribe((res) => {
+      this.unreadCount.set(res.totalUnread);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
+  }
 
   // Icons
   protected readonly icons = {

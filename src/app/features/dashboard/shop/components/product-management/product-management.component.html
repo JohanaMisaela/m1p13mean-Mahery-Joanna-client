@@ -1,61 +1,100 @@
 <div class="space-y-6">
-    <!-- ADD PRODUCT SECTION -->
-    <div *ngIf="isAddingProduct"
-        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden animate-in slide-in-from-top-4 duration-300">
-        <app-product-form [categories]="categories" [isEdit]="false" [loading]="isSavingProduct"
-            (save)="onSaveProduct($event)" (cancel)="cancelEdit()" (openImageModal)="openImageModal($event)">
-        </app-product-form>
-    </div>
+  <!-- ADD PRODUCT SECTION -->
+  <div
+    *ngIf="isAddingProduct"
+    class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden animate-in slide-in-from-top-4 duration-300"
+  >
+    <app-product-form
+      [categories]="categories"
+      [isEdit]="false"
+      [loading]="isSavingProduct"
+      (save)="onSaveProduct($event)"
+      (cancel)="cancelEdit()"
+      (openImageModal)="openImageModal($event)"
+      (createCategory)="onCreateCategory($event)"
+    >
+    </app-product-form>
+  </div>
 
-    <!-- PRODUCT LIST -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <table class="w-full text-left">
-            <thead class="bg-gray-50/50 border-b border-gray-100">
-                <tr>
-                    <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Produit</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Info</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">
-                        Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                <ng-container *ngFor="let product of products">
-                    <!-- VIEW MODE -->
-                    <!-- Product Row Component -->
-                    <tr app-product-list-item class="group hover:bg-gray-50 transition-colors"
-                        *ngIf="editingProductId !== product._id" [product]="product" [promotions]="promotions"
-                        [isExpanded]="expandedProductId === product._id" [isEditing]="editingProductId === product._id"
-                        [reportCount]="productReportCounts()[product._id] || 0"
-                        (expandToggle)="toggleExpand(product._id)" (statusToggle)="onToggleStatus(product)"
-                        (editStart)="startEdit(product)" (refresh)="refresh.emit()">
-                    </tr>
+  <!-- PRODUCT LIST -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <table class="w-full text-left">
+      <thead class="bg-gray-50/50 border-b border-gray-100">
+        <tr>
+          <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Produit
+          </th>
+          <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Status
+          </th>
+          <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Info
+          </th>
+          <th
+            class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <ng-container *ngFor="let product of products">
+          <!-- VIEW MODE -->
+          <!-- Product Row Component -->
+          <tr
+            app-product-list-item
+            class="group hover:bg-gray-50 transition-colors"
+            *ngIf="editingProductId !== product._id"
+            [product]="product"
+            [promotions]="promotions"
+            [isExpanded]="expandedProductId === product._id"
+            [isEditing]="editingProductId === product._id"
+            [reportCount]="productReportCounts()[product._id] || 0"
+            (expandToggle)="toggleExpand(product._id)"
+            (statusToggle)="onToggleStatus(product)"
+            (editStart)="startEdit(product)"
+            (refresh)="refresh.emit()"
+          ></tr>
 
-                    <!-- EDIT MODE -->
-                    <tr *ngIf="editingProductId === product._id" class="bg-gray-50/50">
-                        <td colspan="4" class="p-6">
-                            <app-product-form [product]="product" [categories]="categories" [isEdit]="true"
-                                [loading]="isSavingProduct" (save)="onSaveProduct($event)" (cancel)="cancelEdit()"
-                                (openImageModal)="openImageModal($event)">
-                            </app-product-form>
-                        </td>
-                    </tr>
-                </ng-container>
+          <!-- EDIT MODE -->
+          <tr *ngIf="editingProductId === product._id" class="bg-gray-50/50">
+            <td colspan="4" class="p-6">
+              <app-product-form
+                [product]="product"
+                [categories]="categories"
+                [isEdit]="true"
+                [loading]="isSavingProduct"
+                (save)="onSaveProduct($event)"
+                (cancel)="cancelEdit()"
+                (openImageModal)="openImageModal($event)"
+                (createCategory)="onCreateCategory($event)"
+              >
+              </app-product-form>
+            </td>
+          </tr>
+        </ng-container>
 
-                <tr *ngIf="products.length === 0 && !isAddingProduct">
-                    <td colspan="4" class="py-20 text-center">
-                        <div class="text-gray-400 italic mb-4">Aucun produit dans la boutique</div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <tr *ngIf="products.length === 0 && !isAddingProduct">
+          <td colspan="4" class="py-20 text-center">
+            <div class="text-gray-400 italic mb-4">Aucun produit dans la boutique</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <div class="flex justify-end pt-4" *ngIf="totalPages > 0">
-        <app-pagination [currentPage]="currentPage" [totalPages]="totalPages"
-            (pageChange)="pageChange.emit($event)"></app-pagination>
-    </div>
+  <div class="flex justify-end pt-4" *ngIf="totalPages > 0">
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChange)="pageChange.emit($event)"
+    ></app-pagination>
+  </div>
 
-    <app-image-management-modal *ngIf="showImageModal" [variant]="currentEditingVariant" (close)="closeImageModal()">
-    </app-image-management-modal>
+  <app-image-management-modal
+    *ngIf="showImageModal"
+    [variant]="currentEditingVariant"
+    (close)="closeImageModal()"
+  >
+  </app-image-management-modal>
 </div>

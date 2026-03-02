@@ -21,7 +21,6 @@ import { faHeart, faStore, faShoppingBag } from '@fortawesome/free-solid-svg-ico
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ProductCardComponent,
     ShopCardComponent,
     PaginationComponent,

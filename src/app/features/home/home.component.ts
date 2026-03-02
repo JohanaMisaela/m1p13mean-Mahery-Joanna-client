@@ -9,7 +9,15 @@ import { CategoryService } from '../../core/services/category.service';
 import { ShopService } from '../../core/services/shop.service';
 import { Product, Category, Shop } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faFilter, faCartPlus, faStar, faStore, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
+import {
+  faFilter,
+  faCartPlus,
+  faStar,
+  faStore,
+  faChevronLeft,
+  faChevronRight,
+  faSearch,
+} from '@fortawesome/free-solid-svg-icons';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { FilterSidebarComponent } from '../../shared/components/filter-sidebar/filter-sidebar.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
@@ -19,9 +27,18 @@ import { FooterComponent } from '../../core/layout/footer/footer.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FontAwesomeModule, ProductCardComponent, FilterSidebarComponent, PaginationComponent, EmptyStateComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FontAwesomeModule,
+    ProductCardComponent,
+    FilterSidebarComponent,
+    PaginationComponent,
+    EmptyStateComponent,
+    FooterComponent,
+  ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
   private readonly authService = inject(AuthService);
@@ -50,7 +67,7 @@ export class HomeComponent implements OnInit {
     shop: faStore,
     next: faChevronRight,
     prev: faChevronLeft,
-    search: faSearch
+    search: faSearch,
   };
 
   protected filterForm: FormGroup = this.fb.group({
@@ -59,7 +76,7 @@ export class HomeComponent implements OnInit {
     minPrice: [''],
     maxPrice: [''],
     shop: [''],
-    isOnSale: [false]
+    isOnSale: [false],
   });
 
   constructor() {
@@ -71,10 +88,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.filterForm.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(() => {
+    this.filterForm.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(() => {
       this.loadProducts();
     });
   }
@@ -84,7 +98,7 @@ export class HomeComponent implements OnInit {
       next: (cats: any) => {
         this.categories.set(Array.isArray(cats) ? cats : cats.data || []);
       },
-      error: () => { }
+      error: () => {},
     });
   }
 
@@ -93,7 +107,7 @@ export class HomeComponent implements OnInit {
       next: (shops: any) => {
         this.shops.set(Array.isArray(shops) ? shops : shops.data || []);
       },
-      error: () => { }
+      error: () => {},
     });
   }
 
@@ -103,7 +117,7 @@ export class HomeComponent implements OnInit {
 
     const params: any = {
       page: this.currentPage(),
-      limit: this.itemsPerPage()
+      limit: this.itemsPerPage(),
     };
 
     if (filters.search) params.search = filters.search;
@@ -115,7 +129,8 @@ export class HomeComponent implements OnInit {
 
     this.productService.getProducts(params).subscribe({
       next: (response: any) => {
-        const data = Array.isArray(response) ? response : (response.data || []);
+        const data = Array.isArray(response) ? response : response.data || [];
+
         this.products.set(data);
 
         if (!Array.isArray(response)) {
@@ -125,7 +140,7 @@ export class HomeComponent implements OnInit {
 
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => this.loading.set(false),
     });
   }
 
@@ -138,7 +153,7 @@ export class HomeComponent implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.showFilterSidebar.update(v => !v);
+    this.showFilterSidebar.update((v) => !v);
   }
 
   resetFilters(): void {
@@ -148,6 +163,8 @@ export class HomeComponent implements OnInit {
   }
 
   getStarArray(rating: number): number[] {
-    return Array(5).fill(0).map((_, i) => i < Math.round(rating) ? 1 : 0);
+    return Array(5)
+      .fill(0)
+      .map((_, i) => (i < Math.round(rating) ? 1 : 0));
   }
 }

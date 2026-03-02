@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ShopService } from '../../../../core/services/shop.service';
@@ -17,6 +17,9 @@ import { ProductManagementComponent } from '../components/product-management/pro
 import { PromotionManagementComponent } from '../components/promotion-management/promotion-management.component';
 import { ReportManagementComponent } from '../components/report-management/report-management.component';
 import { OrderListComponent } from '../components/order-list/order-list.component';
+import { ChatManagementComponent } from '../components/chat-management/chat-management.component';
+import { ChatService } from '../../../../core/services/chat.service';
+import { ReportService } from '../../../../core/services/report.service';
 
 @Component({
   selector: 'app-shop-management',
@@ -30,6 +33,7 @@ import { OrderListComponent } from '../components/order-list/order-list.componen
     PromotionManagementComponent,
     ReportManagementComponent,
     OrderListComponent,
+    ChatManagementComponent,
     FooterComponent,
   ],
   templateUrl: './shop-management.component.html',
@@ -45,7 +49,7 @@ import { OrderListComponent } from '../components/order-list/order-list.componen
     `,
   ],
 })
-export class ShopManagementComponent implements OnInit {
+export class ShopManagementComponent implements OnInit, OnDestroy {
   private readonly shopService = inject(ShopService);
   private readonly productService = inject(ProductService);
   private readonly variantService = inject(ProductVariantService);
@@ -54,13 +58,15 @@ export class ShopManagementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly toastService = inject(ToastService);
+  private readonly chatService = inject(ChatService);
+  private readonly reportService = inject(ReportService);
 
   protected userRating = signal<number>(0);
 
   currentUser = this.authService.currentUser;
-  activeView = signal<'preview' | 'settings' | 'products' | 'promotions' | 'orders' | 'reports'>(
-    'products',
-  );
+  activeView = signal<
+    'preview' | 'settings' | 'products' | 'promotions' | 'orders' | 'reports' | 'chat'
+  >('products');
 
   shop = signal<Shop | null>(null);
   products = signal<Product[]>([]);
@@ -73,12 +79,16 @@ export class ShopManagementComponent implements OnInit {
   isAddingProduct = signal(false);
   isSavingProduct = signal(false);
 
+  chatUnreadCount = signal(0);
+  reportPendingCount = signal(0);
+
   showProductForm = signal(false);
   showVariantForm = signal(false);
   showPromotionForm = signal(false);
 
   selectedProduct: any = null;
   currentProductId: string = '';
+  private indicatorInterval: any;
 
   constructor() {
     afterNextRender(() => {
@@ -95,10 +105,41 @@ export class ShopManagementComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.startIndicatorPolling();
+  }
+
+  ngOnDestroy() {
+    if (this.indicatorInterval) {
+      clearInterval(this.indicatorInterval);
+    }
+  }
+
+  private startIndicatorPolling() {
+    this.indicatorInterval = setInterval(() => {
+      const id = this.shop()?._id;
+      if (id) {
+        this.loadIndicators(id);
+      }
+    }, 10000); // Polling every 10 seconds
+  }
 
   loadShop(id: string) {
-    this.shopService.getShopById(id).subscribe((s) => this.shop.set(s));
+    this.shopService.getShopById(id).subscribe((s) => {
+      this.shop.set(s);
+      this.loadIndicators(id);
+    });
+  }
+
+  loadIndicators(id: string) {
+    this.chatService
+      .getShopUnreadCount(id)
+      .subscribe((res) => this.chatUnreadCount.set(res.totalUnread));
+    if (this.currentUser()?.role === 'admin') {
+      this.reportService
+        .getPendingCount(id)
+        .subscribe((res) => this.reportPendingCount.set(res.count));
+    }
   }
 
   loadCategories() {
@@ -165,6 +206,24 @@ export class ShopManagementComponent implements OnInit {
       this.loadProducts(shopId);
       this.loadCategories();
     }
+  }
+
+  handleCreateCategory(name: string) {
+    if (!name.trim()) return;
+
+    this.isSavingProduct.set(true);
+    this.categoryService.createCategory({ name, type: 'product' }).subscribe({
+      next: (newCategory) => {
+        this.isSavingProduct.set(false);
+        this.toastService.success(`Catégorie "${newCategory.name}" créée !`);
+        this.loadCategories();
+      },
+      error: (err) => {
+        this.isSavingProduct.set(false);
+        this.toastService.error('Erreur lors de la création de la catégorie.');
+        console.error('Error creating category:', err);
+      },
+    });
   }
 
   openProductForm(product?: any) {

@@ -42,7 +42,8 @@ export class MainLayoutComponent {
       cleanUrl === '' ||
       cleanUrl.includes('/dashboard') ||
       cleanUrl.includes('/admin/shop/') ||
-      cleanUrl.includes('/shops') ||
+      cleanUrl === '/shops' ||
+      cleanUrl === '/chat' ||
       (cleanUrl.startsWith('/shop/') && !cleanUrl.startsWith('/shops'))
     );
   });

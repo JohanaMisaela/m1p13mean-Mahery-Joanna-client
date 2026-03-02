@@ -7,7 +7,6 @@ import {
   AppSelectComponent,
   SelectOption,
 } from '../../../../../shared/components/app-select/app-select.component';
-
 @Component({
   selector: 'app-report-management',
   standalone: true,
@@ -22,6 +21,7 @@ export class ReportManagementComponent implements OnInit {
   reports = signal<any[]>([]);
   total = signal<number>(0);
   loading = signal<boolean>(false);
+  openDropdownId = signal<string | null>(null);
 
   // Filters
   selectedStatus = signal<string>('');
@@ -40,6 +40,12 @@ export class ReportManagementComponent implements OnInit {
     { label: 'Tous les types', value: '' },
     { label: 'Produits', value: 'product' },
     { label: 'Boutique', value: 'shop' },
+  ];
+
+  actionOptions: SelectOption[] = [
+    { label: 'En attente', value: 'pending' },
+    { label: 'Résolu', value: 'resolved' },
+    { label: 'Rejeté', value: 'dismissed' },
   ];
 
   ngOnInit() {
@@ -69,7 +75,7 @@ export class ReportManagementComponent implements OnInit {
   }
 
   updateStatus(report: any, newStatus: string) {
-    if (report.status === newStatus) return;
+    if (!newStatus || report.status === newStatus) return;
 
     this.reportService.updateReportStatus(report._id, newStatus).subscribe(() => {
       // Optimistic update
@@ -77,6 +83,15 @@ export class ReportManagementComponent implements OnInit {
         items.map((item) => (item._id === report._id ? { ...item, status: newStatus } : item)),
       );
     });
+  }
+
+  toggleDropdown(reportId: string, event: Event) {
+    event.stopPropagation();
+    if (this.openDropdownId() === reportId) {
+      this.openDropdownId.set(null);
+    } else {
+      this.openDropdownId.set(reportId);
+    }
   }
 
   onFilterChange() {
