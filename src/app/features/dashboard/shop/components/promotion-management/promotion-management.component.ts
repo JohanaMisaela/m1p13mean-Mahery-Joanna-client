@@ -13,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 import { PromotionService } from '../../../../../core/services/promotion.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { Product } from '../../../../../shared/models/product.model';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 
 interface Promotion {
   _id: string;
@@ -32,7 +34,7 @@ interface Promotion {
 @Component({
   selector: 'app-promotion-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule],
   templateUrl: './promotion-management.component.html',
 })
 export class PromotionManagementComponent implements OnChanges {
@@ -59,6 +61,23 @@ export class PromotionManagementComponent implements OnChanges {
     isActive: true,
     products: [] as string[],
   });
+
+  // Current datetime for min constraints
+  minDateTime = '';
+
+  icons = {
+    calendar: faCalendarAlt,
+    clock: faClock,
+  };
+
+  constructor() {
+    this.updateMinDateTime();
+  }
+
+  updateMinDateTime() {
+    const now = new Date();
+    this.minDateTime = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+  }
 
   // Product selection
   showProductSelector = signal(false);
@@ -150,12 +169,18 @@ export class PromotionManagementComponent implements OnChanges {
 
   openCreateForm() {
     this.editingPromotion = null;
+    this.updateMinDateTime();
+
+    const now = new Date();
+    const tonight = new Date();
+    tonight.setHours(23, 59, 59, 999);
+
     this.formData.set({
       name: '',
       description: '',
       discountPercentage: 0,
-      startDate: '',
-      endDate: '',
+      startDate: this.formatDateForInput(now.toISOString()),
+      endDate: this.formatDateForInput(tonight.toISOString()),
       isActive: true,
       products: [],
     });
@@ -165,6 +190,7 @@ export class PromotionManagementComponent implements OnChanges {
 
   openEditForm(promotion: Promotion) {
     this.editingPromotion = promotion;
+    this.updateMinDateTime();
     this.formData.set({
       name: promotion.name,
       description: promotion.description || '',
@@ -199,16 +225,10 @@ export class PromotionManagementComponent implements OnChanges {
 
     this.isSaving.set(true);
 
-    // Convert dates to ISO datetime format
-    const startDate = new Date(data.startDate);
-    startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(data.endDate);
-    endDate.setHours(23, 59, 59, 999);
-
     const payload = {
       ...data,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: new Date(data.startDate).toISOString(),
+      endDate: new Date(data.endDate).toISOString(),
       products: this.selectedProducts(),
     };
 
@@ -268,7 +288,24 @@ export class PromotionManagementComponent implements OnChanges {
 
   formatDateForInput(dateString: string): string {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    // Pad values for datetime-local (YYYY-MM-DDTHH:mm)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  formatDateWithTime(dateString: string): string {
+    return new Date(dateString).toLocaleString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
 
   formatDateForDisplay(dateString: string): string {

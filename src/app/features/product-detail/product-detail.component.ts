@@ -33,6 +33,7 @@ import {
   faChevronLeft,
   faChevronRight,
   faCheckCircle,
+  faStopwatch,
 } from '@fortawesome/free-solid-svg-icons';
 import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ProductAttributesComponent } from './components/product-attributes/product-attributes.component';
@@ -66,6 +67,8 @@ export class ProductDetailComponent implements OnInit {
   currentImageIndex = signal<number>(0);
   showAddedToCart = signal<boolean>(false);
   promotions = signal<any[]>([]);
+  countdownValue = signal<string | null>(null);
+  private countdownInterval: any;
 
   selectedAttributes = signal<{ [key: string]: string }>({});
 
@@ -250,6 +253,7 @@ export class ProductDetailComponent implements OnInit {
     prev: faChevronLeft,
     next: faChevronRight,
     check: faCheckCircle,
+    stopwatch: faStopwatch,
   };
 
   constructor() {
@@ -258,6 +262,7 @@ export class ProductDetailComponent implements OnInit {
       if (productId) {
         this.loadAll(productId);
       }
+      this.startCountdown();
     });
 
     effect(() => {
@@ -430,5 +435,40 @@ export class ProductDetailComponent implements OnInit {
 
   openImage(url: string): void {
     window.open(url, '_blank');
+  }
+
+  private startCountdown() {
+    this.countdownInterval = setInterval(() => {
+      const promo = this.currentPromotion();
+      if (!promo) {
+        this.countdownValue.set(null);
+        return;
+      }
+
+      const now = new Date();
+      const end = new Date(promo.endDate);
+      const diff = end.getTime() - now.getTime();
+
+      // Check if ends "today" (less than 24h) and still active
+      if (diff > 0 && diff < 24 * 60 * 60 * 1000) {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        this.countdownValue.set(
+          `${hours.toString().padStart(2, '0')}:${minutes
+            .toString()
+            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
+        );
+      } else {
+        this.countdownValue.set(null);
+      }
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
   }
 }
