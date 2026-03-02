@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CartService, CartItem } from '../../../core/services/cart.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { UserAddress, CreateAddressDto } from '../../../shared/models/address.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-checkout-modal',
@@ -155,33 +156,34 @@ export class CheckoutModalComponent implements OnInit {
       itemsByShop.get(shopId)!.push(item);
     });
 
-    // For now, create order for the first shop (in a real app, handle multiple shops)
-    const [shopId, shopItems] = Array.from(itemsByShop.entries())[0];
+    const orderRequests = Array.from(itemsByShop.entries()).map(([shopId, shopItems]) => {
+      const orderData = {
+        shopId,
+        items: shopItems.map((item) => ({
+          product: item.product._id,
+          variant: item.variant?._id,
+          quantity: item.quantity,
+        })),
+        addressId: this.selectedAddressId(),
+      };
 
-    const orderData = {
-      shopId,
-      items: shopItems.map((item) => ({
-        product: item.product._id,
-        variant: item.variant?._id,
-        quantity: item.quantity,
-      })),
-      addressId: this.selectedAddressId(),
-    };
+      return this.orderService.createOrder(orderData);
+    });
 
     this.submitting.set(true);
-    this.orderService.createOrder(orderData).subscribe({
+    forkJoin(orderRequests).subscribe({
       next: () => {
         this.submitting.set(false);
         this.cartService.clearCart();
         this.orderSuccess.emit();
         this.close.emit();
-        this.toastService.success('Commande passée avec succès !');
+        this.toastService.success('Commandes passées avec succès !');
       },
       error: (err: any) => {
-        console.error('Failed to create order', err);
+        console.error('Failed to create orders', err);
         this.submitting.set(false);
         this.toastService.error(
-          'Erreur lors de la création de la commande: ' + (err.error?.message || 'Erreur inconnue'),
+          'Erreur lors de la création des commandes: ' + (err.error?.message || 'Erreur inconnue'),
         );
       },
     });
