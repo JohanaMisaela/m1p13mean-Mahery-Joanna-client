@@ -1,4 +1,13 @@
-import { Component, inject, signal, OnInit, computed, effect, untracked, afterNextRender } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  computed,
+  effect,
+  untracked,
+  afterNextRender,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,7 +17,23 @@ import { CartService } from '../../core/services/cart.service';
 import { PromotionService } from '../../core/services/promotion.service';
 import { Product, ProductVariant } from '../../shared/models/product.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStar, faCartPlus, faStore, faExclamationTriangle, faComment, faUser, faTimes, faHeart, faPlus, faTrash, faCamera, faEdit, faChevronLeft, faChevronRight, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import {
+  faStar,
+  faCartPlus,
+  faStore,
+  faExclamationTriangle,
+  faComment,
+  faUser,
+  faTimes,
+  faHeart,
+  faPlus,
+  faTrash,
+  faCamera,
+  faEdit,
+  faChevronLeft,
+  faChevronRight,
+  faCheckCircle,
+} from '@fortawesome/free-solid-svg-icons';
 import { ProductReviewsComponent } from './components/product-reviews/product-reviews.component';
 import { ProductAttributesComponent } from './components/product-attributes/product-attributes.component';
 import { ProductReportComponent } from './components/product-report/product-report.component';
@@ -16,9 +41,17 @@ import { ProductReportComponent } from './components/product-report/product-repo
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FontAwesomeModule, ProductReviewsComponent, ProductAttributesComponent, ProductReportComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    FontAwesomeModule,
+    ProductReviewsComponent,
+    ProductAttributesComponent,
+    ProductReportComponent,
+  ],
   templateUrl: './product-detail.component.html',
-  styleUrl: './product-detail.component.scss'
+  styleUrl: './product-detail.component.scss',
 })
 export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -46,25 +79,32 @@ export class ProductDetailComponent implements OnInit {
     if (selectedKeys.length === 0) return null;
 
     const findValue = (searchKey: string) => {
-      const actualKey = Object.keys(selected).find(k => k.toLowerCase() === searchKey.toLowerCase());
+      const actualKey = Object.keys(selected).find(
+        (k) => k.toLowerCase() === searchKey.toLowerCase(),
+      );
       return actualKey ? selected[actualKey] : undefined;
     };
 
-    const variant = prod.variants.find(v => {
-      const matchesSelection = Object.entries(selected).every(([selKey, selValue]) => {
-        const variantKey = Object.keys(v.attributes).find(k => k.toLowerCase() === selKey.toLowerCase());
-        if (!variantKey) return false;
-        return v.attributes[variantKey]?.toString().toLowerCase() === selValue.toString().toLowerCase();
-      });
+    const variant =
+      prod.variants.find((v) => {
+        const matchesSelection = Object.entries(selected).every(([selKey, selValue]) => {
+          const variantKey = Object.keys(v.attributes).find(
+            (k) => k.toLowerCase() === selKey.toLowerCase(),
+          );
+          if (!variantKey) return false;
+          return (
+            v.attributes[variantKey]?.toString().toLowerCase() === selValue.toString().toLowerCase()
+          );
+        });
 
-      if (!matchesSelection) return false;
+        if (!matchesSelection) return false;
 
-      const allAttributesPresent = Object.keys(v.attributes).every(vKey => {
-        return !!findValue(vKey);
-      });
+        const allAttributesPresent = Object.keys(v.attributes).every((vKey) => {
+          return !!findValue(vKey);
+        });
 
-      return allAttributesPresent;
-    }) || null;
+        return allAttributesPresent;
+      }) || null;
     return variant;
   });
 
@@ -77,17 +117,16 @@ export class ProductDetailComponent implements OnInit {
 
     // Check for variant specific promotion first
     if (variant) {
-      const variantPromo = allPromotions.find(p => p.products?.includes(variant._id));
+      const variantPromo = allPromotions.find((p) => p.products?.includes(variant._id));
       if (variantPromo) return variantPromo;
     }
 
     // Check for product level promotion (if product ID is in promotion)
-    const productPromo = allPromotions.find(p => p.products?.includes(prod._id));
+    const productPromo = allPromotions.find((p) => p.products?.includes(prod._id));
     if (productPromo) return productPromo;
 
     return null; // No promotion found
   });
-
 
   isSelectionComplete = computed(() => {
     const prod = this.product();
@@ -95,10 +134,12 @@ export class ProductDetailComponent implements OnInit {
     if (!prod || !prod.variants || prod.variants.length === 0) return true;
 
     const requiredKeys = new Set<string>();
-    prod.variants.forEach(v => Object.keys(v.attributes).forEach(k => requiredKeys.add(k.toLowerCase())));
+    prod.variants.forEach((v) =>
+      Object.keys(v.attributes).forEach((k) => requiredKeys.add(k.toLowerCase())),
+    );
 
-    const selectedKeys = Object.keys(selected).map(k => k.toLowerCase());
-    return Array.from(requiredKeys).every(rk => selectedKeys.includes(rk));
+    const selectedKeys = Object.keys(selected).map((k) => k.toLowerCase());
+    return Array.from(requiredKeys).every((rk) => selectedKeys.includes(rk));
   });
 
   effectivePrice = computed(() => {
@@ -142,7 +183,9 @@ export class ProductDetailComponent implements OnInit {
     if (!prod) return [];
 
     const baseImages = prod.images || [];
-    const variantImages = (prod.variants || []).flatMap(v => v.images || []);
+    const variantImages = (prod.variants || [])
+      .filter((v) => v.isActive !== false)
+      .flatMap((v) => v.images || []);
 
     return Array.from(new Set([...baseImages, ...variantImages]));
   });
@@ -154,8 +197,9 @@ export class ProductDetailComponent implements OnInit {
 
     const baseImages = prod.images || [];
     const variantFirstImages = (prod.variants || [])
-      .map(v => v.images?.[0])
-      .filter(img => !!img);
+      .filter((v) => v.isActive !== false)
+      .map((v) => v.images?.[0])
+      .filter((img) => !!img);
 
     // Filter out duplicates (variant images that might also be in base images)
     return Array.from(new Set([...baseImages, ...variantFirstImages]));
@@ -180,11 +224,13 @@ export class ProductDetailComponent implements OnInit {
     const map = new Map<string, ProductVariant>();
     if (!prod || !prod.variants) return map;
 
-    prod.variants.forEach(v => {
-      if (v.images) {
-        v.images.forEach(img => map.set(img, v));
-      }
-    });
+    prod.variants
+      .filter((v) => v.isActive !== false)
+      .forEach((v) => {
+        if (v.images) {
+          v.images.forEach((img) => map.set(img, v));
+        }
+      });
     return map;
   });
 
@@ -203,7 +249,7 @@ export class ProductDetailComponent implements OnInit {
     edit: faEdit,
     prev: faChevronLeft,
     next: faChevronRight,
-    check: faCheckCircle
+    check: faCheckCircle,
   };
 
   constructor() {
@@ -247,18 +293,18 @@ export class ProductDetailComponent implements OnInit {
     const isFav = this.isFavorite();
 
     const newFavoritedBy = isFav
-      ? (prod.favoritedBy || []).filter(id => id !== userId)
+      ? (prod.favoritedBy || []).filter((id) => id !== userId)
       : [...(prod.favoritedBy || []), userId];
 
     const updatedProd = { ...prod, favoritedBy: newFavoritedBy };
     this.product.set(updatedProd);
 
     this.productService.toggleProductFavorite(prod._id, !isFav).subscribe({
-      error: () => this.product.set(prod)
+      error: () => this.product.set(prod),
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   loadAll(id: string, silent: boolean = false): void {
     if (!silent) this.isLoading.set(true);
@@ -267,9 +313,10 @@ export class ProductDetailComponent implements OnInit {
       next: (product) => {
         this.product.set(product);
 
-        // Pre-select first variant attributes if they exist
-        if (product.variants && product.variants.length > 0) {
-          this.selectedAttributes.set({ ...product.variants[0].attributes });
+        // Pre-select first ACTIVE variant attributes if they exist
+        const firstActiveVariant = product.variants?.find((v) => v.isActive !== false);
+        if (firstActiveVariant) {
+          this.selectedAttributes.set({ ...firstActiveVariant.attributes });
         } else {
           this.selectedAttributes.set({});
         }
@@ -286,7 +333,7 @@ export class ProductDetailComponent implements OnInit {
 
         if (!silent) this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: () => this.isLoading.set(false),
     });
   }
 
@@ -302,7 +349,7 @@ export class ProductDetailComponent implements OnInit {
       },
       error: () => {
         if (!silent) this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -312,7 +359,7 @@ export class ProductDetailComponent implements OnInit {
     this.promotionService.getShopPromotions(shopId).subscribe({
       next: (res: any) => {
         console.log('Promotions loaded for shop', shopId, res);
-        const data = Array.isArray(res) ? res : (res.data || []);
+        const data = Array.isArray(res) ? res : res.data || [];
         const activePromotions = data.filter((p: any) => {
           const now = new Date();
           const start = new Date(p.startDate);
@@ -325,7 +372,7 @@ export class ProductDetailComponent implements OnInit {
       error: (err) => {
         console.error('Error loading promotions:', err);
         this.promotions.set([]);
-      }
+      },
     });
   }
 
@@ -354,7 +401,9 @@ export class ProductDetailComponent implements OnInit {
 
   getStarArray(rating: any): number[] {
     const r = Number(rating) || 0;
-    return Array(5).fill(0).map((_, i) => i < Math.round(r) ? 1 : 0);
+    return Array(5)
+      .fill(0)
+      .map((_, i) => (i < Math.round(r) ? 1 : 0));
   }
 
   getDiscountedPrice(price: number, discountPercentage: number): number {
@@ -364,13 +413,13 @@ export class ProductDetailComponent implements OnInit {
   prevImage(): void {
     const images = this.allAvailableImages();
     if (images.length <= 1) return;
-    this.currentImageIndex.update(idx => (idx === 0 ? images.length - 1 : idx - 1));
+    this.currentImageIndex.update((idx) => (idx === 0 ? images.length - 1 : idx - 1));
   }
 
   nextImage(): void {
     const images = this.allAvailableImages();
     if (images.length <= 1) return;
-    this.currentImageIndex.update(idx => (idx === images.length - 1 ? 0 : idx + 1));
+    this.currentImageIndex.update((idx) => (idx === images.length - 1 ? 0 : idx + 1));
   }
 
   setImageIndex(idx: number): void {
