@@ -2,155 +2,181 @@ import { Component, OnInit, inject, signal, afterNextRender } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faEdit, faUserCircle, faShieldAlt, faCheckCircle, faTimesCircle, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEdit,
+  faUserCircle,
+  faShieldAlt,
+  faCheckCircle,
+  faTimesCircle,
+  faPowerOff,
+} from '@fortawesome/free-solid-svg-icons';
 import { UserService } from '../../../../core/services/user.service';
 import { User, RegisterRequest, UserResponse } from '../../../../shared/models/user.model';
+import {
+  AppSelectComponent,
+  SelectOption,
+} from '../../../../shared/components/app-select/app-select.component';
 
 @Component({
-    selector: 'app-user-list',
-    standalone: true,
-    imports: [CommonModule, FormsModule, FontAwesomeModule],
-    templateUrl: './user-list.component.html',
-    styleUrl: './user-list.component.css'
+  selector: 'app-user-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, FontAwesomeModule, AppSelectComponent],
+  templateUrl: './user-list.component.html',
+  styleUrl: './user-list.component.css',
 })
 export class UserListComponent implements OnInit {
-    private readonly userService = inject(UserService);
+  private readonly userService = inject(UserService);
 
-    // Icons
-    protected readonly icons = {
-        edit: faEdit,
-        user: faUserCircle,
-        admin: faShieldAlt,
-        active: faCheckCircle,
-        inactive: faTimesCircle,
-        power: faPowerOff
+  // Icons
+  protected readonly icons = {
+    edit: faEdit,
+    user: faUserCircle,
+    admin: faShieldAlt,
+    active: faCheckCircle,
+    inactive: faTimesCircle,
+    power: faPowerOff,
+  };
+
+  roleOptions: SelectOption[] = [
+    { label: 'Utilisateur', value: 'user' },
+    { label: 'Propriétaire de Boutique', value: 'shop' },
+    { label: 'Administrateur', value: 'admin' },
+  ];
+
+  users = signal<User[]>([]);
+  showAddForm = false;
+
+  // Pagination state
+  totalItems = signal<number>(0);
+  totalPages = signal<number>(0);
+  currentPage = signal<number>(1);
+  limit = signal<number>(10); // Default to 10 for dashboard lists
+  errorMessage = signal<string | null>(null);
+
+  // Edit Form State
+  isEditFormOpen = signal<boolean>(false);
+  editingUser = signal<User | null>(null);
+  editForm: Partial<User> = {
+    name: '',
+    surname: '',
+    email: '',
+    contact: '',
+    role: 'user',
+  };
+
+  newUser: RegisterRequest = {
+    name: '',
+    surname: '',
+    email: '',
+    contact: '',
+    password: '',
+    role: 'user',
+  };
+
+  constructor() {
+    afterNextRender(() => {
+      this.loadUsers();
+    });
+  }
+
+  ngOnInit() {
+    // Initialization logic that doesn't require HTTP calls
+  }
+
+  loadUsers() {
+    const params = {
+      page: this.currentPage(),
+      limit: this.limit(),
     };
+    this.userService.getAllUsers(params).subscribe({
+      next: (res: UserResponse) => {
+        this.users.set(res.data);
+        this.totalItems.set(res.total);
+        this.totalPages.set(res.totalPages);
+      },
+      error: (err: any) => console.error('Error loading users', err),
+    });
+  }
 
-    users = signal<User[]>([]);
-    showAddForm = false;
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.loadUsers();
+  }
 
-    // Pagination state
-    totalItems = signal<number>(0);
-    totalPages = signal<number>(0);
-    currentPage = signal<number>(1);
-    limit = signal<number>(10); // Default to 10 for dashboard lists
-    errorMessage = signal<string | null>(null);
-
-    // Edit Form State
-    isEditFormOpen = signal<boolean>(false);
-    editingUser = signal<User | null>(null);
-    editForm: Partial<User> = {
-        name: '',
-        surname: '',
-        email: '',
-        contact: '',
-        role: 'user'
-    };
-
-    newUser: RegisterRequest = {
-        name: '',
-        surname: '',
-        email: '',
-        contact: '',
-        password: '',
-        role: 'user'
-    };
-
-    constructor() {
-        afterNextRender(() => {
-            this.loadUsers();
-        });
-    }
-
-    ngOnInit() {
-        // Initialization logic that doesn't require HTTP calls
-    }
-
-    loadUsers() {
-        const params = {
-            page: this.currentPage(),
-            limit: this.limit()
-        };
-        this.userService.getAllUsers(params).subscribe({
-            next: (res: UserResponse) => {
-                this.users.set(res.data);
-                this.totalItems.set(res.total);
-                this.totalPages.set(res.totalPages);
-            },
-            error: (err: any) => console.error('Error loading users', err)
-        });
-    }
-
-    changePage(page: number) {
-        if (page < 1 || page > this.totalPages()) return;
-        this.currentPage.set(page);
+  createUser(event: Event) {
+    event.preventDefault();
+    this.errorMessage.set(null);
+    this.userService.createUser(this.newUser).subscribe({
+      next: () => {
         this.loadUsers();
-    }
-
-    createUser(event: Event) {
-        event.preventDefault();
-        this.errorMessage.set(null);
-        this.userService.createUser(this.newUser).subscribe({
-            next: () => {
-                this.loadUsers();
-                this.showAddForm = false;
-                this.newUser = { name: '', surname: '', email: '', contact: '', password: '', role: 'user' };
-            },
-            error: (err: any) => {
-                console.error('Error creating user', err);
-                const msg = err.error?.message || (err.error?.errors ? err.error.errors[0]?.message : 'Erreur lors de la création');
-                this.errorMessage.set(msg);
-            }
-        });
-    }
-
-    toggleUserStatus(user: User) {
-        const newStatus = !user.isActive;
-        const id = user._id || user.id;
-        if (!id) return;
-
-        this.userService.updateUserStatus(id, newStatus).subscribe({
-            next: () => this.loadUsers(),
-            error: (err: any) => console.error('Error updating status', err)
-        });
-    }
-
-    openEditForm(user: User) {
-        this.showAddForm = false; // Close add form if open
-        this.editingUser.set(user);
-        this.editForm = {
-            name: user.name,
-            surname: user.surname || '',
-            email: user.email,
-            contact: user.contact || '',
-            role: user.role
+        this.showAddForm = false;
+        this.newUser = {
+          name: '',
+          surname: '',
+          email: '',
+          contact: '',
+          password: '',
+          role: 'user',
         };
-        this.isEditFormOpen.set(true);
-        this.errorMessage.set(null);
-        // Scroll to top to see the form
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+      },
+      error: (err: any) => {
+        console.error('Error creating user', err);
+        const msg =
+          err.error?.message ||
+          (err.error?.errors ? err.error.errors[0]?.message : 'Erreur lors de la création');
+        this.errorMessage.set(msg);
+      },
+    });
+  }
 
-    closeEditForm() {
-        this.isEditFormOpen.set(false);
-        this.editingUser.set(null);
-    }
+  toggleUserStatus(user: User) {
+    const newStatus = !user.isActive;
+    const id = user._id || user.id;
+    if (!id) return;
 
-    updateUser(event: Event) {
-        event.preventDefault();
-        const user = this.editingUser();
-        const id = user?._id || user?.id;
-        if (!id) return;
+    this.userService.updateUserStatus(id, newStatus).subscribe({
+      next: () => this.loadUsers(),
+      error: (err: any) => console.error('Error updating status', err),
+    });
+  }
 
-        this.userService.updateUserData(id, this.editForm).subscribe({
-            next: () => {
-                this.loadUsers();
-                this.closeEditForm();
-            },
-            error: (err: any) => {
-                console.error('Error updating user', err);
-                this.errorMessage.set(err.error?.message || 'Erreur lors de la mise à jour');
-            }
-        });
-    }
+  openEditForm(user: User) {
+    this.showAddForm = false; // Close add form if open
+    this.editingUser.set(user);
+    this.editForm = {
+      name: user.name,
+      surname: user.surname || '',
+      email: user.email,
+      contact: user.contact || '',
+      role: user.role,
+    };
+    this.isEditFormOpen.set(true);
+    this.errorMessage.set(null);
+    // Scroll to top to see the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  closeEditForm() {
+    this.isEditFormOpen.set(false);
+    this.editingUser.set(null);
+  }
+
+  updateUser(event: Event) {
+    event.preventDefault();
+    const user = this.editingUser();
+    const id = user?._id || user?.id;
+    if (!id) return;
+
+    this.userService.updateUserData(id, this.editForm).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.closeEditForm();
+      },
+      error: (err: any) => {
+        console.error('Error updating user', err);
+        this.errorMessage.set(err.error?.message || 'Erreur lors de la mise à jour');
+      },
+    });
+  }
 }

@@ -6,11 +6,15 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { User } from '../../../../shared/models/user.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import {
+  AppSelectComponent,
+  SelectOption,
+} from '../../../../shared/components/app-select/app-select.component';
 
 @Component({
   selector: 'app-shop-report',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule, AppSelectComponent],
   templateUrl: './shop-report.component.html',
 })
 export class ShopReportComponent {
@@ -27,6 +31,14 @@ export class ShopReportComponent {
   icons = {
     report: faExclamationTriangle,
   };
+
+  reasonOptions: SelectOption[] = [
+    { label: 'Sélectionnez une raison', value: '' },
+    { label: 'Arnaque', value: 'scam' },
+    { label: 'Informations incorrectes', value: 'wrong_info' },
+    { label: 'Contenu interdit', value: 'prohibited' },
+    { label: 'Autre', value: 'other' },
+  ];
 
   constructor() {
     this.reportForm = this.fb.group({

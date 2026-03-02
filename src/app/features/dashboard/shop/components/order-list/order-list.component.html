@@ -1,4 +1,4 @@
-<div class="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden">
+<div class="bg-white border border-gray-100 shadow-sm rounded-xl">
   <div class="bg-white border-b border-gray-100 p-6">
     <div class="flex flex-wrap items-center gap-6">
       <!-- Text Filters -->
@@ -30,21 +30,13 @@
         </div>
 
         <div class="relative">
-          <label class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block"
-            >Statut</label
-          >
-          <select
+          <app-select
+            [label]="'Statut'"
+            [options]="statusOptions"
             [ngModel]="filterStatus()"
             (ngModelChange)="filterStatus.set($event); applyFilters()"
-            class="w-full bg-gray-50 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none appearance-none"
-          >
-            <option value="">Tous les statuts</option>
-            <option value="PENDING">En attente</option>
-            <option value="CONFIRMED">Confirmée</option>
-            <option value="SHIPPED">Expédiée</option>
-            <option value="CANCELLED">Annulée</option>
-            <option value="REJECTED">Rejetée</option>
-          </select>
+            placeholder="Tous les statuts"
+          ></app-select>
         </div>
 
         <div class="relative">

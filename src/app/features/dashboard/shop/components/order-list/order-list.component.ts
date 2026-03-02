@@ -9,6 +9,10 @@ import { ShopOrderCardComponent } from '../order-card/shop-order-card.component'
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { ConfirmModalComponent } from '../../../../../shared/components/confirm-modal/confirm-modal.component';
+import {
+  AppSelectComponent,
+  SelectOption,
+} from '../../../../../shared/components/app-select/app-select.component';
 
 @Component({
   selector: 'app-order-list',
@@ -21,6 +25,7 @@ import { ConfirmModalComponent } from '../../../../../shared/components/confirm-
     EmptyStateComponent,
     PaginationComponent,
     ConfirmModalComponent,
+    AppSelectComponent,
   ],
   templateUrl: './order-list.component.html',
 })
@@ -51,6 +56,14 @@ export class OrderListComponent implements OnInit {
   icons = {
     bag: faShoppingBag,
   };
+
+  statusOptions: SelectOption[] = [
+    { label: 'Tous les statuts', value: '' },
+    { label: 'En attente', value: 'PENDING' },
+    { label: 'Confirmée', value: 'CONFIRMED' },
+    { label: 'Expédiée', value: 'SHIPPED' },
+    { label: 'Annulée', value: 'CANCELLED' },
+  ];
 
   ngOnInit(): void {
     this.loadOrders();

@@ -3,20 +3,29 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faSearch, faTimes, faStore, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSearch,
+  faTimes,
+  faStore,
+  faChevronLeft,
+  faChevronRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { Category, Shop } from '../../models/product.model';
+import { AppSelectComponent, SelectOption } from '../app-select/app-select.component';
 
 @Component({
   selector: 'app-filter-sidebar',
-  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FontAwesomeModule, RouterLink, AppSelectComponent],
   standalone: true,
   templateUrl: './filter-sidebar.component.html',
-  styles: [`
-    :host {
-      display: block;
-      height: 100%;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+        height: 100%;
+      }
+    `,
+  ],
 })
 export class FilterSidebarComponent {
   @Input({ required: true }) filterForm!: FormGroup;
@@ -40,7 +49,7 @@ export class FilterSidebarComponent {
     close: faTimes,
     shop: faStore,
     prev: faChevronLeft,
-    next: faChevronRight
+    next: faChevronRight,
   };
 
   closeSidebar(): void {
@@ -55,5 +64,25 @@ export class FilterSidebarComponent {
     if (page >= 1 && page <= this.totalPages) {
       this.pageChange.emit(page);
     }
+  }
+
+  get categoryOptions(): SelectOption[] {
+    return [
+      { label: 'Toutes les catégories', value: '' },
+      ...this.categories.map((cat) => ({
+        label: cat.name,
+        value: cat._id || cat.name,
+      })),
+    ];
+  }
+
+  get shopOptions(): SelectOption[] {
+    return [
+      { label: 'Toutes les boutiques', value: '' },
+      ...this.shops.map((shop) => ({
+        label: shop.name,
+        value: shop._id,
+      })),
+    ];
   }
 }

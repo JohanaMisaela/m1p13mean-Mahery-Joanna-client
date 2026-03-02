@@ -9,7 +9,7 @@
 
   <div class="max-w-5xl mx-auto px-6 py-12">
     <!-- Filter Bar -->
-    <div class="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden mb-12">
+    <div class="bg-white border border-gray-100 shadow-sm rounded-xl mb-12">
       <div class="p-6">
         <div class="flex flex-wrap items-center gap-6">
           <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -40,21 +40,12 @@
               />
             </div>
             <div class="relative">
-              <label
-                class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5 block"
-                >Statut</label
-              >
-              <select
+              <app-select
+                [label]="'Statut'"
+                [options]="statusOptions"
                 [ngModel]="filterStatus()"
                 (ngModelChange)="filterStatus.set($event); applyFilters()"
-                class="w-full bg-gray-50 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-black/5 transition-all outline-none appearance-none"
-              >
-                <option value="">Tous les statuts</option>
-                <option value="PENDING">En attente</option>
-                <option value="CONFIRMED">Confirmée</option>
-                <option value="SHIPPED">Expédiée</option>
-                <option value="CANCELLED">Annulée</option>
-              </select>
+              ></app-select>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>

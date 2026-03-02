@@ -22,6 +22,10 @@ import { FormsModule } from '@angular/forms';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { OrderCardComponent } from './components/order-card/order-card.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
+import {
+  AppSelectComponent,
+  SelectOption,
+} from '../../shared/components/app-select/app-select.component';
 
 @Component({
   selector: 'app-orders',
@@ -35,6 +39,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
     OrderCardComponent,
     PaginationComponent,
     ConfirmModalComponent,
+    AppSelectComponent,
   ],
   templateUrl: './orders.component.html',
   styles: [
@@ -84,6 +89,14 @@ export class OrdersComponent implements OnInit {
     chevron: faChevronRight,
     empty: faBoxOpen,
   };
+
+  statusOptions: SelectOption[] = [
+    { label: 'Tous les statuts', value: '' },
+    { label: 'En attente', value: 'PENDING' },
+    { label: 'Confirmée', value: 'CONFIRMED' },
+    { label: 'Expédiée', value: 'SHIPPED' },
+    { label: 'Annulée', value: 'CANCELLED' },
+  ];
 
   ngOnInit(): void {
     this.loadOrders();

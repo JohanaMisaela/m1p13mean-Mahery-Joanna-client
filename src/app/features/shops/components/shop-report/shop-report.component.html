@@ -1,69 +1,96 @@
 @if (currentUser) {
-<button (click)="openReportModal()" class="text-gray-400 hover:text-red-500 transition-colors mt-4"
-    title="Signaler cette boutique">
+  <button
+    (click)="openReportModal()"
+    class="text-gray-400 hover:text-red-500 transition-colors mt-4"
+    title="Signaler cette boutique"
+  >
     <fa-icon [icon]="icons.report"></fa-icon>
-</button>
+  </button>
 }
 
 @if (showReportModal()) {
-<div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" (click)="closeReportModal()"
-            aria-hidden="true"></div>
+  <div
+    class="fixed inset-0 z-50 overflow-y-auto"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <!-- Background overlay -->
+      <div
+        class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+        (click)="closeReportModal()"
+        aria-hidden="true"
+      ></div>
 
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"
+        >&#8203;</span
+      >
 
-        <div
-            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div
-                        class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <fa-icon [icon]="icons.report" class="text-red-600"></fa-icon>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                        <h3 class="text-lg leading-6 font-bold uppercase tracking-widest text-gray-900"
-                            id="modal-title">
-                            Signaler cette boutique
-                        </h3>
-                        <div class="mt-5 -ml-4">
-                            <form [formGroup]="reportForm" class="space-y-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] uppercase tracking-widest font-black text-gray-400 mb-1">Raison</label>
-                                    <select formControlName="reason"
-                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-200 focus:outline-none focus:ring-black focus:border-black rounded-none border-b-2">
-                                        <option value="" disabled>Sélectionnez une raison</option>
-                                        <option value="scam">Arnaque</option>
-                                        <option value="wrong_info">Informations incorrectes</option>
-                                        <option value="prohibited">Contenu interdit</option>
-                                        <option value="other">Autre</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] uppercase tracking-widest font-black text-gray-400 mb-1">Description</label>
-                                    <textarea formControlName="description" rows="3"
-                                        class="mt-1 block w-full p-2 border-gray-100 rounded-none border-b-2 focus:ring-0 focus:border-black text-sm"
-                                        placeholder="Détails supplémentaires..."></textarea>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+      <div
+        class="inline-block align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full"
+      >
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div
+              class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+            >
+              <fa-icon [icon]="icons.report" class="text-red-600"></fa-icon>
             </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" (click)="submitReport()" [disabled]="reportForm.invalid"
-                    class="w-full inline-flex justify-center border-b-2 border-red-600 bg-red-600 px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-white hover:bg-black hover:border-black transition-all sm:ml-3 sm:w-auto disabled:opacity-50">
-                    Signaler
-                </button>
-                <button type="button" (click)="closeReportModal()"
-                    class="mt-3 w-full inline-flex justify-center border-b-2 border-gray-300 bg-white px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-gray-700 hover:text-black hover:border-black transition-all sm:mt-0 sm:ml-3 sm:w-auto">
-                    Annuler
-                </button>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+              <h3
+                class="text-lg leading-6 font-bold uppercase tracking-widest text-gray-900"
+                id="modal-title"
+              >
+                Signaler cette boutique
+              </h3>
+              <div class="mt-5 -ml-4">
+                <form [formGroup]="reportForm" class="space-y-4">
+                  <div>
+                    <app-select
+                      label="Raison"
+                      [options]="reasonOptions"
+                      formControlName="reason"
+                      placeholder="Sélectionnez une raison"
+                    ></app-select>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-[10px] uppercase tracking-widest font-black text-gray-400 mb-1"
+                      >Description</label
+                    >
+                    <textarea
+                      formControlName="description"
+                      rows="3"
+                      class="mt-1 block w-full p-2 border-gray-100 rounded-none border-b-2 focus:ring-0 focus:border-black text-sm"
+                      placeholder="Détails supplémentaires..."
+                    ></textarea>
+                  </div>
+                </form>
+              </div>
             </div>
+          </div>
         </div>
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            (click)="submitReport()"
+            [disabled]="reportForm.invalid"
+            class="w-full inline-flex justify-center border-b-2 border-red-600 bg-red-600 px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-white hover:bg-black hover:border-black transition-all sm:ml-3 sm:w-auto disabled:opacity-50"
+          >
+            Signaler
+          </button>
+          <button
+            type="button"
+            (click)="closeReportModal()"
+            class="mt-3 w-full inline-flex justify-center border-b-2 border-gray-300 bg-white px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-gray-700 hover:text-black hover:border-black transition-all sm:mt-0 sm:ml-3 sm:w-auto"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 }

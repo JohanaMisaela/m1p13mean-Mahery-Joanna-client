@@ -1,0 +1,60 @@
+<div class="relative w-full select-none">
+  <!-- Label -->
+  <label
+    *ngIf="label"
+    class="block text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1.5"
+  >
+    {{ label }}
+  </label>
+
+  <!-- Trigger -->
+  <div
+    (click)="toggle()"
+    class="group w-full bg-gray-50 border border-transparent hover:border-gray-200 rounded-lg px-4 py-2.5 text-sm flex items-center justify-between cursor-pointer transition-all duration-300 outline-none"
+    [class.bg-white]="isOpen"
+    [class.border-gray-100]="isOpen"
+    [class.shadow-sm]="isOpen"
+  >
+    <span
+      [class.text-gray-400]="!selectedOption"
+      class="truncate font-medium transition-colors duration-300"
+      [class.text-black]="selectedOption"
+    >
+      {{ selectedOption ? selectedOption.label : placeholder }}
+    </span>
+    <fa-icon
+      [icon]="faChevronDown"
+      class="text-[10px] text-gray-300 group-hover:text-gray-500 transition-transform duration-500 ease-out"
+      [class.rotate-180]="isOpen"
+    ></fa-icon>
+  </div>
+
+  <!-- Dropdown Menu -->
+  <div
+    *ngIf="isOpen"
+    class="absolute z-[60] w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden origin-top transform transition-all duration-300"
+  >
+    <div class="max-h-64 overflow-y-auto py-1 custom-scrollbar">
+      <div
+        *ngFor="let option of options"
+        (click)="selectOption(option)"
+        class="px-5 py-3 text-sm cursor-pointer transition-all duration-200 flex items-center justify-between group/item"
+        [class.bg-gray-50]="selectedOption?.value === option.value"
+      >
+        <span
+          class="text-gray-500 group-hover/item:text-black group-hover/item:translate-x-1 transition-all duration-300"
+          [class.text-black]="selectedOption?.value === option.value"
+          [class.font-bold]="selectedOption?.value === option.value"
+        >
+          {{ option.label }}
+        </span>
+
+        <!-- Active Indicator -->
+        <div
+          *ngIf="selectedOption?.value === option.value"
+          class="w-1.5 h-1.5 bg-black rounded-full shadow-[0_0_8px_rgba(0,0,0,0.3)]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>

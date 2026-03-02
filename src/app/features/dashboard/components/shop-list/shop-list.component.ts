@@ -10,13 +10,17 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ReportService } from '../../../../core/services/report.service';
 import { Shop, ShopResponse } from '../../../../shared/models/product.model';
 import { User } from '../../../../shared/models/user.model';
+import {
+  AppSelectComponent,
+  SelectOption,
+} from '../../../../shared/components/app-select/app-select.component';
 
 @Component({
   selector: 'app-shop-list',
   standalone: true,
-  imports: [CommonModule, FontAwesomeModule, FormsModule],
+  imports: [CommonModule, FontAwesomeModule, FormsModule, AppSelectComponent],
   templateUrl: './shop-list.component.html',
-  styleUrl: './shop-list.component.css'
+  styleUrl: './shop-list.component.css',
 })
 export class ShopListComponent implements OnInit {
   private readonly shopService = inject(ShopService);
@@ -31,7 +35,7 @@ export class ShopListComponent implements OnInit {
     shop: faStore,
     edit: faEdit,
     status: faPowerOff,
-    manage: faCog
+    manage: faCog,
   };
 
   @Input() onlyMyShops = false;
@@ -48,7 +52,7 @@ export class ShopListComponent implements OnInit {
     owner: '',
     description: '',
     email: '',
-    phone: ''
+    phone: '',
   };
 
   // Pagination state
@@ -70,14 +74,14 @@ export class ShopListComponent implements OnInit {
   loadShops() {
     const params: any = {
       page: this.currentPage(),
-      limit: this.limit()
+      limit: this.limit(),
     };
 
     const user = this.authService.currentUser();
     if (user && (user.role === 'shop' || this.onlyMyShops)) {
       params.owner = user._id || user.id;
     }
-    this.shopService.getShops(params).subscribe(res => {
+    this.shopService.getShops(params).subscribe((res) => {
       this.shops.set(res.data);
       this.totalItems.set(res.total);
       this.totalPages.set(res.totalPages);
@@ -86,10 +90,10 @@ export class ShopListComponent implements OnInit {
       res.data.forEach((shop: any) => {
         const id = (shop._id || shop.id)?.toString();
         if (id) {
-          this.reportService.getShopReports(id, { status: 'pending' }).subscribe(reportsRes => {
-            this.shopReportCounts.update(counts => ({
+          this.reportService.getShopReports(id, { status: 'pending' }).subscribe((reportsRes) => {
+            this.shopReportCounts.update((counts) => ({
               ...counts,
-              [id]: reportsRes.total || 0
+              [id]: reportsRes.total || 0,
             }));
             console.log('Updated counts for', id, ':', reportsRes.total);
           });
@@ -107,18 +111,27 @@ export class ShopListComponent implements OnInit {
   loadPotentialOwners() {
     this.userService.getAllUsers({ limit: 100 }).subscribe({
       next: (res) => {
-        const owners = res.data.filter(u => u.role === 'shop' || u.role === 'admin');
+        const owners = res.data.filter((u) => u.role === 'shop' || u.role === 'admin');
         this.potentialOwners.set(owners);
-      }
+      },
     });
   }
 
   onOwnerChange() {
-    const owner = this.potentialOwners().find(u => (u._id || (u as any).id) === this.newShop.owner);
+    const owner = this.potentialOwners().find(
+      (u) => (u._id || (u as any).id) === this.newShop.owner,
+    );
     if (owner) {
       if (owner.email) this.newShop.email = owner.email;
       if (owner.contact) this.newShop.phone = owner.contact;
     }
+  }
+
+  get ownerOptions(): SelectOption[] {
+    return this.potentialOwners().map((u) => ({
+      label: `${u.name} ${u.surname || ''} (${u.role})`,
+      value: u._id || (u as any).id,
+    }));
   }
 
   toggleAddForm() {
@@ -140,12 +153,19 @@ export class ShopListComponent implements OnInit {
       next: () => {
         this.loadShops();
         this.showAddForm = false;
-        this.newShop = { name: '', mallBoxNumber: '', owner: '', description: '', email: '', phone: '' };
+        this.newShop = {
+          name: '',
+          mallBoxNumber: '',
+          owner: '',
+          description: '',
+          email: '',
+          phone: '',
+        };
       },
       error: (err) => {
         console.error('Error creating shop', err);
         this.errorMessage.set(err.error?.message || 'Erreur lors de la création de la boutique');
-      }
+      },
     });
   }
 
@@ -166,7 +186,7 @@ export class ShopListComponent implements OnInit {
 
     this.shopService.updateStatus(id, newStatus).subscribe({
       next: () => this.loadShops(),
-      error: (err: any) => console.error('Error updating shop status', err)
+      error: (err: any) => console.error('Error updating shop status', err),
     });
   }
 }
