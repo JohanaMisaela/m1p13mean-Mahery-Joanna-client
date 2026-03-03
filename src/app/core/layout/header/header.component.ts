@@ -48,7 +48,7 @@ export class HeaderComponent {
   }
 
   private loadUnreadCount() {
-    if (!this.currentUser()) return;
+    if (!this.authService.isLoggedIn() || !this.currentUser()) return;
     this.chatService.getUnreadCount().subscribe((res) => {
       this.unreadCount.set(res.totalUnread);
     });
@@ -87,6 +87,6 @@ export class HeaderComponent {
 
   protected logout(): void {
     this.closeMenu();
-    this.authService.logout();
+    this.authService.logout(true); // Explicit redirect for manual logout
   }
 }

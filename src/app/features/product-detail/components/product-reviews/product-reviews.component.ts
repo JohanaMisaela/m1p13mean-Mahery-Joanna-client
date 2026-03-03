@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../../../core/services/product.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -47,6 +48,7 @@ export class ProductReviewsComponent implements OnInit {
   @Output() reviewsUpdated = new EventEmitter<void>();
 
   private productService = inject(ProductService);
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
 
@@ -86,7 +88,7 @@ export class ProductReviewsComponent implements OnInit {
     afterNextRender(() => {
       if (this.productId) {
         this.loadComments(this.productId);
-        if (this.currentUser) {
+        if (this.authService.isLoggedIn() && this.currentUser) {
           this.loadUserRating(this.productId);
         }
       }
