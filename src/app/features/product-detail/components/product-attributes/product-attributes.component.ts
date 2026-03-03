@@ -62,18 +62,7 @@ export class ProductAttributesComponent {
                 merged[matchingKey].push(strValue);
               }
             } else {
-              const selectableKeys = [
-                'color',
-                'couleur',
-                'size',
-                'taille',
-                'material',
-                'matériau',
-                'style',
-              ];
-              if (selectableKeys.some((sk) => eq(sk, vKey))) {
-                merged[vKey] = [strValue];
-              }
+              merged[vKey] = [strValue];
             }
           });
         });
